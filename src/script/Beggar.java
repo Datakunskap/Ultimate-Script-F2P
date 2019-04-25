@@ -30,7 +30,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     private int startC;
     private StopWatch runtime;
     private Player toTrade;
-    private InterfaceComponent tradeBtn;
 
     public static Location location;
     public static boolean trading = false;
@@ -59,14 +58,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             String name = event.getMessage().replaceAll(" wishes to trade with you.", "");
             toTrade = Players.getNearest(name);
             if (toTrade != null) {
-                //toTrade.interact("Trade with");
                 trading = true;
-                Time.sleep(2500, 6000);
-                tradeBtn = Dialog.getChatOption(x -> x.contains("wishes to trade with you."));
-                if (tradeBtn != null){
-                    Log.info("Clicking trade");
-                    tradeBtn.click();
-                }
+                Time.sleep(2500, 5500);
+                toTrade.interact("Trade with");
             }
         }
     }

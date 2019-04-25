@@ -28,7 +28,7 @@ public class TradePlayer extends Task {
     public int execute() {
         Log.info("Trading");
         //Beggar.trading = false;
-        //acceptBtn.click();
+        acceptBtn.click();
         return 1000;
     }
 }
