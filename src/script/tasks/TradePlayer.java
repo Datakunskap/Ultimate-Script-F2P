@@ -1,8 +1,10 @@
 package script.tasks;
 
+import org.rspeer.runetek.adapter.Interactable;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.commons.Time;
+import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.event.listeners.ChatMessageListener;
@@ -14,7 +16,8 @@ import org.rspeer.ui.Log;
 public class TradePlayer extends Task implements ChatMessageListener {
 
     private Player toTrade;
-    private InterfaceComponent switcher;
+    private InterfaceComponent acceptBtn;
+    private InterfaceComponent tradeBtn;
 
     @Override
     public void notify(ChatMessageEvent event) {
@@ -22,21 +25,24 @@ public class TradePlayer extends Task implements ChatMessageListener {
             String name = event.getMessage().replaceAll(" wishes to trade with you.", "");
             toTrade = Players.getNearest(name);
             if (toTrade != null) {
-                toTrade.interact("TradePlayer with");
-                //Time.sleep(5000);
+                //toTrade.interact("Trade with");
+                Time.sleep(3500);
+                Log.info("Clicking trade");
+                tradeBtn = Dialog.getChatOption(x -> x.contains(name + " wishes to trade with you."));
+                tradeBtn.click();
             }
         }
     }
 
     @Override
     public boolean validate() {
-        switcher = Interfaces.getComponent(335, 3);
-        return toTrade != null && switcher != null;
+        acceptBtn = Interfaces.getComponent(335, 12);
+        return toTrade != null && acceptBtn != null;
     }
 
     @Override
     public int execute() {
-        Log.info(switcher.getName() + "    " + switcher.getActions().toString());
+        Log.info(acceptBtn.getName() + "    " + acceptBtn.getActions().toString());
         return 1000;
     }
 }
