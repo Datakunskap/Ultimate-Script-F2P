@@ -1,5 +1,12 @@
 package script;
 
+import org.rspeer.runetek.adapter.scene.Player;
+import org.rspeer.runetek.api.commons.Time;
+import org.rspeer.runetek.api.component.Dialog;
+import org.rspeer.runetek.api.scene.Players;
+import org.rspeer.runetek.event.listeners.ChatMessageListener;
+import org.rspeer.runetek.event.types.ChatMessageEvent;
+import org.rspeer.runetek.event.types.ChatMessageType;
 import script.data.Location;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.api.commons.StopWatch;
@@ -18,12 +25,15 @@ import script.tasks.Traverse;
 import java.awt.*;
 
 @ScriptMeta(name = "Begging bot", desc = "Begs for gold", developer = "DrScatman")
-public class Beggar extends TaskScript implements RenderListener {
+public class Beggar extends TaskScript implements RenderListener, ChatMessageListener {
 
     private int startC;
     private StopWatch runtime;
+    private Player toTrade;
+    private InterfaceComponent tradeBtn;
 
     public static Location location;
+    public static boolean trading = false;
 
     @Override
     public void onStart() {
@@ -41,6 +51,24 @@ public class Beggar extends TaskScript implements RenderListener {
     @Override
     public void onStop() {
         Log.severe("Script stopped.");
+    }
+
+    @Override
+    public void notify(ChatMessageEvent event) {
+        if (event.getType().equals(ChatMessageType.TRADE) && !trading) {
+            String name = event.getMessage().replaceAll(" wishes to trade with you.", "");
+            toTrade = Players.getNearest(name);
+            if (toTrade != null) {
+                //toTrade.interact("Trade with");
+                trading = true;
+                Time.sleep(2500, 6000);
+                tradeBtn = Dialog.getChatOption(x -> x.contains("wishes to trade with you."));
+                if (tradeBtn != null){
+                    Log.info("Clicking trade");
+                    tradeBtn.click();
+                }
+            }
+        }
     }
 
     @Override
