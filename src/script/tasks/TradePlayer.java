@@ -26,9 +26,9 @@ public class TradePlayer extends Task implements ChatMessageListener {
             toTrade = Players.getNearest(name);
             if (toTrade != null) {
                 //toTrade.interact("Trade with");
-                Time.sleep(3500);
+                Time.sleep(3000, 6000);
                 Log.info("Clicking trade");
-                tradeBtn = Dialog.getChatOption(x -> x.contains(name + " wishes to trade with you."));
+                tradeBtn = Dialog.getChatOption(x -> x.contains("wishes to trade with you."));
                 tradeBtn.click();
             }
         }
@@ -36,13 +36,14 @@ public class TradePlayer extends Task implements ChatMessageListener {
 
     @Override
     public boolean validate() {
-        acceptBtn = Interfaces.getComponent(335, 12);
-        return toTrade != null && acceptBtn != null;
+        acceptBtn = Interfaces.getComponent(335, 11);
+        return toTrade != null && acceptBtn.isVisible();
     }
 
     @Override
     public int execute() {
-        Log.info(acceptBtn.getName() + "    " + acceptBtn.getActions().toString());
+        Log.info("Trading");
+        acceptBtn.click();
         return 1000;
     }
 }
