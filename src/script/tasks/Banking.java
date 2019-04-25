@@ -1,4 +1,4 @@
-package tasks;
+package script.tasks;
 
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.tab.Inventory;

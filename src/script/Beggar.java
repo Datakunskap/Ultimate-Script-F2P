@@ -1,16 +1,19 @@
+package script;
+
+import script.data.Location;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.api.commons.StopWatch;
 import org.rspeer.runetek.api.component.Interfaces;
-import org.rspeer.runetek.api.component.Trade;
 import org.rspeer.runetek.api.component.tab.Inventory;
-import org.rspeer.runetek.api.component.tab.Skills;
 import org.rspeer.runetek.event.listeners.RenderListener;
 import org.rspeer.runetek.event.types.RenderEvent;
 import org.rspeer.script.ScriptMeta;
 import org.rspeer.script.task.TaskScript;
 import org.rspeer.ui.Log;
-import tasks.Banking;
-import tasks.TradePlayer;
+import script.tasks.Banking;
+import script.tasks.ToggleRun;
+import script.tasks.TradePlayer;
+import script.tasks.Traverse;
 
 import java.awt.*;
 
@@ -20,13 +23,19 @@ public class Beggar extends TaskScript implements RenderListener {
     private int startC;
     private StopWatch runtime;
 
+    public static Location location;
+
     @Override
     public void onStart() {
         Log.fine("Script started.");
         runtime = StopWatch.start();
         startC = Inventory.getCount(true, "Coins");
+        location = Location.GE_AREA;
 
-        submit(new Banking(), new TradePlayer());
+        submit(new Banking(),
+                new TradePlayer(),
+                new Traverse(),
+                new ToggleRun());
     }
 
     @Override

@@ -1,4 +1,4 @@
-package tasks;
+package script.tasks;
 
 public class Beg {
 }
