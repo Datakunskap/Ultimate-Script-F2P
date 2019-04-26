@@ -1,17 +1,11 @@
 package script.tasks;
 
-import org.rspeer.runetek.adapter.Interactable;
-import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.component.Item;
 import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.component.Dialog;
-import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.Trade;
-import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.scene.Players;
-import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.runetek.event.listeners.ChatMessageListener;
 import org.rspeer.runetek.event.types.ChatMessageEvent;
 import org.rspeer.runetek.event.types.ChatMessageType;
@@ -33,7 +27,6 @@ public class TradePlayer extends Task implements ChatMessageListener{
         if (!Trade.isOpen() && msg.getType().equals(ChatMessageType.TRADE)) {
             traderName = msg.getSource();
             tradePending = true;
-
         }
     }
 
@@ -45,39 +38,54 @@ public class TradePlayer extends Task implements ChatMessageListener{
     @Override
     public int execute() {
         //Log.info("Trading");
+        Beggar.beg = false;
+        Beggar.walk = false;
+
         if (Trade.isOpen(false) && tradingP1) {
             // handle first trade window...
+            Log.info("Entering trade offer");
             Trade.offer("Coins", x -> x.contains("X"));
             Time.sleep(3000, 3500);
-            Keyboard.sendText("1000");
+            Keyboard.sendText(Beggar.gp.getSgp());
             Keyboard.pressEnter();
             tradingP1 = false;
         }
 
-        if(!tradingP1 && Trade.isOpen(false)){
-            for (Item item : Trade.getMyItems(x -> x.getName().equals("Coins"))){
-                if(item.getStackSize() > 1000){
-                    Trade.accept();
-                    tradingP2 = true;
+        else if(!tradingP1 && Trade.isOpen(false)){
+            for (Item item : Trade.getTheirItems(x -> x.getName().equals("Coins"))){
+                if(item.getStackSize() > Beggar.gp.getGp()){
+                    if(Trade.accept()) {
+                        Log.info("Accepted trade");
+                        tradingP2 = true;
+                        return 1000;
+                    }
                 }
             }
         }
 
-        if (Trade.isOpen(true) && tradingP2){
-            Trade.accept();
-            Log.fine("Trade completed");
-            tradingP2 = false;
+        else if (Trade.isOpen(true) && tradingP2){
+            if(Trade.accept()) {
+                Log.fine("Trade completed");
+                tradingP2 = false;
+                //Beggar.walk = true;
+                //Beggar.beg = true;
+                return 1000;
+            }
         }
 
         // If someone is requesting to trade you & you're not in trade, accept trade...
-        else {
+        else if (!Trade.isOpen(true) && !Trade.isOpen(false) && tradePending) {
             Player trader = Players.getNearest(traderName);
             if (tradePending && trader != null) {
                 Players.getNearest(traderName).interact("Trade with");
                 tradePending = false;
                 tradingP1 = true;
+                return 500;
             }
         }
-        return 500;
+        else {
+            return 500;
+        }
+        return 1200;
     }
 }

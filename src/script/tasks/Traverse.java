@@ -10,13 +10,14 @@ public class Traverse extends Task {
 
     @Override
     public boolean validate() {
-        return !Beggar.location.getBegArea().contains(Players.getLocal());
+        return !Beggar.location.getBegArea().contains(Players.getLocal()) || Beggar.walk;
     }
 
     @Override
     public int execute() {
         Movement.walkToRandomized(Beggar.location.getBegArea().getTiles().get(randInt(0, Beggar.location.getBegArea().getTiles().size()-1)));
         Log.info("Walking to location");
+        Beggar.walk = false;
         return 1000;
     }
 

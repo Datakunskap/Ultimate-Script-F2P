@@ -1,4 +1,4 @@
 package script.data;
 
-public class Lines {
+public enum Lines {
 }
