@@ -3,6 +3,7 @@ package script;
 import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Dialog;
+import org.rspeer.runetek.api.component.Trade;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.event.listeners.ChatMessageListener;
 import org.rspeer.runetek.event.types.ChatMessageEvent;
@@ -25,14 +26,12 @@ import script.tasks.Traverse;
 import java.awt.*;
 
 @ScriptMeta(name = "Begging bot", desc = "Begs for gold", developer = "DrScatman")
-public class Beggar extends TaskScript implements RenderListener, ChatMessageListener {
+public class Beggar extends TaskScript implements RenderListener {
 
     private int startC;
     private StopWatch runtime;
-    private Player toTrade;
 
     public static Location location;
-    public static boolean trading = false;
 
     @Override
     public void onStart() {
@@ -53,19 +52,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     }
 
     @Override
-    public void notify(ChatMessageEvent event) {
-        if (event.getType().equals(ChatMessageType.TRADE) && !trading) {
-            String name = event.getMessage().replaceAll(" wishes to trade with you.", "");
-            toTrade = Players.getNearest(name);
-            if (toTrade != null) {
-                trading = true;
-                Time.sleep(2500, 5500);
-                toTrade.interact("Trade with");
-            }
-        }
-    }
-
-    @Override
     public void notify(RenderEvent e) {
         Graphics g = e.getSource();
 
@@ -75,6 +61,5 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         g.drawString("Runtime: " + runtime.toElapsedString(), 20, 20);
         g.drawString("Gp gained: " + gainedC, 20, 40);
         g.drawString("Gp /h: " + runtime.getHourlyRate(gainedC), 20, 60);
-        g.drawString(switcher.getName(), 20, 80);
     }
 }

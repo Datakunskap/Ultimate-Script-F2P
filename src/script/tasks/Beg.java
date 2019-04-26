@@ -1,4 +1,16 @@
 package script.tasks;
 
-public class Beg {
+import org.rspeer.script.task.Task;
+
+public class Beg extends Task {
+
+    @Override
+    public boolean validate() {
+        return false;
+    }
+
+    @Override
+    public int execute() {
+        return 0;
+    }
 }
