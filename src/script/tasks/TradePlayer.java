@@ -3,6 +3,7 @@ package script.tasks;
 import org.rspeer.runetek.adapter.component.Item;
 import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.commons.Time;
+import org.rspeer.runetek.api.component.EnterInput;
 import org.rspeer.runetek.api.component.Trade;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.scene.Players;
@@ -13,79 +14,114 @@ import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
 
-public class TradePlayer extends Task implements ChatMessageListener{
+public class TradePlayer extends Task {
 
-    private boolean tradePending = false;
-    private boolean tradingP1 = false;
-    private boolean tradingP2 = false;
-    private String traderName;
-
-
-    @Override
-    public void notify(ChatMessageEvent msg) {
-        // If not in a trade and a player trades you...
-        if (!Trade.isOpen() && msg.getType().equals(ChatMessageType.TRADE)) {
-            traderName = msg.getSource();
-            tradePending = true;
-        }
-    }
+    private boolean modified = false;
 
     @Override
     public boolean validate() {
-        return tradePending || tradingP1 || tradingP2;
+        return Beggar.trading;
     }
 
     @Override
     public int execute() {
+
         //Log.info("Trading");
-        Beggar.beg = false;
-        Beggar.walk = false;
-
-        if (Trade.isOpen(false) && tradingP1) {
+        if (Trade.isOpen(false)) {
             // handle first trade window...
-            Log.info("Entering trade offer");
-            Trade.offer("Coins", x -> x.contains("X"));
-            Time.sleep(3000, 3500);
-            Keyboard.sendText(Beggar.gp.getSgp());
-            Keyboard.pressEnter();
-            tradingP1 = false;
-        }
+            if (Beggar.tradePending) {
+                Beggar.tradePending = false;
 
-        else if(!tradingP1 && Trade.isOpen(false)){
-            for (Item item : Trade.getTheirItems(x -> x.getName().equals("Coins"))){
-                if(item.getStackSize() > Beggar.gp.getGp()){
-                    if(Trade.accept()) {
-                        Log.info("Accepted trade");
-                        tradingP2 = true;
-                        return 1000;
+                int attempts = 0;
+                while (true) {
+                    attempts++;
+                    Log.info("Entering trade offer");
+                    Trade.offer("Coins", x -> x.contains("X"));
+                    Time.sleep(1000);
+                    if (EnterInput.isOpen()) {
+                        EnterInput.initiate(Beggar.gp.getGp());
+                        Time.sleep(1000);
+                    }
+                    if (Time.sleepUntil(() -> Trade.contains(true, 995), 500, 3500)) {
+                        Log.info("Trade entered");
+                        break;
+                    }
+                    if(attempts > 10){
+                        break;
                     }
                 }
             }
-        }
 
-        else if (Trade.isOpen(true) && tradingP2){
+            // Checks if they entered more gp than you
+            if (Trade.getTheirItems().length > 0) {
+                for (Item item : Trade.getTheirItems(x -> x.getName().equals("Coins"))) {
+                    Time.sleep(300);
+                    if (item.getStackSize() > Beggar.gp.getGp()) {
+                        if (!Trade.contains(false, 995)) {
+                            Trade.decline();
+                        }
+                        else {
+                            if(Trade.accept()) {
+                                Log.info("Accepted trade");
+                                Time.sleepUntil(() -> Trade.isOpen(true), 300, 3000);
+                            }
+                        }
+                    }
+                    // Checks if they are just trying to pay the half
+                    if(item.getStackSize() == Beggar.gp.getGp()) {
+                        Time.sleep(4500);
+                        if(item.getStackSize() == Beggar.gp.getGp()) {
+                            for (Item my : Trade.getMyItems(x -> x.getName().equals("Coins"))) {
+                                my.interact(x -> x.contains("All"));
+                            }
+                            Time.sleepUntil(() -> !Trade.contains(true, 995), 500, 5000);
+                            if (!Trade.contains(false, 995)) {
+                                Trade.decline();
+                            }
+                            else {
+                                if(Trade.accept()) {
+                                    Log.info("Accepted trade");
+                                    Time.sleepUntil(() -> Trade.isOpen(true), 300, 3000);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (Trade.isOpen(true)) {
+            // handle second trade window...
+            Time.sleep(500, 1500);
             if(Trade.accept()) {
                 Log.fine("Trade completed");
-                tradingP2 = false;
-                //Beggar.walk = true;
-                //Beggar.beg = true;
-                return 1000;
+                Keyboard.sendText("Wowza thank you!");
+                Keyboard.pressEnter();
+                Time.sleep(10000, 15000);
+                Beggar.walk = true;
+                Beggar.beg = true;
+                Beggar.trading = false;
+                Beggar.changeAmount = true;
             }
         }
-
         // If someone is requesting to trade you & you're not in trade, accept trade...
-        else if (!Trade.isOpen(true) && !Trade.isOpen(false) && tradePending) {
-            Player trader = Players.getNearest(traderName);
-            if (tradePending && trader != null) {
-                Players.getNearest(traderName).interact("Trade with");
-                tradePending = false;
-                tradingP1 = true;
-                return 500;
+        else {
+            if (Beggar.tradePending && !Trade.isOpen()) {
+                Player trader = Players.getNearest(Beggar.traderName);
+                if (trader != null) {
+                    Players.getNearest(Beggar.traderName).interact("Trade with");
+                    Beggar.beg = false;
+                    Beggar.walk = false;
+                    Time.sleep(2500);
+                }
+            }
+            if (!Trade.isOpen(false) && !Beggar.tradePending) {
+                Time.sleepUntil(() -> Trade.isOpen(false), 500, 5000);
+                if (!Trade.isOpen(false) && !Beggar.tradePending) {
+                    Beggar.walk = true;
+                    Beggar.beg = true;
+                    Beggar.trading = false;
+                }
             }
         }
-        else {
-            return 500;
-        }
-        return 1200;
+        return 500;
     }
 }

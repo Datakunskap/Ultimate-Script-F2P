@@ -1,5 +1,6 @@
 package script.tasks;
 
+import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
@@ -10,20 +11,23 @@ public class Traverse extends Task {
 
     @Override
     public boolean validate() {
-        return !Beggar.location.getBegArea().contains(Players.getLocal()) || Beggar.walk;
+        return (Beggar.walk || !Beggar.atGE) && !Beggar.trading;
     }
 
     @Override
     public int execute() {
-        Movement.walkToRandomized(Beggar.location.getBegArea().getTiles().get(randInt(0, Beggar.location.getBegArea().getTiles().size()-1)));
-        Log.info("Walking to location");
-        Beggar.walk = false;
+        if(!Beggar.atGE){
+            Log.info("Walking to GE");
+            Movement.walkToRandomized(Beggar.location.getBegArea().getTiles().get(Beggar.randInt(0, Beggar.location.getBegArea().getTiles().size()-1)));
+            if(Beggar.location.getBegArea().contains(Players.getLocal())){
+                Beggar.atGE = true;
+            }
+        } else{
+            Movement.walkToRandomized(Beggar.location.getBegArea().getTiles().get(Beggar.randInt(0, Beggar.location.getBegArea().getTiles().size() - 1)));
+            Log.info("Walking to random GE location");
+            Beggar.walk = false;
+            return 4000;
+        }
         return 1000;
-    }
-
-    public static int randInt(int min, int max) {
-        java.util.Random rand = new java.util.Random();
-        int randomNum = rand.nextInt(max - min + 1) + min;
-        return randomNum;
     }
 }
