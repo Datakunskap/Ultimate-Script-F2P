@@ -28,20 +28,30 @@ import java.util.TreeMap;
 
 public class Mule extends Task {
 
-    public static final org.rspeer.runetek.api.movement.position.Position Mulepos = new Position(3165, 3487);
+    public static final org.rspeer.runetek.api.movement.position.Position Mulepos = new Position(3179, 3512);
     public String name;
     public int Gold;
     public int Gold2;
     public int gold3;
     public String status1 = "mule";
     String user;
-    public String status;
+    public String status = "needgold";
     public GUI gui;
-    private boolean startScript;
+    private boolean startScript = false;
     public static String Username;
     public static String Password;
+    public int muleAmount;
 
-    public void setupMule(){
+    public void setupGui(){
+        gui = new GUI(this);
+        gui.setVisible(true);
+
+        muleAmount = gui.muleAmount;
+        Username = gui.Username;
+        Password = gui.Password;
+    }
+
+    private void setupMule(){
         try {
             File file = new File("mule.txt");
 
@@ -49,7 +59,7 @@ public class Mule extends Task {
                 file.createNewFile();
             }
             PrintWriter pw = new PrintWriter(file);
-            pw.println("done");
+            pw.println("mule");
             pw.close();
 
             FileReader fr = new FileReader(file);
@@ -63,22 +73,21 @@ public class Mule extends Task {
         } catch (IOException e) {
             Log.info("File not found");
         }
-        //
-        gui = new GUI(this);
-        gui.setVisible(true);
     }
 
     @Override
     public boolean validate() {
-        return startScript;
+        if(Inventory.getCount(true, 995) >= muleAmount){
+            setupMule();
+            return true;
+        }
+        return false;
     }
 
     @Override
     public int execute() {
-        Username = gui.Username;
-        Password = gui.Password;
         if(startScript) {
-            inRead();
+            //inRead();
             if (status != null) {
                 status = status.trim();
             }
@@ -117,6 +126,7 @@ public class Mule extends Task {
             }
             if (status.contains("done")) {
                 Game.logout();
+                setStartScript(false);
             }
             if (status.contains("needgold")) {
                 if (!Game.isLoggedIn() && Username != null && Password != null) {

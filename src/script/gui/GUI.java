@@ -1,8 +1,7 @@
-package script.gui;
-
 /*
  * Created by JFormDesigner on Fri Mar 01 07:42:49 GMT 2019
  */
+package script.gui;
 
 import org.rspeer.ui.Log;
 import script.tasks.Mule;
@@ -20,11 +19,13 @@ public class GUI extends JFrame {
     public static String Username;
     public static String Password;
 
-    public GUI() {
-
-    }
+//    public GUI() {
+//
+//    }
 
     private Mule ctx;
+    public static int muleAmount;
+    private boolean amountSet = false;
 
     public GUI(Mule main) {
         initComponents();
@@ -35,11 +36,21 @@ public class GUI extends JFrame {
 
     private void button1ActionPerformed(ActionEvent e) {
         // TODO add your code here
-        ctx.setStartScript(true);
-        Username = textField1.getText();
-        Password = textField2.getText();
-        Log.info("Credentials Set");
+        if(amountSet) {
+            ctx.setStartScript(true);
+            Username = textField1.getText();
+            Password = textField2.getText();
+            Log.info("Credentials Set");
+        }
+        else{
+            Log.severe("Set mule amount first!");
+        }
+    }
 
+    private void button2ActionPerformed(ActionEvent e) {
+        muleAmount = Integer.parseInt(spinner1.getValue().toString());
+        amountSet = true;
+        Log.info("Amount set to " + muleAmount);
     }
 
     private void initComponents() {
@@ -105,6 +116,7 @@ public class GUI extends JFrame {
 
         //---- button2 ----
         button2.setText("SET");
+        button2.addActionListener(e -> button2ActionPerformed(e));
         contentPane.add(button2);
         button2.setBounds(680, 105, 85, 35);
 

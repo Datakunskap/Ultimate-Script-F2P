@@ -23,7 +23,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 
-@ScriptMeta(name = "Begging bot (Rand)", desc = "Begs for gold", developer = "DrScatman")
+@ScriptMeta(name = "Begging bot", desc = "Begs for gold", developer = "DrScatman")
 public class Beggar extends TaskScript implements RenderListener, ChatMessageListener {
 
     private int startC;
@@ -52,27 +52,29 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         gpArr = new ArrayList<>();
         gpArr.add(Coins.GP_25);
-        //gpArr.add(Coins.GP_50);
-        //gpArr.add(Coins.GP_100);
+
+        gpArr.add(Coins.GP_50);
+        gpArr.add(Coins.GP_100);
+
         gpArr.add(Coins.GP_500);
         gpArr.add(Coins.GP_1000);
         gpArr.add(Coins.GP_2500);
         gpArr.add(Coins.GP_5000);
 
         // Set start amount
-        gp = gpArr.get(2);
+        gp = gpArr.get(0);
         // Set increment or random
-        iterAmount = false;
+        iterAmount = true;
 
         loadLines();
 
         // Mule
-        removeBlockingEvent(LoginScreen.class);
+        //removeBlockingEvent(LoginScreen.class);
         Mule mule = new Mule();
-        //mule.setupMule();
-        //submit(mule);
+        mule.setupGui();
 
-        submit(new TradePlayer(),
+        submit( mule,
+                new TradePlayer(),
                 new ToggleRun(),
                 new Traverse(),
                 new Beg(),
