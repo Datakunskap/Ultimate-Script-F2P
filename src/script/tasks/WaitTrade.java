@@ -24,7 +24,7 @@ public class WaitTrade extends Task {
         }
 
         int timeout = Beggar.randInt(min, max);
-        Log.info("Waiting " + timeout + "s for a trade");
+        Log.info("Waiting " + (timeout / 1000) + "s for a trade");
 
         if (Time.sleepUntil(() -> Beggar.trading, timeout)){
             return Beggar.randInt(1000, 2000);

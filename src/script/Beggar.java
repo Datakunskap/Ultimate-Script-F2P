@@ -4,7 +4,6 @@ import org.rspeer.runetek.api.component.Trade;
 import org.rspeer.runetek.event.listeners.ChatMessageListener;
 import org.rspeer.runetek.event.types.ChatMessageEvent;
 import org.rspeer.runetek.event.types.ChatMessageType;
-import org.rspeer.script.events.LoginScreen;
 import script.data.Coins;
 import script.data.Lines;
 import script.data.Location;
@@ -15,21 +14,21 @@ import org.rspeer.runetek.event.types.RenderEvent;
 import org.rspeer.script.ScriptMeta;
 import org.rspeer.script.task.TaskScript;
 import org.rspeer.ui.Log;
-//import script.gui.muleGUI;
-import script.gui.GUI;
+//import script.ui.muleGUI;
 import script.tasks.*;
+import script.ui.Gui;
 
+import java.util.List;
 import java.awt.*;
-import java.io.*;
-import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
-@ScriptMeta(name = "Begging bot", desc = "Begs for gold", developer = "DrScatman")
+@ScriptMeta(name = "Ultimate Beggar", desc = "Begs for gp", developer = "DrScatman")
 public class Beggar extends TaskScript implements RenderListener, ChatMessageListener {
 
     private int startC;
     private StopWatch runtime;
 
-    public static ArrayList<Coins> gpArr;
+    public static List<Coins> gpArr;
     public static Coins gp;
     public static Location location;
     public static Lines lines;
@@ -42,6 +41,11 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static boolean changeAmount = false;
     public static boolean iterAmount;
     public static boolean atGE = false;
+    public static String muleName;
+    public static int muleAmnt = Integer.MAX_VALUE;
+    public static int minWait;
+    public static int maxWait;
+    public static int muleKeep;
 
     @Override
     public void onStart() {
@@ -50,37 +54,15 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         startC = Inventory.getCount(true, 995);
         location = Location.GE_AREA;
 
-        gpArr = new ArrayList<>();
-        gpArr.add(Coins.GP_25);
-
-        gpArr.add(Coins.GP_50);
-        gpArr.add(Coins.GP_100);
-
-        gpArr.add(Coins.GP_500);
-        gpArr.add(Coins.GP_1000);
-        gpArr.add(Coins.GP_2500);
-        gpArr.add(Coins.GP_5000);
-
-        // Set start amount
-        gp = gpArr.get(0);
-        // Set increment or random
-        iterAmount = true;
-
-        loadLines();
-
-        // Mule
-        //removeBlockingEvent(LoginScreen.class);
-        Mule mule = new Mule();
-        mule.setupGui();
-
-        submit( mule,
+        submit( new Gui(),
+                new Mule(),
                 new TradePlayer(),
-                new ToggleRun(),
-                new Traverse(),
-                new Beg(),
+                new WaitTrade(),
                 new Amount(),
+                new ToggleRun(),
                 new Banking(),
-                new WaitTrade()
+                new Traverse(),
+                new Beg()
                 );
     }
 
