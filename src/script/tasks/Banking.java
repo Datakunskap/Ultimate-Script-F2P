@@ -12,8 +12,7 @@ public class Banking extends Task {
     @Override
     public boolean validate() {
         return (Inventory.getCount(true, "Coins") < 25 ||
-                Inventory.isFull() ||
-                Inventory.getCount(true, "Coins") > 20000) &&
+                Inventory.isFull()) &&
                 !Beggar.trading;
     }
 
@@ -24,12 +23,8 @@ public class Banking extends Task {
             Bank.open();
             return 1000;
         }
-        if(Inventory.getCount(true, "Coins") > 20000) {
-            Bank.depositInventory();
-            return 1000;
-        }
         if(Inventory.getCount(true, "Coins") < 25) {
-            Bank.withdraw("Coins", 5000);
+            Bank.withdraw(995, Integer.MAX_VALUE);
             Time.sleep(3000);
         }
         return 1000;

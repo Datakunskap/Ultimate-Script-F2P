@@ -7,59 +7,37 @@ import script.Beggar;
 
 public class WaitTrade extends Task {
 
-    private int min = 1300;
-    private int max = 2300;
+    private int min;
+    private int max;
+    private boolean waitSet = false;
 
     @Override
     public boolean validate() {
-        return (!Beggar.beg || !Beggar.walk) && !Beggar.trading;
+        return !Beggar.beg && !Beggar.walk && !Beggar.trading;
     }
 
     @Override
     public int execute() {
-        Log.info("Waiting for a trade");
-        Time.sleep(min, max);
-        if(Beggar.trading){
+        if (!waitSet){
+            setMinMaxWait();
+            waitSet = true;
+        }
+
+        int timeout = Beggar.randInt(min, max);
+        Log.info("Waiting " + timeout + "s for a trade");
+
+        if (Time.sleepUntil(() -> Beggar.trading, timeout)){
+            return Beggar.randInt(1000, 2000);
+        }
+        else {
+            Beggar.walk = true;
+            Beggar.beg = true;
             return 500;
         }
-        Time.sleep(min, max);
-        if(Beggar.trading){
-            return 500;
-        }
-        Time.sleep(min, max);
-        if(Beggar.trading){
-            return 500;
-        }
-        Time.sleep(min, max);
-        if(Beggar.trading){
-            return 500;
-        }
-        Time.sleep(min, max);
-        if(Beggar.trading){
-            return 500;
-        }
-        Time.sleep(min, max);
-        if(Beggar.trading){
-            return 500;
-        }
-        Time.sleep(min, max);
-        if(Beggar.trading){
-            return 500;
-        }
-        Time.sleep(min, max);
-        if(Beggar.trading){
-            return 500;
-        }
-        Time.sleep(min, max);
-        if(Beggar.trading){
-            return 500;
-        }
-        Time.sleep(min, max);
-        if(Beggar.trading){
-            return 500;
-        }
-        Beggar.walk = true;
-        Beggar.beg = true;
-        return 500;
+    }
+
+    private void setMinMaxWait(){
+        min = Beggar.minWait *1000;
+        max = Beggar.maxWait *1000;
     }
 }

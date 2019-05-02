@@ -11,14 +11,12 @@ import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Players;
+import org.rspeer.runetek.event.listeners.ChatMessageListener;
 import org.rspeer.runetek.event.types.ChatMessageEvent;
-import org.rspeer.runetek.event.types.ChatMessageType;
 import org.rspeer.runetek.event.types.RenderEvent;
-import org.rspeer.script.events.LoginScreen;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.gui.GUI;
 
 import java.awt.*;
 import java.io.*;
@@ -26,32 +24,22 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-public class Mule extends Task {
+public class Mule extends Task implements ChatMessageListener {
 
-    public static final org.rspeer.runetek.api.movement.position.Position Mulepos = new Position(3179, 3512);
+    public static final org.rspeer.runetek.api.movement.position.Position Mulepos = new Position(3181, 3511);
     public String name;
     public int Gold;
     public int Gold2;
     public int gold3;
-    public String status1 = "mule";
+    public String status1;
     String user;
     public String status = "needgold";
-    public GUI gui;
-    private boolean startScript = false;
+    private boolean startScript = true;
     public static String Username;
     public static String Password;
-    public int muleAmount;
+    private boolean muleing = false;
 
-    public void setupGui(){
-        gui = new GUI(this);
-        gui.setVisible(true);
-
-        muleAmount = gui.muleAmount;
-        Username = gui.Username;
-        Password = gui.Password;
-    }
-
-    private void setupMule(){
+    private void loginMule(){
         try {
             File file = new File("mule.txt");
 
@@ -65,8 +53,34 @@ public class Mule extends Task {
             FileReader fr = new FileReader(file);
             BufferedReader br = new BufferedReader(fr);
 
-            while (((status = br.readLine())) != null) {
-                Log.info(status);
+            while (((status1 = br.readLine())) != null) {
+                Log.info(status1);
+            }
+
+            br.close();
+        } catch (IOException e) {
+            Log.info("File not found");
+        }
+
+        user = Beggar.muleName;
+    }
+
+    public void logoutMule(){
+        try {
+            File file = new File("mule.txt");
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            PrintWriter pw = new PrintWriter(file);
+            pw.println("done");
+            pw.close();
+
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+
+            while (((status1 = br.readLine())) != null) {
+                Log.info(status1);
             }
 
             br.close();
@@ -77,8 +91,8 @@ public class Mule extends Task {
 
     @Override
     public boolean validate() {
-        if(Inventory.getCount(true, 995) >= muleAmount){
-            setupMule();
+        if(Inventory.getCount(true, 995) >= Beggar.muleAmnt || muleing){
+            loginMule();
             return true;
         }
         return false;
@@ -120,7 +134,7 @@ public class Mule extends Task {
                     Time.sleep(3000);
                 }
                 if (Trade.hasOtherAccepted()) {
-                    Trade.accept();
+                    Time.sleepUntil(() -> Trade.accept(), 5000);
                     Log.info("Trade accepted");
                 }
             }
@@ -147,20 +161,39 @@ public class Mule extends Task {
                     if (!Trade.contains(true, 995)) {
                         int Coins = Inventory.getFirst(995).getStackSize();
                         if (Trade.isOpen(false)) {
+                            muleing = true;
                             // handle first trade window...
-                            Trade.offer("Coins", x -> x.contains("Offer-X"));
-                            Time.sleep(1000);
-                            if (EnterInput.isOpen()) {
-                                EnterInput.initiate(4000000);
-                                Time.sleep(1000);
-                            }
-                            if (Trade.contains(true, 995)) {
-                                Trade.accept();
-                                Time.sleep(700);
-                            }
-                        } else if (Trade.isOpen(true)) {
+                                int attempts = 0;
+                                while (true) {
+                                    attempts++;
+                                    Log.info("Entering trade offer");
+                                    Trade.offer("Coins", x -> x.contains("X"));
+                                    Time.sleep(1000);
+                                    if (EnterInput.isOpen()) {
+                                        EnterInput.initiate(Beggar.muleAmnt - Beggar.muleKeep);
+                                        Time.sleep(1000);
+                                    }
+                                    if (Time.sleepUntil(() -> Trade.contains(true, 995), 500, 3500)) {
+                                        Log.info("Trade entered & accepted");
+                                        Trade.accept();
+                                        Time.sleepUntil(() -> Trade.isOpen(true), 5000);
+                                        break;
+                                    }
+                                    if(attempts > 10){
+                                        break;
+                                    }
+                                }
+                        } if (Trade.isOpen(true)) {
                             // handle second trade window...
-                            Trade.accept();
+                            Time.sleep(500, 1500);
+                            if(Trade.accept()) {
+                                if(!Trade.isOpen(true) && !Trade.isOpen(false)
+                                        && !Inventory.contains(995)) {
+                                    Log.fine("Trade completed shutting down mule");
+                                    logoutMule();
+                                    muleing = false;
+                                }
+                            }
                             Time.sleep(700);
                         }
 
@@ -246,14 +279,14 @@ public class Mule extends Task {
                 Gold2 = Inventory.getFirst(995).getStackSize();
             }
         }
-        ChatMessageType type = Chatevent.getType();
-
-        if (type.equals(ChatMessageType.TRADE)) {
-            user = Chatevent.getSource();
-            // Do stuff
-            Log.info(user + " is Trading");
-
-        }
+//        ChatMessageType type = Chatevent.getType();
+//
+//        if (type.equals(ChatMessageType.TRADE) && Mulepos.distance() <= 2) {
+//            user = Chatevent.getSource();
+//            // Do stuff
+//            Log.info(user + " is Trading");
+//
+//        }
     }
 }
 

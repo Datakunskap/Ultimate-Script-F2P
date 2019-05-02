@@ -7,24 +7,19 @@ public enum Coins {
     GP_25(25),
     GP_50(50),
     GP_100(100),
+    GP_200(200),
+    GP_400(400),
     GP_500(500),
+    GP_800(800),
     GP_1000(1000),
+    GP_2000(2000),
     GP_2500(2500),
     GP_5000(5000),
     GP_10000(10000);
 
     private int gp;
-    private String Sgpk;
     private String Sgp;
 
-//    private static final ArrayList GP_ARR;
-//
-//    static {
-//        GP_ARR = new ArrayList();
-//        for (Coins gps : Coins.values()){
-//            GP_ARR.add(gps);
-//        }
-//    }
 
     Coins (int gp){
         this.gp = gp;
@@ -43,4 +38,5 @@ public enum Coins {
     public String getSgp(){
         return Sgp;
     }
+
 }

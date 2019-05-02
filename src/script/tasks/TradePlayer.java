@@ -57,14 +57,13 @@ public class TradePlayer extends Task {
                 for (Item item : Trade.getTheirItems(x -> x.getName().equals("Coins"))) {
                     Time.sleep(300);
                     if (item.getStackSize() > Beggar.gp.getGp()) {
-                        if (!Trade.contains(false, 995)) {
-                            Trade.decline();
-                        }
-                        else {
+                        if (Time.sleepUntilForDuration(() -> Trade.contains(false, 995), 2000, 10000)) {
                             if(Trade.accept()) {
                                 Log.info("Accepted trade");
                                 Time.sleepUntil(() -> Trade.isOpen(true), 300, 3000);
                             }
+                        } else {
+                            Trade.decline();
                         }
                     }
                     // Checks if they are just trying to pay the half
