@@ -4,7 +4,7 @@ import org.rspeer.script.task.Task;
 import script.Beggar;
 import script.data.Lines;
 
-public class Amount extends Task {
+public class ChangeAmount extends Task {
 
     private int index = 1;
 

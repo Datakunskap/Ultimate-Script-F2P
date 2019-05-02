@@ -31,7 +31,7 @@ public class Beg extends Task {
     }
 
     public void maybeAmount(){
-        if(Beggar.randInt(1, 10) == 2){
+        if(Beggar.randInt(1, Beggar.amountChance) == 1){
             Beggar.changeAmount = true;
         }
     }

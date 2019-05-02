@@ -33,6 +33,8 @@ public class Gui extends Task {
     private JTextField max;
     private JButton clear;
     private JLabel tLabel;
+    private JLabel timesLabel;
+    private JTextField timesText;
 
     private String[] types = new String[] {"Incremental", "Random"};
 
@@ -42,26 +44,28 @@ public class Gui extends Task {
     public Gui(){
         frame = new JFrame("Ultimate Beggar");
         frame.setLayout(new MigLayout());
-        frame.setPreferredSize(new Dimension(300, 800));
+        frame.setPreferredSize(new Dimension(300, 825));
 
         m2Label = new JLabel("Mules In-Game Name:");
-        mLabel = new JLabel("Amount To Mule At:");
+        mLabel = new JLabel("Change Amount To Mule At:");
         muleName = new JTextField();
         muleAmount = new JTextField();
-        kLabel = new JLabel("Amount To Keep From Mule");
+        kLabel = new JLabel("ChangeAmount To Keep From Mule");
         mKeep = new JTextField();
         begType = new JComboBox(types);
         lLabel = new JLabel("Enter Beg Lines Here:");
-        tLabel = new JLabel("Begging Amount Style");
+        tLabel = new JLabel("Begging ChangeAmount Style");
         line = new JTextArea(20, 20);
         bLabel = new JLabel("Hold CTRL To Select Beg Amounts");
         begAmounts = new JList(Coins.values());
-        aLabel = new JLabel("Select Starting Beg Amount");
+        aLabel = new JLabel("Select Starting Beg ChangeAmount");
         startAmount = new JComboBox(Coins.values());
         t1Label = new JLabel("Min Time Between Begs (sec)");
         t2Label = new JLabel("Max Time Between Begs (sec)");
         min = new JTextField();
         max = new JTextField();
+        timesLabel = new JLabel("Change Amount 1 In Every __ Begs (random)");
+        timesText = new JTextField();
         clear = new JButton("Clear Selected");
         startBtn = new JButton("Start");
 
@@ -75,6 +79,7 @@ public class Gui extends Task {
         max.setText("25");
         begAmounts.setSelectedIndices(new int[] {0,5,7,9,10});
         begType.setSelectedIndex(1);
+        timesText.setText("10");
 
         frame.add(m2Label, "wrap, growx");
         frame.add(muleName, "wrap, growx");
@@ -91,6 +96,8 @@ public class Gui extends Task {
         frame.add(startAmount,"wrap, growx");
         frame.add(tLabel, "wrap, growx");
         frame.add(begType, "wrap, growx");
+        frame.add(timesLabel, "wrap, growx");
+        frame.add(timesText, "wrap, growx");
         frame.add(t2Label,"wrap, growx");
         frame.add(max, "wrap, growx");
         frame.add(t1Label, "wrap, growx");
@@ -130,6 +137,7 @@ public class Gui extends Task {
         Beggar.gp = (Coins) startAmount.getSelectedItem();
         Beggar.maxWait = Integer.parseInt(max.getText());
         Beggar.minWait = Integer.parseInt(min.getText());
+        Beggar.amountChance = Integer.parseInt(timesText.getText());
 
         if(line.getText().contains("DEFAULT")) {
             Beggar.loadLines();

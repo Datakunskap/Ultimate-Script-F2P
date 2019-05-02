@@ -46,6 +46,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static int minWait;
     public static int maxWait;
     public static int muleKeep;
+    public static int amountChance;
+    public static boolean isMuling = false;
 
     @Override
     public void onStart() {
@@ -58,7 +60,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 new Mule(),
                 new TradePlayer(),
                 new WaitTrade(),
-                new Amount(),
+                new ChangeAmount(),
                 new ToggleRun(),
                 new Banking(),
                 new Traverse(),
@@ -75,7 +77,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     @Override
     public void notify(ChatMessageEvent msg) {
         // If not in a trade and a player trades you...
-        if (!Trade.isOpen() && msg.getType().equals(ChatMessageType.TRADE)) {
+        if (!Trade.isOpen() && msg.getType().equals(ChatMessageType.TRADE) && !isMuling) {
             traderName = msg.getSource();
             tradePending = true;
             trading = true;
