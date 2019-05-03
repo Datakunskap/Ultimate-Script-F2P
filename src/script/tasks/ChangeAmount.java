@@ -21,7 +21,7 @@ public class ChangeAmount extends Task {
             randAmount();
         }
 
-        Beggar.loadLines();
+        Beggar.reloadLines();
         Beggar.changeAmount = false;
         Beggar.walk = true;
         Beggar.beg = true;

@@ -9,7 +9,6 @@ import org.rspeer.runetek.api.component.Trade;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
-import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
@@ -21,7 +20,6 @@ import java.util.TreeMap;
 
 public class Mule extends Task {
 
-    public static final org.rspeer.runetek.api.movement.position.Position Mulepos = new Position(3181, 3511);
     public int Gold;
     public int Gold2;
     public int gold3;
@@ -101,8 +99,8 @@ public class Mule extends Task {
             Dialog.processContinue();
             Time.sleep(1000);
         }
-        if (Mulepos.distance() > 2) {
-            Movement.setWalkFlag(Mulepos);
+        if (!Beggar.muleArea.getMuleArea().contains(Players.getLocal())) {
+            Movement.setWalkFlag(Beggar.muleArea.getMuleArea().getTiles().get(Beggar.randInt(0, Beggar.muleArea.getMuleArea().getTiles().size()-1)));
         }
 
         if (Inventory.getFirst(995) != null) {

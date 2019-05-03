@@ -5,6 +5,7 @@ import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.EnterInput;
 import org.rspeer.runetek.api.component.Trade;
+import org.rspeer.runetek.api.component.chatter.Chat;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.event.listeners.ChatMessageListener;
@@ -17,6 +18,10 @@ import script.Beggar;
 public class TradePlayer extends Task {
 
     private boolean modified = false;
+    private final String[] completeLines = new String[] {"holy shit", "ty", "Wowza thanks!",
+                                        "TY!", "Holy Shit!!", "Woah! TY!", "Wow! thanks bro",
+                                        "Thanks!", "Thank you", "Dang!! thanks :)",
+                                        "Holy Fucking Shit!!", "Omfggg", "OMG! ty", ":)"};
 
     @Override
     public boolean validate() {
@@ -63,13 +68,15 @@ public class TradePlayer extends Task {
                                 Time.sleepUntil(() -> Trade.isOpen(true), 300, 3000);
                             }
                         } else {
+                            Keyboard.sendText("Whats Up " + Beggar.traderName + "??");
+                            Keyboard.pressEnter();
                             Trade.decline();
                         }
                     }
-                    // Checks if they are just trying to pay the half
-                    if(item.getStackSize() == Beggar.gp.getGp()) {
+                    // Checks if they are just trying to donate
+                    if(item.getStackSize() <= Beggar.gp.getGp()) {
                         Time.sleep(4500);
-                        if(item.getStackSize() == Beggar.gp.getGp()) {
+                        if(item.getStackSize() <= Beggar.gp.getGp()) {
                             for (Item my : Trade.getMyItems(x -> x.getName().equals("Coins"))) {
                                 my.interact(x -> x.contains("All"));
                             }
@@ -92,13 +99,14 @@ public class TradePlayer extends Task {
             Time.sleep(500, 1500);
             if(Trade.accept()) {
                 Log.fine("Trade completed");
-                Keyboard.sendText("Wowza thank you!");
+                Time.sleep(1000, 2000);
+                Keyboard.sendText(completeLines[Beggar.randInt(0, completeLines.length-1)]);
                 Keyboard.pressEnter();
-                Time.sleep(10000, 15000);
                 Beggar.walk = true;
                 Beggar.beg = true;
                 Beggar.trading = false;
                 Beggar.changeAmount = true;
+                Time.sleep(9000, 14000);
             }
         }
         // If someone is requesting to trade you & you're not in trade, accept trade...

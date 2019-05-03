@@ -14,13 +14,14 @@ import org.rspeer.runetek.event.types.RenderEvent;
 import org.rspeer.script.ScriptMeta;
 import org.rspeer.script.task.TaskScript;
 import org.rspeer.ui.Log;
-//import script.ui.muleGUI;
+import script.data.MuleArea;
 import script.tasks.*;
 import script.ui.Gui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.awt.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 @ScriptMeta(name = "Ultimate Beggar", desc = "Begs for gp", developer = "DrScatman")
 public class Beggar extends TaskScript implements RenderListener, ChatMessageListener {
@@ -32,6 +33,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static Coins gp;
     public static Location location;
     public static Lines lines;
+    public static MuleArea muleArea;
 
     public static boolean walk = true;
     public static boolean beg = true;
@@ -48,6 +50,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static int muleKeep;
     public static int amountChance;
     public static boolean isMuling = false;
+    public static String[] linesArr;
+    public static boolean defaultLines = false;
+    public static String inputLines;
 
     @Override
     public void onStart() {
@@ -56,7 +61,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         startC = Inventory.getCount(true, 995);
         location = Location.GE_AREA;
 
-        submit( new Gui(),
+        submit(new Gui(),
                 new Mule(),
                 new TradePlayer(),
                 new WaitTrade(),
@@ -65,7 +70,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 new Banking(),
                 new Traverse(),
                 new Beg()
-                );
+        );
     }
 
     @Override
@@ -91,7 +96,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public void notify(RenderEvent e) {
         Graphics g = e.getSource();
 
-        int gainedC  = Inventory.getCount(true, 995) - startC;
+        int gainedC = Inventory.getCount(true, 995) - startC;
 
         g.drawString("Runtime: " + runtime.toElapsedString(), 20, 40);
         //g.drawString("Gp in bank: " + Bank.getCount(995), 20, 60);
@@ -105,8 +110,16 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         return randomNum;
     }
 
-    public static void loadLines(){
-        lines = new Lines("Can someone pls double my " + Beggar.gp.getSgp() + " coins?",
+    public static void reloadLines(){
+        if(defaultLines){
+            defaultLines();
+        } else {
+            convertInputLines(inputLines);
+        }
+    }
+
+    public static void defaultLines() {
+        linesArr = new String[]{"Can someone pls double my " + Beggar.gp.getSgp() + " coins?",
                 "I only have " + Beggar.gp.getSgp() + " can anyone double it pls?",
                 "I have " + Beggar.gp.getSgp() + " Can someone double it so I buy pick",
                 "Can Any1 Double My " + Beggar.gp.getSgp() + " gp pls??",
@@ -114,7 +127,58 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 "Any1 willing to double " + Beggar.gp.getSgp() + "?",
                 "Can someone help a noob out and double my " + Beggar.gp.getSgp() + "? :)",
                 "Please someone double me so I can buy a pick and diggy diggy hole!",
-                "Im newb can some1 help me and double " + Beggar.gp.getSgp() + "! :)");
+                "Im newb can some1 help me and double " + Beggar.gp.getSgp() + "! :)"};
 
+        lines = new Lines(linesArr);
+    }
+
+    public static void convertInputLines(String inputLines) {
+        // Trims leading/trailing whitespace
+        String inLines = inputLines.trim();
+
+        // ENTER delimiter
+        List<String> arr = Arrays.asList(inLines.split(System.lineSeparator()));
+        linesArr = new String[arr.size()];
+        int index = 0;
+
+        // Checks for no gp amount in line
+        for (String s : arr) {
+            if (!s.contains("$")) {
+                linesArr[index] = s;
+                index++;
+            }
+        }
+
+        List<String> arr2 = new ArrayList<>();
+        for (String s2 : arr) {
+            if (s2.contains("$")) {
+                String[] temp = s2.split("\\$", -1);
+                arr2.add(temp[0]);
+                arr2.add(temp[1]);
+            }
+        }
+
+        for (int i = 0; i < arr2.size(); i += 2) {
+
+            // Checks for gp amount at start of line
+            if (arr2.get(i) == null || arr2.get(i).equals("") || arr2.get(i).equals(" ")) {
+                linesArr[index] = gp.getSgp() + arr2.get(i + 1);
+                index++;
+            }
+
+            // Checks for gp amount at end of line
+            else if (arr2.get(i + 1) == null || arr2.get(i + 1).equals("") || arr2.get(i + 1).equals(" ")) {
+                linesArr[index] = arr2.get(i) + gp.getSgp();
+                index++;
+            }
+
+            // Otherwise somewhere in middle
+            else {
+                linesArr[index] = arr2.get(i) + gp.getSgp() + arr2.get(i + 1);
+                index++;
+            }
+        }
+
+        lines = new Lines(linesArr);
     }
 }

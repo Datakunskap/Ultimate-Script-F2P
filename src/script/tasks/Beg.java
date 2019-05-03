@@ -1,7 +1,5 @@
 package script.tasks;
 
-import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
