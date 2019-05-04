@@ -53,6 +53,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static String[] linesArr;
     public static boolean defaultLines = false;
     public static String inputLines;
+    public static int muleWorld;
 
     @Override
     public void onStart() {

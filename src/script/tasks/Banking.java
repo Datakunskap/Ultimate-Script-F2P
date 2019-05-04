@@ -24,6 +24,8 @@ public class Banking extends Task {
             return 1000;
         }
         if(Inventory.getCount(true, "Coins") < 25) {
+            Bank.depositInventory();
+            Time.sleep(2000);
             Bank.withdraw(995, Integer.MAX_VALUE);
             Time.sleep(3000);
         }

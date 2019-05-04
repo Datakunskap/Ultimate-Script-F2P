@@ -20,6 +20,8 @@ public class Gui extends Task {
 
     private boolean validate = true;
 
+    private JLabel wLabel;
+    private JTextField mWorld;
     private JButton openB;
     private JLabel mLabel;
     private JLabel m2Label;
@@ -55,8 +57,10 @@ public class Gui extends Task {
     public Gui() {
         frame = new JFrame("Ultimate Beggar");
         frame.setLayout(new MigLayout());
-        frame.setPreferredSize(new Dimension(400, 900));
+        frame.setPreferredSize(new Dimension(400, 950));
 
+        wLabel = new JLabel("Mules World:");
+        mWorld = new JTextField();
         openB = new JButton("Open File");
         posLabel = new JLabel("Select Mule Area:");
         mulePos = new JComboBox(MuleArea.values());
@@ -69,7 +73,7 @@ public class Gui extends Task {
         begType = new JComboBox(types);
         lLabel = new JLabel("Select A Text File With Beg Lines: (ENTER To Separate And $ Gets Gp)");
         tLabel = new JLabel("Begging ChangeAmount Style");
-        file = new JFileChooser();
+        file = new JFileChooser("C:\\Users\\bllit\\OneDrive\\Desktop");
         bLabel = new JLabel("Hold CTRL To Select Beg Amounts");
         begAmounts = new JList(Coins.values());
         aLabel = new JLabel("Select Starting Beg Amount");
@@ -83,6 +87,7 @@ public class Gui extends Task {
         clear = new JButton("Clear Selected");
         startBtn = new JButton("Start");
 
+        mWorld.setText("301");
         muleName.setText("milleja1");
         muleAmount.setText("25000");
         mulePos.setSelectedIndex(0);
@@ -95,6 +100,8 @@ public class Gui extends Task {
 
         frame.add(m2Label, "wrap, growx");
         frame.add(muleName, "wrap, growx");
+        frame.add(wLabel, "wrap, growx");
+        frame.add(mWorld, "wrap, growx");
         frame.add(posLabel, "wrap, growx");
         frame.add(mulePos, "wrap, growx");
         frame.add(mLabel, "wrap, growx");
@@ -145,6 +152,7 @@ public class Gui extends Task {
         } else {
             Beggar.iterAmount = false;
         }
+        Beggar.muleWorld = Integer.parseInt(mWorld.getText());
         Beggar.muleArea = (MuleArea) mulePos.getSelectedItem();
         Beggar.muleName = this.muleName.getText();
         Beggar.muleAmnt = Integer.parseInt(muleAmount.getText());

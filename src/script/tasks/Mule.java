@@ -2,10 +2,12 @@ package script.tasks;
 
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Login;
+import org.rspeer.runetek.api.Worlds;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.EnterInput;
 import org.rspeer.runetek.api.component.Trade;
+import org.rspeer.runetek.api.component.WorldHopper;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
@@ -29,6 +31,7 @@ public class Mule extends Task {
     public static String Username;
     public static String Password;
     private boolean muleing = false;
+    private int begWorld = -1;
 
     private void loginMule() {
         try {
@@ -67,14 +70,8 @@ public class Mule extends Task {
             pw.println("done");
             pw.close();
 
-            FileReader fr = new FileReader(file);
-            BufferedReader br = new BufferedReader(fr);
+            Log.info("done");
 
-            while (((status1 = br.readLine())) != null) {
-                Log.info(status1);
-            }
-
-            br.close();
         } catch (IOException e) {
             Log.info("File not found");
         }
@@ -92,6 +89,12 @@ public class Mule extends Task {
 
     @Override
     public int execute() {
+        if(Worlds.getCurrent() != Beggar.muleWorld){
+            begWorld = Worlds.getCurrent();
+            WorldHopper.hopTo(Beggar.muleWorld);
+            Time.sleepUntil(() -> Worlds.getCurrent() == Beggar.muleWorld, 10000);
+        }
+
         if (status != null) {
             status = status.trim();
         }
@@ -146,7 +149,7 @@ public class Mule extends Task {
                                 Time.sleepUntil(() -> Trade.isOpen(true), 5000);
                                 break;
                             }
-                            if (attempts > 10) {
+                            if (attempts > 6) {
                                 break;
                             }
                         }
@@ -159,7 +162,14 @@ public class Mule extends Task {
                             Log.fine("Trade completed shutting down mule");
                             logoutMule();
                             muleing = false;
+                            Beggar.walk = false;
+                            Beggar.beg = false;
+                            Beggar.trading = false;
                             Beggar.isMuling = false;
+                            if(begWorld != -1) {
+                                WorldHopper.hopTo(begWorld);
+                                Time.sleepUntil(() -> Worlds.getCurrent() == begWorld, 10000);
+                            }
                         }
                         Time.sleep(700);
                     }

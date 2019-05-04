@@ -120,9 +120,9 @@ public class TradePlayer extends Task {
                     Time.sleep(2500);
                 }
             }
-            if (!Trade.isOpen(false) && !Beggar.tradePending) {
-                Time.sleepUntil(() -> Trade.isOpen(false), 500, 5000);
-                if (!Trade.isOpen(false) && !Beggar.tradePending) {
+            if (!Trade.isOpen() && !Beggar.tradePending) {
+                Time.sleepUntil(() -> Trade.isOpen(), 500, 5000);
+                if (!Trade.isOpen() && !Beggar.tradePending) {
                     Beggar.walk = true;
                     Beggar.beg = true;
                     Beggar.trading = false;

@@ -25,7 +25,7 @@ public class Beg extends Task {
         if(!Beggar.iterAmount) {
             maybeAmount();
         }
-        return 3000;
+        return 1000;
     }
 
     public void maybeAmount(){
