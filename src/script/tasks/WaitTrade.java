@@ -18,6 +18,7 @@ public class WaitTrade extends Task {
 
     @Override
     public int execute() {
+
         if (!waitSet){
             setMinMaxWait();
             waitSet = true;
@@ -32,6 +33,8 @@ public class WaitTrade extends Task {
         else {
             Beggar.walk = true;
             Beggar.beg = true;
+
+            Beggar.checkWorldHopTime();
             return 500;
         }
     }

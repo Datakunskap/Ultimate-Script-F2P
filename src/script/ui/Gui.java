@@ -20,6 +20,13 @@ public class Gui extends Task {
 
     private boolean validate = true;
 
+    private JLabel hopCheckLabel;
+    private JLabel hopChanceLabel;
+    private JLabel hopPopLabel;
+    private JCheckBox hopCheck;
+    private JTextField hopTimeText;
+    private JTextField hopPopText;
+
     private JLabel wLabel;
     private JTextField mWorld;
     private JButton openB;
@@ -47,6 +54,8 @@ public class Gui extends Task {
     private JTextField timesText;
     private JLabel posLabel;
     private JComboBox mulePos;
+    private JLabel walkLabel;
+    private JTextField walkText;
 
     private String readLines;
     private String[] types = new String[]{"Incremental", "Random"};
@@ -56,8 +65,15 @@ public class Gui extends Task {
 
     public Gui() {
         frame = new JFrame("Ultimate Beggar");
-        frame.setLayout(new MigLayout());
-        frame.setPreferredSize(new Dimension(400, 950));
+        //frame.setLayout(new MigLayout());
+        //frame.setPreferredSize(new Dimension(400, 950));
+
+        hopCheckLabel = new JLabel("Wold hop? (members)");
+        hopChanceLabel = new JLabel("Hop After __ Minutes Of No Completed Trades:");
+        hopPopLabel = new JLabel("Population Of Worlds: >=");
+        hopCheck = new JCheckBox();
+        hopTimeText = new JTextField();
+        hopPopText = new JTextField();
 
         wLabel = new JLabel("Mules World:");
         mWorld = new JTextField();
@@ -84,51 +100,73 @@ public class Gui extends Task {
         max = new JTextField();
         timesLabel = new JLabel("Change Amount 1 In Every __ Begs (random)");
         timesText = new JTextField();
+        walkLabel = new JLabel("Walks After 1 In Every __ Begs");
+        walkText = new JTextField();
         clear = new JButton("Clear Selected");
         startBtn = new JButton("Start");
 
         mWorld.setText("301");
         muleName.setText("milleja1");
-        muleAmount.setText("25000");
+        muleAmount.setText("100000");
         mulePos.setSelectedIndex(0);
         mKeep.setText("5000");
         min.setText("15");
-        max.setText("20");
-        begAmounts.setSelectedIndices(new int[]{0, 5, 7, 9, 10});
+        max.setText("30");
+        begAmounts.setSelectedIndices(new int[]{0, 1, 2, 5, 7, 9, 10, 11});
         begType.setSelectedIndex(1);
         timesText.setText("10");
+        walkText.setText("2");
+        hopCheck.setSelected(true);
+        hopPopText.setText("1100");
+        hopTimeText.setText("15");
 
-        frame.add(m2Label, "wrap, growx");
-        frame.add(muleName, "wrap, growx");
-        frame.add(wLabel, "wrap, growx");
-        frame.add(mWorld, "wrap, growx");
-        frame.add(posLabel, "wrap, growx");
-        frame.add(mulePos, "wrap, growx");
-        frame.add(mLabel, "wrap, growx");
-        frame.add(muleAmount, "wrap, growx");
-        frame.add(kLabel, "wrap, growx");
-        frame.add(mKeep, "wrap, growx");
-        frame.add(lLabel, "wrap, growx");
-        frame.add(openB, "wrap, growx");
-        frame.add(bLabel, "wrap, growx");
-        frame.add(clear, "wrap, growx");
-        frame.add(begAmounts, "wrap, growx");
-        frame.add(aLabel, "wrap, growx");
-        frame.add(startAmount, "wrap, growx");
-        frame.add(tLabel, "wrap, growx");
-        frame.add(begType, "wrap, growx");
-        frame.add(timesLabel, "wrap, growx");
-        frame.add(timesText, "wrap, growx");
-        frame.add(t2Label, "wrap, growx");
-        frame.add(max, "wrap, growx");
-        frame.add(t1Label, "wrap, growx");
-        frame.add(min, "wrap, growx");
-        frame.add(startBtn, "wrap, growx");
+        JPanel p1 = new JPanel(new MigLayout("filly, wrap 2"));
+        JPanel p2 = new JPanel(new MigLayout("filly, wrap 2"));
+
+        p1.add(m2Label, "wrap, growx");
+        p1.add(muleName, "wrap, growx");
+        p1.add(wLabel, "wrap, growx");
+        p1.add(mWorld, "wrap, growx");
+        p1.add(posLabel, "wrap, growx");
+        p1.add(mulePos, "wrap, growx");
+        p1.add(mLabel, "wrap, growx");
+        p1.add(muleAmount, "wrap, growx");
+        p1.add(kLabel, "wrap, growx");
+        p1.add(mKeep, "wrap, growx");
+        p1.add(lLabel, "wrap, growx");
+        p1.add(openB, "wrap, growx");
+        p1.add(bLabel, "wrap, growx");
+        p1.add(clear, "wrap, growx");
+        p1.add(begAmounts, "wrap, growx");
+        p2.add(aLabel, "wrap, growx");
+        p2.add(startAmount, "wrap, growx");
+        p2.add(tLabel, "wrap, growx");
+        p2.add(begType, "wrap, growx");
+        p2.add(timesLabel, "wrap, growx");
+        p2.add(timesText, "wrap, growx");
+        p2.add(t2Label, "wrap, growx");
+        p2.add(max, "wrap, growx");
+        p2.add(t1Label, "wrap, growx");
+        p2.add(min, "wrap, growx");
+        p2.add(walkLabel, "wrap, growx");
+        p2.add(walkText, "wrap, growx");
+        p2.add(hopCheckLabel, "wrap, growx");
+        p2.add(hopCheck, "wrap, growx");
+        p2.add(hopChanceLabel, "wrap, growx");
+        p2.add(hopTimeText, "wrap, growx");
+        p2.add(hopPopLabel, "wrap, growx");
+        p2.add(hopPopText, "wrap, growx");
+        p2.add(startBtn, "wrap, growx");
 
         clear.addActionListener(x -> clearBtnHandler());
         startBtn.addActionListener(x -> startBtnHandler());
         openB.addActionListener(x -> openBtnHandler());
 
+        JPanel contentPane = new JPanel(new MigLayout("filly"));
+        contentPane.add(p1, "growy");
+        contentPane.add(p2, "growy");
+
+        frame.setContentPane(contentPane);
         frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         frame.setLocationRelativeTo(Game.getCanvas());
         frame.pack();
@@ -162,6 +200,13 @@ public class Gui extends Task {
         Beggar.maxWait = Integer.parseInt(max.getText());
         Beggar.minWait = Integer.parseInt(min.getText());
         Beggar.amountChance = Integer.parseInt(timesText.getText());
+        Beggar.walkChance = Integer.parseInt(walkText.getText());
+
+        if (hopCheck.isSelected()) {
+            Beggar.worldHop = true;
+            Beggar.worldPop = Integer.parseInt(hopPopText.getText());
+            Beggar.hopTime = Integer.parseInt(hopTimeText.getText());
+        }
 
         if (readLines.contains("DEFAULT")) {
             Beggar.defaultLines();

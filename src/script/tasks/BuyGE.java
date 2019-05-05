@@ -11,13 +11,16 @@ import static org.rspeer.runetek.providers.RSGrandExchangeOffer.Type.BUY;
 
 public class BuyGE extends Task {
 
+    private boolean bought = false;
+
     @Override
     public boolean validate() {
-        return false;
+        return Inventory.getFirst(995).getStackSize() > 100 && !bought;
     }
 
     @Override
     public int execute() {
+        Log.info("Buying from GE");
         if (!GrandExchange.isOpen()) {
             GrandExchange.open();
             return 1000;
@@ -30,6 +33,7 @@ public class BuyGE extends Task {
             if(GrandExchangeSetup.confirm()){
                 Log.fine("Succesfully purchased");
                 GrandExchange.collectAll();
+                bought = true;
             }
         }
          return 1000;

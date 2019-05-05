@@ -35,7 +35,7 @@ public class Mule extends Task {
 
     private void loginMule() {
         try {
-            File file = new File("mule.txt");
+            File file = new File("C:" + File.separator + "Mule"+ File.separator + "mule.txt");
 
             if (!file.exists()) {
                 file.createNewFile();
@@ -61,7 +61,7 @@ public class Mule extends Task {
 
     public void logoutMule() {
         try {
-            File file = new File("mule.txt");
+            File file = new File("C:" + File.separator + "Mule"+ File.separator + "mule.txt");
 
             if (!file.exists()) {
                 Log.info("Logout file not found");
@@ -78,17 +78,13 @@ public class Mule extends Task {
     }
 
     @Override
-    public boolean validate() {
-        if (Inventory.getCount(true, 995) >= Beggar.muleAmnt || muleing) {
-            Beggar.isMuling = true;
-            loginMule();
-            return true;
-        }
-        return false;
-    }
+    public boolean validate() { return Inventory.getCount(true, 995) >= Beggar.muleAmnt || muleing; }
 
     @Override
     public int execute() {
+        Beggar.isMuling = true;
+        loginMule();
+
         if(Worlds.getCurrent() != Beggar.muleWorld){
             begWorld = Worlds.getCurrent();
             WorldHopper.hopTo(Beggar.muleWorld);
@@ -160,16 +156,20 @@ public class Mule extends Task {
                         if (Trade.accept()) {
                             Time.sleep(3000);
                             Log.fine("Trade completed shutting down mule");
-                            logoutMule();
                             muleing = false;
-                            Beggar.walk = false;
-                            Beggar.beg = false;
+                            logoutMule();
+                            Beggar.changeAmount = true;
+                            Beggar.walk = true;
+                            Beggar.beg = true;
+                            Beggar.atGE = false;
+                            Beggar.buildGEPath = true;
                             Beggar.trading = false;
-                            Beggar.isMuling = false;
                             if(begWorld != -1) {
                                 WorldHopper.hopTo(begWorld);
                                 Time.sleepUntil(() -> Worlds.getCurrent() == begWorld, 10000);
                             }
+                            Time.sleep(8000, 10000);
+                            Beggar.isMuling = false;
                         }
                         Time.sleep(700);
                     }

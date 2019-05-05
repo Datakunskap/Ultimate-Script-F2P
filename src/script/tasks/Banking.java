@@ -27,7 +27,8 @@ public class Banking extends Task {
             Bank.depositInventory();
             Time.sleep(2000);
             Bank.withdraw(995, Integer.MAX_VALUE);
-            Time.sleep(3000);
+            Time.sleep(5000);
+            Bank.close();
         }
         return 1000;
     }

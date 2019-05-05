@@ -18,10 +18,9 @@ import script.data.MuleArea;
 import script.tasks.*;
 import script.ui.Gui;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.awt.*;
+import java.util.List;
 
 @ScriptMeta(name = "Ultimate Beggar", desc = "Begs for gp", developer = "DrScatman")
 public class Beggar extends TaskScript implements RenderListener, ChatMessageListener {
@@ -39,7 +38,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static boolean beg = true;
     public static boolean tradePending = false;
     public static boolean trading = false;
-    public static String traderName;
+    public static String traderName = "";
     public static boolean changeAmount = false;
     public static boolean iterAmount;
     public static boolean atGE = false;
@@ -54,6 +53,16 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static boolean defaultLines = false;
     public static String inputLines;
     public static int muleWorld;
+    public static boolean buildGEPath = true;
+    public static int worldPop;
+    public static boolean worldHop;
+    public static int hopTime;
+    public static boolean hopTimeExpired  = false;
+    public static int sameTraderCount = 0;
+    public static int walkChance;
+
+    public static long startTime = 0;
+    public static long currTime = 0;
 
     @Override
     public void onStart() {
@@ -62,10 +71,15 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         startC = Inventory.getCount(true, 995);
         location = Location.GE_AREA;
 
-        submit(new Gui(),
-                new Mule(),
-                new TradePlayer(),
+        submit(new Gui());
+        if (Beggar.worldHop) {
+            startTime = System.currentTimeMillis();
+        }
+
+        submit( new TradePlayer(),
                 new WaitTrade(),
+                new Mule(),
+                new WorldHop(),
                 new ChangeAmount(),
                 new ToggleRun(),
                 new Banking(),
@@ -84,12 +98,19 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public void notify(ChatMessageEvent msg) {
         // If not in a trade and a player trades you...
         if (!Trade.isOpen() && msg.getType().equals(ChatMessageType.TRADE) && !isMuling) {
-            traderName = msg.getSource();
-            tradePending = true;
-            trading = true;
-            walk = false;
-            beg = false;
-            //new TradePlayer().execute();
+            if(msg.getSource().equals(traderName)) {
+                sameTraderCount++;
+            } else {
+                sameTraderCount = 0;
+            }
+            if (sameTraderCount < 5) {
+                traderName = msg.getSource();
+                tradePending = true;
+                trading = true;
+                walk = false;
+                beg = false;
+                //new TradePlayer().execute();
+            }
         }
     }
 
@@ -98,14 +119,15 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         Graphics g = e.getSource();
 
         int gainedC = Inventory.getCount(true, 995) - startC;
-
         g.drawString("Runtime: " + runtime.toElapsedString(), 20, 40);
-        //g.drawString("Gp in bank: " + Bank.getCount(995), 20, 60);
         g.drawString("Gp gained: " + gainedC, 20, 80);
         g.drawString("Gp /h: " + runtime.getHourlyRate(gainedC), 20, 100);
     }
 
     public static int randInt(int min, int max) {
+        if (min >= max) {
+            throw new IllegalArgumentException("max must be greater than min");
+        }
         java.util.Random rand = new java.util.Random();
         int randomNum = rand.nextInt(max - min + 1) + min;
         return randomNum;
@@ -181,5 +203,13 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
 
         lines = new Lines(linesArr);
+    }
+
+    public static void checkWorldHopTime(){
+        currTime = System.currentTimeMillis();
+        int elapsedSeconds = (int)((currTime - startTime) / 1000);
+        if (elapsedSeconds > (hopTime * 60)) {
+            hopTimeExpired = true;
+        }
     }
 }

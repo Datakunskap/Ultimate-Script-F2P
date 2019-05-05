@@ -18,10 +18,23 @@ import script.Beggar;
 public class TradePlayer extends Task {
 
     private boolean modified = false;
-    private final String[] completeLines = new String[] {"holy shit", "ty", "Wowza thanks!",
-                                        "TY!", "Holy Shit!!", "Woah! TY!", "Wow! thanks bro",
-                                        "Thanks!", "Thank you", "Dang!! thanks :)",
-                                        "Holy Fucking Shit!!", "Omfggg", "OMG! ty", ":)"};
+    private final String[] completeLines = new String[]{"Holy shit!!!!", "Wowzzaaa!!! thnk u :))",
+            "Holy Shit!! Ty!!! :))))", "Woah ur rich! TY mann!!!", "Wow ur rich!! thanks man :))",
+            "Dang mannn!!!! thanks :)",
+            "Holy Fucking Shit!!", "Omfggg!!", "OMG!!!! thnk youu!!!!",
+            "Yes!!! Im 11k from rune legs!!!! Ty :)", "Yess!!!! Holly thnk u!!",
+            "Yes man!!! Thanks man!!!", "Yesss!!!!!", "Holly mannn y is everyone giving me stuff lol thanks",
+            "Shyt ur rich! Thnk u!!!!", "U guys make me rich in 3 minutes thnks :)))", "ure 2 nice!!!",
+            "omfggq1!!!!!", "Yessssssssssssss :)", "Yess!! man you pimping me out lmao",
+            "Wat is happening lmao!!! Y is evry1 giving so much coin lol",
+            "yesssssssssssssssss!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+            "Thnk u man!!!!!!! Im half way to 100k now!!!!!!!!",
+            "Thnk u man!!!!!!! Im half way to 10k now!!!!!!!!",
+            "U guys are seriously making my year hahahha :)", "Omgg im almost half a millionire!!! Thnks!!!",
+            "Omggg Im almost half 100k!!!!!! Thank you man!! you the man!!!!",
+            "Holy man Tyyy!!! 10ks alot to give a random person!! Thnks :)))))",
+            "Holy man Tyyy!!! 20k is alot to give a random person!! Thnks :)))))",
+            "Hollllyy 5k is a lot to give a random person Tyy!!!!! :)"};
 
     @Override
     public boolean validate() {
@@ -51,7 +64,7 @@ public class TradePlayer extends Task {
                         Log.info("Trade entered");
                         break;
                     }
-                    if(attempts > 10){
+                    if (attempts > 3) {
                         break;
                     }
                 }
@@ -63,29 +76,22 @@ public class TradePlayer extends Task {
                     Time.sleep(300);
                     if (item.getStackSize() > Beggar.gp.getGp()) {
                         if (Time.sleepUntilForDuration(() -> Trade.contains(false, 995), 2000, 10000)) {
-                            if(Trade.accept()) {
+                            if (Trade.accept()) {
                                 Log.info("Accepted trade");
                                 Time.sleepUntil(() -> Trade.isOpen(true), 300, 3000);
                             }
-                        } else {
-                            Keyboard.sendText("Whats Up " + Beggar.traderName + "??");
-                            Keyboard.pressEnter();
-                            Trade.decline();
                         }
                     }
                     // Checks if they are just trying to donate
-                    if(item.getStackSize() <= Beggar.gp.getGp()) {
+                    if (item.getStackSize() <= Beggar.gp.getGp()) {
                         Time.sleep(4500);
-                        if(item.getStackSize() <= Beggar.gp.getGp()) {
+                        if (item.getStackSize() <= Beggar.gp.getGp()) {
                             for (Item my : Trade.getMyItems(x -> x.getName().equals("Coins"))) {
                                 my.interact(x -> x.contains("All"));
                             }
                             Time.sleepUntil(() -> !Trade.contains(true, 995), 500, 5000);
-                            if (!Trade.contains(false, 995)) {
-                                Trade.decline();
-                            }
-                            else {
-                                if(Trade.accept()) {
+                            if (Trade.contains(false, 995)) {
+                                if (Trade.accept()) {
                                     Log.info("Accepted trade");
                                     Time.sleepUntil(() -> Trade.isOpen(true), 300, 3000);
                                 }
@@ -97,16 +103,18 @@ public class TradePlayer extends Task {
         } else if (Trade.isOpen(true)) {
             // handle second trade window...
             Time.sleep(500, 1500);
-            if(Trade.accept()) {
+            if (Trade.accept()) {
+                Time.sleepUntil(() -> Trade.hasOtherAccepted() || !Trade.isOpen(true), 120000);
                 Log.fine("Trade completed");
-                Time.sleep(1000, 2000);
-                Keyboard.sendText(completeLines[Beggar.randInt(0, completeLines.length-1)]);
+                Time.sleep(3000, 3500);
+                Keyboard.sendText(completeLines[Beggar.randInt(0, completeLines.length - 1)]);
                 Keyboard.pressEnter();
-                Beggar.walk = true;
-                Beggar.beg = true;
+                Beggar.walk = false;
+                Beggar.beg = false;
                 Beggar.trading = false;
                 Beggar.changeAmount = true;
-                Time.sleep(9000, 14000);
+                Beggar.startTime = System.currentTimeMillis();
+                //Time.sleep(9000, 14000);
             }
         }
         // If someone is requesting to trade you & you're not in trade, accept trade...
