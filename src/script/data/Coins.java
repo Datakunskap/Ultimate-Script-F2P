@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum Coins {
+    GP_10(10),
     GP_25(25),
     GP_50(50),
     GP_100(100),

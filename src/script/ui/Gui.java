@@ -56,6 +56,7 @@ public class Gui extends Task {
     private JComboBox mulePos;
     private JLabel walkLabel;
     private JTextField walkText;
+    private JCheckBox hopCheckf2p;
 
     private String readLines;
     private String[] types = new String[]{"Incremental", "Random"};
@@ -98,6 +99,7 @@ public class Gui extends Task {
         t2Label = new JLabel("Max Time Between Begs (sec)");
         min = new JTextField();
         max = new JTextField();
+        hopCheckf2p = new JCheckBox();
         timesLabel = new JLabel("Change Amount 1 In Every __ Begs (random)");
         timesText = new JTextField();
         walkLabel = new JLabel("Walks After 1 In Every __ Begs");
@@ -107,18 +109,19 @@ public class Gui extends Task {
 
         mWorld.setText("301");
         muleName.setText("milleja1");
-        muleAmount.setText("100000");
-        mulePos.setSelectedIndex(0);
+        muleAmount.setText("50000");
+        mulePos.setSelectedIndex(3);
         mKeep.setText("5000");
         min.setText("15");
         max.setText("30");
-        begAmounts.setSelectedIndices(new int[]{0, 1, 2, 5, 7, 9, 10, 11});
-        begType.setSelectedIndex(1);
-        timesText.setText("10");
-        walkText.setText("2");
-        hopCheck.setSelected(true);
-        hopPopText.setText("1100");
-        hopTimeText.setText("15");
+        begAmounts.setSelectedIndices(new int[]{0, 1, 2, 3, 6, 8, 10, 11});
+        begType.setSelectedIndex(0);
+        timesText.setText("6");
+        walkText.setText("24");
+        hopCheckf2p.setSelected(true);
+        hopCheck.setSelected(false);
+        hopPopText.setText("900");
+        hopTimeText.setText("10");
 
         JPanel p1 = new JPanel(new MigLayout("filly, wrap 2"));
         JPanel p2 = new JPanel(new MigLayout("filly, wrap 2"));
@@ -152,6 +155,7 @@ public class Gui extends Task {
         p2.add(walkText, "wrap, growx");
         p2.add(hopCheckLabel, "wrap, growx");
         p2.add(hopCheck, "wrap, growx");
+        p2.add(hopCheckf2p, "wrap, growx");
         p2.add(hopChanceLabel, "wrap, growx");
         p2.add(hopTimeText, "wrap, growx");
         p2.add(hopPopLabel, "wrap, growx");
@@ -171,7 +175,9 @@ public class Gui extends Task {
         frame.setLocationRelativeTo(Game.getCanvas());
         frame.pack();
 
-        frame.setVisible(true);
+        //frame.setVisible(true);
+        autoOpen();
+        startBtnHandler();
     }
 
     @Override
@@ -204,6 +210,12 @@ public class Gui extends Task {
 
         if (hopCheck.isSelected()) {
             Beggar.worldHop = true;
+            Beggar.worldPop = Integer.parseInt(hopPopText.getText());
+            Beggar.hopTime = Integer.parseInt(hopTimeText.getText());
+        }
+
+        if (hopCheckf2p.isSelected()) {
+            Beggar.worldHopf2p = true;
             Beggar.worldPop = Integer.parseInt(hopPopText.getText());
             Beggar.hopTime = Integer.parseInt(hopTimeText.getText());
         }
@@ -249,6 +261,28 @@ public class Gui extends Task {
         }
     }
 
+    private void autoOpen() {
+
+            File f = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\BegLines.txt");
+
+            BufferedReader br;
+            try {
+                br = new BufferedReader(new FileReader(f));
+                StringBuilder sb = new StringBuilder();
+                String s = br.readLine();
+
+                while (s != null) {
+                    sb.append(s);
+                    sb.append(System.lineSeparator());
+                    s = br.readLine();
+                }
+                readLines = sb.toString();
+                Log.fine("Lines loaded");
+                br.close();
+            } catch (IOException e) {
+                Log.info("File not found");
+            }
+    }
 
     private void clearBtnHandler() {
         begAmounts.clearSelection();

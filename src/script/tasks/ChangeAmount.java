@@ -6,7 +6,6 @@ import script.data.Lines;
 
 public class ChangeAmount extends Task {
 
-    private int index = 1;
 
     @Override
     public boolean validate() {
@@ -24,6 +23,7 @@ public class ChangeAmount extends Task {
         Beggar.reloadLines();
         Beggar.changeAmount = false;
         Beggar.walk = true;
+        Beggar.sendTrade = true;
         Beggar.beg = true;
         return 1000;
     }
@@ -33,11 +33,11 @@ public class ChangeAmount extends Task {
     }
 
     public void iterAmount(){
-        Beggar.gp = Beggar.gpArr.get(index);
-        index++;
-        if(index == Beggar.gpArr.size()-1){
+        Beggar.gp = Beggar.gpArr.get(Beggar.amntIndex);
+        Beggar.amntIndex++;
+        if(Beggar.amntIndex >= (Beggar.gpArr.size()-1) / 2){
             Beggar.iterAmount = false;
-            index = 0;
+            Beggar.amntIndex = 0;
         }
     }
 }

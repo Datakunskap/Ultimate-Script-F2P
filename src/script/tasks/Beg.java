@@ -1,12 +1,9 @@
 package script.tasks;
 
 import org.rspeer.runetek.api.input.Keyboard;
-import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-
-import java.awt.*;
 
 public class Beg extends Task {
 
@@ -25,7 +22,7 @@ public class Beg extends Task {
         if(!Beggar.iterAmount) {
             maybeAmount();
         }
-        return 1000;
+        return 600;
     }
 
     public void maybeAmount(){

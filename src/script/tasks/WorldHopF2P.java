@@ -11,28 +11,36 @@ import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
 
-public class WorldHop extends Task {
-
-    private int curr;
+public class WorldHopF2P extends Task {
 
     @Override
     public boolean validate() {
-        return Beggar.worldHop && Beggar.hopTimeExpired;
+        return Beggar.worldHopf2p && Beggar.hopTimeExpired;
     }
 
     @Override
     public int execute() {
-        curr = Worlds.getCurrent();
         openWorldSwitcher();
+        Beggar.currWorld = Worlds.getCurrent();
 
-        WorldHopper.randomHop(x -> x != null && x.getPopulation() >= Beggar.worldPop);
-        if(Time.sleepUntil(() -> Worlds.getCurrent() != curr, 20000)){
+        WorldHopper.randomHop(x -> x != null && x.getPopulation() >= Beggar.worldPop &&
+                !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
+
+        if(Time.sleepUntil(() -> Worlds.getCurrent() != Beggar.currWorld, 10000)){
             Log.fine("World hopped to world: " + Worlds.getCurrent());
+            Beggar.startTime = System.currentTimeMillis();
+            Beggar.hopTimeExpired = false;
+            Beggar.hopTryCount = 0;
         } else {
             Log.severe("World hop failed...");
+            Beggar.hopTryCount++;
         }
-        Beggar.hopTimeExpired = false;
-        Beggar.startTime = System.currentTimeMillis();
+
+        if (Beggar.hopTryCount > 15) {
+            Beggar.startTime = System.currentTimeMillis();
+            Beggar.hopTimeExpired = false;
+            Beggar.hopTryCount = 0;
+        }
         return 1000;
     }
 

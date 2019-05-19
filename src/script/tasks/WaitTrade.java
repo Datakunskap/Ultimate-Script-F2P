@@ -1,6 +1,10 @@
 package script.tasks;
 
 import org.rspeer.runetek.api.commons.Time;
+import org.rspeer.runetek.api.component.Bank;
+import org.rspeer.runetek.api.component.Trade;
+import org.rspeer.runetek.api.component.tab.Tab;
+import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
@@ -19,7 +23,11 @@ public class WaitTrade extends Task {
     @Override
     public int execute() {
 
-        if (!waitSet){
+        if (Bank.isOpen()) {
+            Bank.close();
+        }
+
+        if (!waitSet) {
             setMinMaxWait();
             waitSet = true;
         }
@@ -27,20 +35,29 @@ public class WaitTrade extends Task {
         int timeout = Beggar.randInt(min, max);
         Log.info("Waiting " + (timeout / 1000) + "s for a trade");
 
-        if (Time.sleepUntil(() -> Beggar.trading, timeout)){
-            return Beggar.randInt(1000, 2000);
+        if (Time.sleepUntil(() -> Beggar.trading || Trade.isOpen(), timeout)) {
+            if(Trade.isOpen()){
+                Beggar.sentTradeInit = true;
+            }
+            Beggar.trading = true;
+            Beggar.processSentTrade = true;
+            Beggar.walk = false;
+            Beggar.sendTrade = false;
+            Beggar.beg = false;
+            return Beggar.randInt(1500, 2500);
         }
-        else {
-            Beggar.walk = true;
-            Beggar.beg = true;
 
-            Beggar.checkWorldHopTime();
-            return 500;
-        }
+        Tabs.open(Tab.INVENTORY);
+        Beggar.walk = true;
+        Beggar.beg = true;
+        Beggar.sendTrade = true;
+
+        Beggar.checkWorldHopTime();
+        return 500;
     }
 
-    private void setMinMaxWait(){
-        min = Beggar.minWait *1000;
-        max = Beggar.maxWait *1000;
+    private void setMinMaxWait() {
+        min = Beggar.minWait * 1000;
+        max = Beggar.maxWait * 1000;
     }
 }

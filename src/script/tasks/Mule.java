@@ -59,7 +59,7 @@ public class Mule extends Task {
         user = Beggar.muleName;
     }
 
-    public void logoutMule() {
+    public static void logoutMule() {
         try {
             File file = new File("C:" + File.separator + "Mule"+ File.separator + "mule.txt");
 
@@ -155,15 +155,18 @@ public class Mule extends Task {
                         Time.sleep(500, 1500);
                         if (Trade.accept()) {
                             Time.sleep(3000);
-                            Log.fine("Trade completed shutting down mule");
+                            Log.fine("Complete Shutting Down Mule");
                             muleing = false;
                             logoutMule();
                             Beggar.changeAmount = true;
                             Beggar.walk = true;
+                            Beggar.sendTrade = true;
                             Beggar.beg = true;
-                            Beggar.atGE = false;
+                            //Beggar.atGE = false;
                             Beggar.buildGEPath = true;
                             Beggar.trading = false;
+                            Beggar.amntMuled += (Coins - Beggar.muleKeep);
+                            Beggar.equipped = false;
                             if(begWorld != -1) {
                                 WorldHopper.hopTo(begWorld);
                                 Time.sleepUntil(() -> Worlds.getCurrent() == begWorld, 10000);
