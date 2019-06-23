@@ -7,6 +7,7 @@ import org.rspeer.runetek.event.listeners.ChatMessageListener;
 import org.rspeer.runetek.event.types.ChatMessageEvent;
 import org.rspeer.runetek.event.types.ChatMessageType;
 import org.rspeer.runetek.event.types.LoginResponseEvent;
+import org.rspeer.script.Script;
 import org.rspeer.script.events.LoginScreen;
 import script.casino.*;
 import script.data.Coins;
@@ -89,8 +90,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     public static long startTime = 0;
     public static long currTime = 0;
-
-    public static final String CURR_WORLD_PATH = System.getProperty("user.home") + "\\Documents\\RSPeer\\cache\\data\\CurrBegWorld.txt";
+    public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
 
     public static boolean tradeGambler = false;
     public static boolean roll = false;

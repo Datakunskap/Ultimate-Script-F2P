@@ -12,6 +12,7 @@ import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
+import org.rspeer.script.Script;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
@@ -32,10 +33,11 @@ public class Mule extends Task {
     public static String Password;
     private boolean muleing = false;
     private int begWorld = -1;
+    private static final String MULE_FILE_PATH = Script.getDataDirectory() + "\\mule.txt";
 
     private void loginMule() {
         try {
-            File file = new File("C:" + File.separator + "Mule"+ File.separator + "mule.txt");
+            File file = new File(MULE_FILE_PATH);
 
             if (!file.exists()) {
                 file.createNewFile();
@@ -61,7 +63,7 @@ public class Mule extends Task {
 
     public static void logoutMule() {
         try {
-            File file = new File("C:" + File.separator + "Mule"+ File.separator + "mule.txt");
+            File file = new File(MULE_FILE_PATH);
 
             if (!file.exists()) {
                 Log.info("Logout file not found");
