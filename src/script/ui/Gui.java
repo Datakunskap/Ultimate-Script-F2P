@@ -108,20 +108,20 @@ public class Gui extends Task {
         startBtn = new JButton("Start");
 
         mWorld.setText("301");
-        muleName.setText("milleja1");
-        muleAmount.setText("50000");
-        mulePos.setSelectedIndex(3);
+        muleName.setText("drscatman");
+        muleAmount.setText("100000");
+        mulePos.setSelectedIndex(0);
         mKeep.setText("5000");
         min.setText("15");
-        max.setText("30");
+        max.setText("25");
         begAmounts.setSelectedIndices(new int[]{0, 1, 2, 3, 6, 8, 10, 11});
         begType.setSelectedIndex(0);
-        timesText.setText("6");
+        timesText.setText("5");
         walkText.setText("24");
         hopCheckf2p.setSelected(true);
         hopCheck.setSelected(false);
-        hopPopText.setText("900");
-        hopTimeText.setText("10");
+        hopPopText.setText("800");
+        hopTimeText.setText("6");
 
         JPanel p1 = new JPanel(new MigLayout("filly, wrap 2"));
         JPanel p2 = new JPanel(new MigLayout("filly, wrap 2"));

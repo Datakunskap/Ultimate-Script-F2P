@@ -1,15 +1,14 @@
 package script;
 
 import org.rspeer.runetek.adapter.scene.Player;
-import org.rspeer.runetek.api.Login;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Trade;
 import org.rspeer.runetek.event.listeners.ChatMessageListener;
-import org.rspeer.runetek.event.listeners.LoginResponseListener;
 import org.rspeer.runetek.event.types.ChatMessageEvent;
 import org.rspeer.runetek.event.types.ChatMessageType;
 import org.rspeer.runetek.event.types.LoginResponseEvent;
 import org.rspeer.script.events.LoginScreen;
+import script.casino.*;
 import script.data.Coins;
 import script.data.Lines;
 import script.data.Location;
@@ -83,18 +82,37 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static int gainedC = 0;
     public static int amntMuled = 0;
     public static boolean banked = false;
+    private static int elapsedSeconds = 0;
+    private boolean disableChain = false;
+    // ADD TO GUI
+    public static boolean setSendTrades = false;
 
     public static long startTime = 0;
     public static long currTime = 0;
 
-    private static boolean firstHopCall = false;
+    public static final String CURR_WORLD_PATH = System.getProperty("user.home") + "\\Documents\\RSPeer\\cache\\data\\CurrBegWorld.txt";
+
+    public static boolean tradeGambler = false;
+    public static boolean roll = false;
+    public static int gambleAmnt = 0;
+    public static String gamblerName = "";
+    public static boolean giveGambler = false;
+
+    private static final String PYTHON_3_EXE = "C:\\Users\\bllit\\AppData\\Local\\Programs\\Python\\Python37\\python.exe";
+    private static final String ACC_GEN_PY = "C:\\Users\\bllit\\IdeaProjects\\OSRS-Account-Generator\\create_rs_account.py";
+    private String randEmailArg;
+    private static final String PASSWORD_ARG = "-p plmmlp";
+    private static int numAccsBacklogged = 0;
+
+    private final static boolean GAMBLER = false;
 
     @Override
     public void onStart() {
-        Log.fine("Script started.");
+        Log.fine("Script Started");
         LoginScreen ctx = new LoginScreen(this);
         ctx.setStopScriptOn(INVALID_CREDENTIALS);
-
+        ctx.setStopScriptOn(RUNESCAPE_UPDATE);
+        ctx.setStopScriptOn(RUNESCAPE_UPDATE_2);
 
         runtime = StopWatch.start();
         startC = Inventory.getCount(true, 995);
@@ -102,49 +120,110 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         submit(new Gui());
 
-        if (Beggar.worldHop) {
+        if (Beggar.worldHop || Beggar.worldHopf2p) {
             startTime = System.currentTimeMillis();
         }
 
-        submit(new TradePlayer(),
-                new WaitTrade(),
-                new Mule(),
-                new WorldHop(),
-                new WorldHopF2P(),
-                new ChangeAmount(),
-                new ToggleRun(),
-                new Banking(),
-                new Traverse(),
-                new BuyGE(),
-                new SendTrade(),
-                new Beg()
-        );
+        if (GAMBLER) {
+            submit(new GTradePlayer(),
+                    new GWaitTrade(),
+                    //new Mule(),
+                    new GSendTrade(),
+                    new GRoll(),
+                    new WorldHop(),
+                    new Banking(),
+                    new GTraverse(),
+                    new Gambler()
+                    );
+        } else {
+            submit(new TradePlayer(),
+                    new WaitTrade(),
+                    new Mule(),
+                    new WorldHop(),
+                    new ChangeAmount(),
+                    new ToggleRun(),
+                    new Banking(),
+                    new Traverse(),
+                    new BuyGE(),
+                    new Beg(),
+                    new SendTrade()
+            );
+        }
+    }
+
+    @Override
+    public void onPause() {
+        if(!disableChain) {
+            Log.fine("Chain Disabled");
+            disableChain = true;
+        }
+        else {
+            Log.fine("Chain Enabled");
+            disableChain = false;
+        }
     }
 
     @Override
     public void onStop() {
         Log.severe("Script stopped.");
-        if (isMuling) {
-            Mule.logoutMule();
+        if(!disableChain && !GAMBLER) {
+            if (isMuling) {
+                Mule.logoutMule();
+            }
+            File file = new File(CURR_WORLD_PATH);
+            if (file.exists()){
+                file.delete();
+            }
+
+            writeJson(readAccount());
+
+            if(numAccsBacklogged-1 <= 1)
+                generateAccount();
+
+            removeAll();
+            String pid = ManagementFactory.getRuntimeMXBean().getName();
+            String[] arr = pid.split("@");
+            String id = arr[0];
+            String pKill = "taskkill -f /PID " + id;
+            String launcher = "java -jar C:\\Users\\bllit\\OneDrive\\Desktop\\BegLauncher.jar";
+
+            try {
+                Runtime.getRuntime().exec(
+                        "cmd /c start cmd.exe /K \"" + launcher + "\"");
+
+                Runtime.getRuntime().exec(
+                        "cmd /c start cmd.exe /K \"" + pKill + "\"");
+            } catch (Exception e) {
+                System.out.println("HEY Buddy ! U r Doing Something Wrong ");
+                e.printStackTrace();
+            }
         }
-        writeJson(readAccount());
-        removeAll();
-        String pid = ManagementFactory.getRuntimeMXBean().getName();
-        String[] arr = pid.split("@");
-        String id = arr[0];
-        String pKill = "taskkill -f /PID " + id;
-        String launcher = "java -jar C:\\Users\\bllit\\OneDrive\\Desktop\\BeggarLauncher.jar";
+    }
+
+    private void generateAccount() {
+        randEmailArg = "-e " + getRandString() + "@gmail.com";
 
         try {
-            Runtime.getRuntime().exec(
-                    "cmd /c start cmd.exe /K \"" + launcher + "\"");
-
-            Runtime.getRuntime().exec(
-                    "cmd /c start cmd.exe /K \"" + pKill + "\"");
-        } catch (Exception e) {
-            System.out.println("HEY Buddy ! U r Doing Something Wrong ");
+            Process p = Runtime.getRuntime().exec(
+                    "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + randEmailArg + " " + PASSWORD_ARG + "\"");
+        } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    protected String getRandString() {
+        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        StringBuilder salt = new StringBuilder();
+        Random rnd = new Random();
+        int strLen = randInt(12, 18);
+
+        while (salt.length() < strLen) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
+
+        String saltStr = salt.toString();
+        return saltStr;
     }
 
     public static void writeJson(String account) {
@@ -262,6 +341,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                     sb.append(line);
                     sb.append(System.lineSeparator());
                     line = br.readLine();
+                    numAccsBacklogged++;
                 }
                 accounts = sb.toString();
             } finally {
@@ -312,11 +392,12 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         if ((msg.getMessage().contains("Sending trade offer") || msg.getType().equals(ChatMessageType.TRADE_SENT)) &&
                 !isMuling && !Trade.isOpen() && !trading) {
             //Log.info("Trade sent");
-            Beggar.tradeSent = true;
+            tradeSent = true;
         }
 
         if (msg.getMessage().contains("player is busy at the moment") && !isMuling && !Trade.isOpen() && !trading) {
-            Beggar.walk = true;
+            //walk = true;
+            //beg = true;
         }
     }
 
@@ -327,8 +408,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         gainedC = Inventory.getCount(true, 995) + amntMuled;
         gainedC -= startC;
         g.drawString("Runtime: " + runtime.toElapsedString(), 20, 40);
-        g.drawString("Gp gained: " + format(gainedC), 20, 60);
-        g.drawString("Gp /h: " + format((long) runtime.getHourlyRate(gainedC)), 20, 80);
+        g.drawString("Last trade completed: " + elapsedSeconds/60+"min(s)", 20, 60);
+        g.drawString("Gp gained: " + format(gainedC), 20, 80);
+        g.drawString("Gp /h: " + format((long) runtime.getHourlyRate(gainedC)), 20, 100);
     }
 
     private static final NavigableMap<Long, String> suffixes = new TreeMap<>();
@@ -439,14 +521,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     public static void checkWorldHopTime(){
         currTime = System.currentTimeMillis();
-        int elapsedSeconds = (int)((currTime - startTime) / 1000);
+        elapsedSeconds = (int)((currTime - startTime) / 1000);
         if (elapsedSeconds > (hopTime * 60)) {
-            if (firstHopCall) {
-                hopTimeExpired = true;
-            } else {
-                firstHopCall = true;
-                startTime = System.currentTimeMillis();
-            }
+            hopTimeExpired = true;
+            WorldHop.resetMinPop();
         }
     }
 }

@@ -11,7 +11,7 @@ public class SendTrade extends Task {
 
     @Override
     public boolean validate() {
-        return !Beggar.walk && Beggar.beg && Beggar.sendTrade && !Beggar.trading;
+        return Beggar.setSendTrades && !Beggar.walk && !Beggar.beg && Beggar.sendTrade && !Beggar.trading;
     }
 
     @Override
@@ -27,9 +27,11 @@ public class SendTrade extends Task {
                 return;
             }
             Player p = Players.getNearest(x -> x.getCombatLevel() > 3 && x != null && x.isPositionInteractable() && x.isPositionWalkable());
-            p.interact("Trade with");
-            name = p.getName();
-            Time.sleepUntil(() -> Beggar.tradeSent, 1200);
+            if (p != null) {
+                p.interact("Trade with");
+                name = p.getName();
+                Time.sleepUntil(() -> Beggar.tradeSent, 1200);
+            }
             Beggar.sendTryCount++;
         }
 

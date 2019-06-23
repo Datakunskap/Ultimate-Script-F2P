@@ -1,6 +1,7 @@
 package script.tasks;
 
 import org.rspeer.script.task.Task;
+import org.rspeer.ui.Log;
 import script.Beggar;
 import script.data.Lines;
 
@@ -14,6 +15,7 @@ public class ChangeAmount extends Task {
 
     @Override
     public int execute() {
+        Log.info("Changing beg amount");
         if(Beggar.iterAmount){
             iterAmount();
         } else {

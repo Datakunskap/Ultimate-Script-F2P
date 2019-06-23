@@ -1,4 +1,4 @@
-package script.tasks;
+package script.casino;
 
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
@@ -9,7 +9,7 @@ import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
 
-public class WaitTrade extends Task {
+public class GWaitTrade extends Task {
 
     private int min;
     private int max;

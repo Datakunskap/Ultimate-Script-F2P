@@ -5,7 +5,7 @@ import org.rspeer.runetek.api.movement.position.Position;
 
 public enum Location {
 
-    GE_AREA(Area.polygonal(
+    GE_AREA_MED(Area.polygonal(
             new Position[] {
                     new Position(3154, 3500, 0),
                     new Position(3164, 3504, 0),
@@ -30,7 +30,7 @@ public enum Location {
                     new Position(3152, 3477, 0)
             })),
 
-    GE_AREA_SMALL(Area.polygonal(
+    GE_AREA(Area.polygonal(
             new Position[] {
         new Position(3161, 3498, 0),
                 new Position(3168, 3498, 0),
