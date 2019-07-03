@@ -51,4 +51,5 @@ public enum Location {
     public Area getBegArea() {
         return begArea;
     }
+
 }

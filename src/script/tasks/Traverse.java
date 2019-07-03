@@ -11,6 +11,14 @@ import script.Beggar;
 
 public class Traverse extends Task {
 
+    private Beggar main;
+    private WalkingHelper walk;
+
+    public Traverse(Beggar main){
+        this.main = main;
+        walk = new WalkingHelper(main);
+    }
+
     @Override
     public boolean validate() {
         return (Beggar.walk || (!Beggar.location.getBegArea().contains(Players.getLocal()))) && !Beggar.trading;
@@ -22,7 +30,7 @@ public class Traverse extends Task {
 
         if(!Beggar.location.getBegArea().contains(Players.getLocal())){
             Log.info("Walking to GE");
-            if (WalkingHelper.shouldSetDestination()) {
+            if (walk.shouldSetDestination()) {
                 if (Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition())) {
                     Time.sleepUntil(() -> BankLocation.GRAND_EXCHANGE.getPosition().distance(Players.getLocal().getPosition()) <= 7, Random.mid(1800, 2400));
                 }
@@ -38,5 +46,11 @@ public class Traverse extends Task {
             return Beggar.randInt(2000, 3000);
         }
         return 600;
+    }
+
+    public void checkTutorialIsland(){
+        if (Beggar.TUTORIAL_ISLAND_AREA.contains(Players.getLocal())) {
+
+        }
     }
 }

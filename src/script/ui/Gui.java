@@ -112,8 +112,8 @@ public class Gui extends Task {
         muleAmount.setText("100000");
         mulePos.setSelectedIndex(0);
         mKeep.setText("5000");
-        min.setText("15");
-        max.setText("25");
+        min.setText("25");
+        max.setText("35");
         begAmounts.setSelectedIndices(new int[]{0, 1, 2, 3, 6, 8, 10, 11});
         begType.setSelectedIndex(0);
         timesText.setText("5");
@@ -121,7 +121,7 @@ public class Gui extends Task {
         hopCheckf2p.setSelected(true);
         hopCheck.setSelected(false);
         hopPopText.setText("800");
-        hopTimeText.setText("6");
+        hopTimeText.setText("8");
 
         JPanel p1 = new JPanel(new MigLayout("filly, wrap 2"));
         JPanel p2 = new JPanel(new MigLayout("filly, wrap 2"));
