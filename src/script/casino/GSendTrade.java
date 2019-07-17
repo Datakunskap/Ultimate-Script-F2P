@@ -1,3 +1,4 @@
+/*
 package script.casino;
 
 import org.rspeer.runetek.adapter.scene.Player;
@@ -40,4 +41,4 @@ public class GSendTrade extends Task {
         Beggar.giveGambler = true;
         Beggar.sendTryCount = 0;
     }
-}
+}*/

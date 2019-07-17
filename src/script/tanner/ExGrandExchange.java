@@ -37,14 +37,18 @@ public final class ExGrandExchange {
 
         return collectFinishedOffers(toBank)
                 && createOffer(type)
-                && setItem(item)
+                && setItem(item, 10)
                 && setItemPrice(price)
                 && setItemQuantity(quantity)
                 && GrandExchangeSetup.confirm();
 
     }
 
-    private static boolean setItem(RSItemDefinition item) {
+    private static boolean setItem(RSItemDefinition item, int tries) {
+        if (item.getId() < 0 && tries >= 0)
+            setItem(item, tries-1);
+        if (tries < 0)
+            return false;
         return GrandExchangeSetup.setItem(item.getId());
     }
 

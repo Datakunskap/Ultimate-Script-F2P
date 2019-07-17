@@ -9,7 +9,6 @@ import org.rspeer.runetek.api.component.WorldHopper;
 import org.rspeer.runetek.api.component.tab.Tab;
 import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.runetek.providers.RSWorld;
-import org.rspeer.script.Script;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
@@ -19,37 +18,47 @@ import java.util.ArrayList;
 
 public class WorldHop extends Task {
 
-    private static boolean atMinPop = false;
+    private Beggar main;
+
+    public WorldHop(Beggar beggar) {
+        main = beggar;
+    }
 
     @Override
     public boolean validate() {
-        return (Beggar.worldHop || Beggar.worldHopf2p) && Beggar.hopTimeExpired;
+        return (main.worldHop || main.worldHopf2p) && main.hopTimeExpired;
     }
 
     @Override
     public int execute() {
+        int actualWorld = Worlds.getCurrent();
+        main.atMinPop = false;
         resetMinPop();
-        Beggar.OTHER_BEG_WORLDS = getWorldsFromFile();
+        main.OTHER_BEG_WORLDS = getWorldsFromFile();
 
         openWorldSwitcher();
 
-        if (Beggar.worldHop) {
-            WorldHopper.randomHop(x -> x != null && !Beggar.OTHER_BEG_WORLDS.contains(x.getId()) && x.getPopulation() >= Beggar.worldPop &&
+        if (main.worldHop) {
+            WorldHopper.randomHop(x -> x != null && !main.OTHER_BEG_WORLDS.contains(x.getId()) && x.getPopulation() >= main.worldPop &&
                     x.isMembers() && !x.isSkillTotal());
         }
 
-        if (Beggar.worldHopf2p) {
-            if(Beggar.currWorld != 301 && !Beggar.OTHER_BEG_WORLDS.contains(301)){
+        if (main.worldHopf2p) {
+            if(main.currWorld != 301 && actualWorld != 301 && !containsTwoWorlds(301)){
                 WorldHopper.hopTo(301);
             }
-            else if(Beggar.currWorld != 308 && !Beggar.OTHER_BEG_WORLDS.contains(308)){
+            else if(main.currWorld != 308 && actualWorld != 308 && (!containsTwoWorlds(308) &&
+                    Worlds.get(308).getPopulation() > 1000) ||
+                    (!main.OTHER_BEG_WORLDS.contains(308) && Worlds.get(308).getPopulation() > main.worldPop)){
                 WorldHopper.hopTo(308);
             }
-            else if(Beggar.currWorld != 393 && !Beggar.OTHER_BEG_WORLDS.contains(393)){
+            else if(main.currWorld != 393 && actualWorld != 393 &&
+                    (!containsTwoWorlds(393) && Worlds.get(393).getPopulation() > 1000) ||
+                    (!main.OTHER_BEG_WORLDS.contains(393) && Worlds.get(393).getPopulation() > main.worldPop)){
                 WorldHopper.hopTo(393);
             }
             else {
-                WorldHopper.randomHop(x -> x != null && !Beggar.OTHER_BEG_WORLDS.contains(x.getId()) && x.getPopulation() >= Beggar.worldPop &&
+                WorldHopper.randomHop(x -> x != null && !main.OTHER_BEG_WORLDS.contains(x.getId()) && x.getPopulation() >= main.worldPop &&
                         !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
             }
         }
@@ -65,31 +74,32 @@ public class WorldHop extends Task {
             Time.sleep(5000);
         }
 
-        if (Time.sleepUntil(() -> Worlds.getCurrent() != Beggar.currWorld && !Beggar.OTHER_BEG_WORLDS.contains(Worlds.getCurrent()), 10000)) {
+        if (Time.sleepUntil(() -> (main.currWorld > 0) ? Worlds.getCurrent() != main.currWorld : Worlds.getCurrent() != actualWorld, 10000)) {
             Log.fine("World hopped to world: " + Worlds.getCurrent());
             Time.sleep(3000, 5000);
 
-            removeCurrBegWorld();
+            main.removeCurrBegWorld();
 
-            Beggar.startTime = System.currentTimeMillis();
-            Beggar.currWorld = Worlds.getCurrent();
-            Beggar.hopTimeExpired = false;
-            Beggar.hopTryCount = 0;
+            main.startTime = System.currentTimeMillis();
+            main.currWorld = Worlds.getCurrent();
+            main.hopTimeExpired = false;
+            main.hopTryCount = 0;
 
-            Beggar.worldPop = 800;
+            main.worldPop = 800;
             writeWorldToFile();
+            return 1000;
         } else {
             Log.info("World hop failed... Retrying");
-            Beggar.hopTryCount++;
+            main.hopTryCount++;
         }
 
-        if (Beggar.hopTryCount > 10 || atMinPop) {
+        if (main.hopTryCount > 10 || main.atMinPop) {
             Log.severe("World Hop Failed");
             resetMinPop();
 
-            Beggar.startTime = System.currentTimeMillis();
-            Beggar.hopTimeExpired = false;
-            Beggar.hopTryCount = 0;
+            main.startTime = System.currentTimeMillis();
+            main.hopTimeExpired = false;
+            main.hopTryCount = 0;
         }
         return 500;
     }
@@ -97,7 +107,6 @@ public class WorldHop extends Task {
     private void openWorldSwitcher() {
         //Initiate interfaces
         InterfaceComponent worldSwitcher = Interfaces.getComponent(182, 3);
-        InterfaceComponent worldSelect = Interfaces.getComponent(69, 0);
         //Open logout tab
         Tabs.open(Tab.LOGOUT);
         //Open world selector
@@ -110,21 +119,21 @@ public class WorldHop extends Task {
         }
     }
 
-    private static void resetMinPop() {
-        Beggar.OTHER_BEG_WORLDS = getWorldsFromFile();
+    private void resetMinPop() {
+        main.OTHER_BEG_WORLDS = getWorldsFromFile();
 
         RSWorld[] f2pCriteriaWorlds = null;
         while (f2pCriteriaWorlds == null || f2pCriteriaWorlds.length == 0) {
-            f2pCriteriaWorlds = Worlds.getLoaded(x -> x != null && !Beggar.OTHER_BEG_WORLDS.contains(x.getId()) && x.getId() != Worlds.getCurrent() &&
-                    x.getPopulation() >= Beggar.worldPop && !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
+            f2pCriteriaWorlds = Worlds.getLoaded(x -> x != null && !main.OTHER_BEG_WORLDS.contains(x.getId()) && x.getId() != Worlds.getCurrent() &&
+                    x.getPopulation() >= main.worldPop && !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
 
             if (f2pCriteriaWorlds == null || f2pCriteriaWorlds.length == 0) {
-                if (Beggar.worldPop >= 300) {
-                    Beggar.worldPop -= 10;
+                if (main.worldPop >= 300) {
+                    main.worldPop -= 10;
                     Log.info("Decreasing set world pop");
                 } else {
                     Log.severe("Min World Pop Reached");
-                    atMinPop = true;
+                    main.atMinPop = true;
                     break;
                 }
             }
@@ -136,21 +145,21 @@ public class WorldHop extends Task {
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
 
-            out.println(Beggar.currWorld);
+            out.println(main.currWorld);
         } catch (IOException e) {
             Log.severe("File not found");
         }
     }
 
-    public static ArrayList<Integer> getWorldsFromFile() {
+    private ArrayList<Integer> getWorldsFromFile() {
         Log.info("Checking file");
 
-        ArrayList<Integer> worlds = new ArrayList<Integer>();
+        ArrayList<Integer> worlds = new ArrayList<>();
         try {
             File file = new File(Beggar.CURR_WORLD_PATH);
 
             if (!file.exists()) {
-                return new ArrayList<Integer>();
+                return new ArrayList<>();
             }
 
             FileReader fr = new FileReader(file);
@@ -167,50 +176,25 @@ public class WorldHop extends Task {
             br.close();
         } catch (IOException e) {
             Log.info("No other beggar FNF");
-            return new ArrayList<Integer>();
+            return new ArrayList<>();
         }
 
         return worlds;
     }
 
-    public static void removeCurrBegWorld(){
-        BufferedReader reader = null;
-        try {
-            File inputFile = new File(Beggar.CURR_WORLD_PATH);
-            File tempFile = new File(Script.getDataDirectory() + "\\TEMPCurrBegWorld.txt");
+    private boolean containsTwoWorlds(int world) {
+        if (main.OTHER_BEG_WORLDS == null)
+            return false;
 
-            if (!inputFile.exists())
-                return;
-
-            reader = new BufferedReader(new FileReader(inputFile));
-            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-
-            String lineToRemove = Integer.toString(Beggar.currWorld);
-            String currentLine;
-
-            while((currentLine = reader.readLine()) != null) {
-                // trim newline when comparing with lineToRemove
-                String trimmedLine = currentLine.trim();
-                if(trimmedLine.equals(lineToRemove)) continue;
-                writer.write(currentLine + System.getProperty("line.separator"));
+        boolean one = false;
+        for (int x : main.OTHER_BEG_WORLDS) {
+            if (x == world) {
+                if (one) {
+                    return true;
+                }
+                one = true;
             }
-            writer.close();
-            reader.close();
-
-            if (inputFile.exists() && !inputFile.delete()) {
-                Log.severe("Could not delete file | Retrying...");
-                Thread.sleep(5000);
-                removeCurrBegWorld();
-            }
-
-            if (tempFile.exists() && !tempFile.renameTo(inputFile)) {
-                Log.severe("Could not rename file | Retrying...");
-                Thread.sleep(5000);
-                removeCurrBegWorld();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        return false;
     }
 }

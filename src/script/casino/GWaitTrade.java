@@ -1,3 +1,4 @@
+/*
 package script.casino;
 
 import org.rspeer.runetek.api.commons.Time;
@@ -61,3 +62,4 @@ public class GWaitTrade extends Task {
         max = Beggar.maxWait * 1000;
     }
 }
+*/

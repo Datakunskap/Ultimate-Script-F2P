@@ -30,7 +30,7 @@ public class WalkToGE extends Task {
             WalkingHelper.enableRun();
         }
 
-        Log.info("Walking to GE");
+        //Log.info("Walking to GE");
         if (WalkingHelper.shouldSetDestination()) {
             if (Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition())) {
                 Time.sleepUntil(cc::atGE, Random.mid(1800, 2400));

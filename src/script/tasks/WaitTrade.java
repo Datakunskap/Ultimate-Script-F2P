@@ -15,9 +15,15 @@ public class WaitTrade extends Task {
     private int max;
     private boolean waitSet = false;
 
+    private Beggar main;
+
+    public WaitTrade(Beggar beggar){
+        main = beggar;
+    }
+
     @Override
     public boolean validate() {
-        return !Beggar.beg && !Beggar.walk && !Beggar.trading; //&& !Beggar.sendTrade;
+        return !main.beg && !main.walk && !main.trading; //&& !main.sendTrade;
     }
 
     @Override
@@ -35,29 +41,29 @@ public class WaitTrade extends Task {
         int timeout = Beggar.randInt(min, max);
         Log.info("Waiting " + (timeout / 1000) + "s for a trade");
 
-        if (Time.sleepUntil(() -> Beggar.trading || Trade.isOpen(), timeout)) {
+        if (Time.sleepUntil(() -> main.trading || Trade.isOpen(false), timeout)) {
             if(Trade.isOpen()){
-                Beggar.sentTradeInit = true;
+                main.sentTradeInit = true;
             }
-            Beggar.trading = true;
-            Beggar.processSentTrade = true;
-            Beggar.walk = false;
-            Beggar.sendTrade = false;
-            Beggar.beg = false;
+            main.trading = true;
+            main.processSentTrade = true;
+            main.walk = false;
+            main.sendTrade = false;
+            main.beg = false;
             return Beggar.randInt(1500, 2500);
         }
 
         Tabs.open(Tab.INVENTORY);
-        Beggar.walk = true;
-        Beggar.beg = true;
-        Beggar.sendTrade = true;
+        main.walk = true;
+        main.beg = true;
+        main.sendTrade = true;
 
-        Beggar.checkWorldHopTime();
+        main.checkWorldHopTime();
         return 500;
     }
 
     private void setMinMaxWait() {
-        min = Beggar.minWait * 1000;
-        max = Beggar.maxWait * 1000;
+        min = main.minWait * 1000;
+        max = main.maxWait * 1000;
     }
 }

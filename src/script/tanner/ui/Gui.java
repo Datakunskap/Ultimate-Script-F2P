@@ -146,7 +146,7 @@ public class Gui extends JFrame {
         addHidePrice.setText("0");
         subLeatherPrice.setText("0");
         resetGeTime.setText("5");
-        intervalAmnt.setText("3");
+        intervalAmnt.setText("5");
         muleName.setText("drscatman");
         muleWorld.setText("301");
         muleAmnt.setText("200000");

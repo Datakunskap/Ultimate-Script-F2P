@@ -7,27 +7,33 @@ import script.Beggar;
 
 public class Beg extends Task {
 
+    private Beggar main;
+
+    public Beg(Beggar beggar){
+        main = beggar;
+    }
+
     @Override
     public boolean validate() {
-        return Beggar.beg && !Beggar.trading;
+        return main.beg && !main.trading;
     }
 
     @Override
     public int execute() {
         Log.info("Begging");
-        Keyboard.sendText(Beggar.lines.getRandLine());
+        Keyboard.sendText(main.lines.getRandLine());
         Keyboard.pressEnter();
-        Beggar.beg = false;
-        Beggar.walk = false;
-        if(!Beggar.iterAmount) {
+        main.beg = false;
+        main.walk = false;
+        if(!main.iterAmount) {
             maybeAmount();
         }
         return 600;
     }
 
-    public void maybeAmount(){
-        if(Beggar.randInt(1, Beggar.amountChance) == 1){
-            Beggar.changeAmount = true;
+    private void maybeAmount(){
+        if(Beggar.randInt(1, main.amountChance) == 1){
+            main.changeAmount = true;
         }
     }
 }

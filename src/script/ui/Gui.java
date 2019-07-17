@@ -2,7 +2,6 @@ package script.ui;
 
 import net.miginfocom.swing.MigLayout;
 import org.rspeer.runetek.api.Game;
-import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
@@ -10,118 +9,101 @@ import script.data.Coins;
 import script.data.MuleArea;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Objects;
 
 public class Gui extends Task {
 
     private boolean validate = true;
 
-    private JLabel hopCheckLabel;
-    private JLabel hopChanceLabel;
-    private JLabel hopPopLabel;
     private JCheckBox hopCheck;
     private JTextField hopTimeText;
     private JTextField hopPopText;
 
-    private JLabel wLabel;
     private JTextField mWorld;
-    private JButton openB;
-    private JLabel mLabel;
-    private JLabel m2Label;
-    private JLabel kLabel;
     private JTextField muleName;
     private JTextField muleAmount;
-    private JComboBox begType;
+    private JComboBox<String> begType;
     private JTextField mKeep;
-    private JFileChooser file;
-    private JButton startBtn;
-    private JLabel lLabel;
-    private JLabel bLabel;
-    private JList begAmounts;
-    private JLabel aLabel;
-    private JComboBox startAmount;
-    private JLabel t1Label;
-    private JLabel t2Label;
+    //private JFileChooser file;
+    private JList<Coins> begAmounts;
+    private JComboBox<Coins> startAmount;
     private JTextField min;
     private JTextField max;
-    private JButton clear;
-    private JLabel tLabel;
-    private JLabel timesLabel;
     private JTextField timesText;
-    private JLabel posLabel;
-    private JComboBox mulePos;
-    private JLabel walkLabel;
+    private JComboBox<MuleArea> mulePos;
     private JTextField walkText;
     private JCheckBox hopCheckf2p;
 
     private String readLines;
-    private String[] types = new String[]{"Incremental", "Random"};
 
 
     private JFrame frame;
+    private Beggar main;
 
-    public Gui() {
+    public Gui(Beggar beggar) {
+        main = beggar;
         frame = new JFrame("Ultimate Beggar");
         //frame.setLayout(new MigLayout());
         //frame.setPreferredSize(new Dimension(400, 950));
 
-        hopCheckLabel = new JLabel("Wold hop? (members)");
-        hopChanceLabel = new JLabel("Hop After __ Minutes Of No Completed Trades:");
-        hopPopLabel = new JLabel("Population Of Worlds: >=");
+        JLabel hopCheckLabel = new JLabel("Wold hop? (members)");
+        JLabel hopChanceLabel = new JLabel("Hop After __ Minutes Of No Completed Trades:");
+        JLabel hopPopLabel = new JLabel("Population Of Worlds: >=");
         hopCheck = new JCheckBox();
         hopTimeText = new JTextField();
         hopPopText = new JTextField();
 
-        wLabel = new JLabel("Mules World:");
+        JLabel wLabel = new JLabel("Mules World:");
         mWorld = new JTextField();
-        openB = new JButton("Open File");
-        posLabel = new JLabel("Select Mule Area:");
-        mulePos = new JComboBox(MuleArea.values());
-        m2Label = new JLabel("Mules In-Game Name:");
-        mLabel = new JLabel("Amount To Mule At:");
+        JButton openB = new JButton("Open File");
+        JLabel posLabel = new JLabel("Select Mule Area:");
+        mulePos = new JComboBox<>(MuleArea.values());
+        JLabel m2Label = new JLabel("Mules In-Game Name:");
+        JLabel mLabel = new JLabel("Amount To Mule At:");
         muleName = new JTextField();
         muleAmount = new JTextField();
-        kLabel = new JLabel("Amount To Keep From Mule");
+        JLabel kLabel = new JLabel("Amount To Keep From Mule");
         mKeep = new JTextField();
-        begType = new JComboBox(types);
-        lLabel = new JLabel("Select A Text File With Beg Lines: (ENTER To Separate And $ Gets Gp)");
-        tLabel = new JLabel("Begging ChangeAmount Style");
-        file = new JFileChooser("C:\\Users\\bllit\\OneDrive\\Desktop");
-        bLabel = new JLabel("Hold CTRL To Select Beg Amounts");
-        begAmounts = new JList(Coins.values());
-        aLabel = new JLabel("Select Starting Beg Amount");
-        startAmount = new JComboBox(Coins.values());
-        t1Label = new JLabel("Min Time Between Begs (sec)");
-        t2Label = new JLabel("Max Time Between Begs (sec)");
+        String[] types = new String[]{"Incremental", "Random"};
+        begType = new JComboBox<>(types);
+        JLabel lLabel = new JLabel("Select A Text File With Beg Lines: (ENTER To Separate And $ Gets Gp)");
+        JLabel tLabel = new JLabel("Begging ChangeAmount Style");
+        //file = new JFileChooser("C:\\Users\\bllit\\OneDrive\\Desktop");
+        JLabel bLabel = new JLabel("Hold CTRL To Select Beg Amounts");
+        begAmounts = new JList<>(Coins.values());
+        JLabel aLabel = new JLabel("Select Starting Beg Amount");
+        startAmount = new JComboBox<>(Coins.values());
+        JLabel t1Label = new JLabel("Min Time Between Begs (sec)");
+        JLabel t2Label = new JLabel("Max Time Between Begs (sec)");
         min = new JTextField();
         max = new JTextField();
         hopCheckf2p = new JCheckBox();
-        timesLabel = new JLabel("Change Amount 1 In Every __ Begs (random)");
+        JLabel timesLabel = new JLabel("Change Amount 1 In Every __ Begs (random)");
         timesText = new JTextField();
-        walkLabel = new JLabel("Walks After 1 In Every __ Begs");
+        JLabel walkLabel = new JLabel("Walks After 1 In Every __ Begs");
         walkText = new JTextField();
-        clear = new JButton("Clear Selected");
-        startBtn = new JButton("Start");
+        JButton clear = new JButton("Clear Selected");
+        JButton startBtn = new JButton("Start");
 
         mWorld.setText("301");
         muleName.setText("drscatman");
         muleAmount.setText("100000");
         mulePos.setSelectedIndex(0);
         mKeep.setText("5000");
-        min.setText("25");
+        min.setText("20");
         max.setText("35");
-        begAmounts.setSelectedIndices(new int[]{0, 1, 2, 3, 6, 8, 10, 11});
+        begAmounts.setSelectedIndices(new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
         begType.setSelectedIndex(0);
         timesText.setText("5");
         walkText.setText("24");
         hopCheckf2p.setSelected(true);
         hopCheck.setSelected(false);
         hopPopText.setText("800");
-        hopTimeText.setText("8");
+        hopTimeText.setText("7");
 
         JPanel p1 = new JPanel(new MigLayout("filly, wrap 2"));
         JPanel p2 = new JPanel(new MigLayout("filly, wrap 2"));
@@ -162,9 +144,9 @@ public class Gui extends Task {
         p2.add(hopPopText, "wrap, growx");
         p2.add(startBtn, "wrap, growx");
 
-        clear.addActionListener(x -> clearBtnHandler());
-        startBtn.addActionListener(x -> startBtnHandler());
-        openB.addActionListener(x -> openBtnHandler());
+        //clear.addActionListener(x -> clearBtnHandler());
+        //startBtn.addActionListener(x -> startBtnHandler());
+        //openB.addActionListener(x -> openBtnHandler());
 
         JPanel contentPane = new JPanel(new MigLayout("filly"));
         contentPane.add(p1, "growy");
@@ -191,49 +173,45 @@ public class Gui extends Task {
     }
 
     private void startBtnHandler() {
-        if (begType.getSelectedItem().equals("Incremental")) {
-            Beggar.iterAmount = true;
-        } else {
-            Beggar.iterAmount = false;
-        }
-        Beggar.muleWorld = Integer.parseInt(mWorld.getText());
-        Beggar.muleArea = (MuleArea) mulePos.getSelectedItem();
-        Beggar.muleName = this.muleName.getText();
-        Beggar.muleAmnt = Integer.parseInt(muleAmount.getText());
-        Beggar.muleKeep = Integer.parseInt(mKeep.getText());
-        Beggar.gpArr = begAmounts.getSelectedValuesList();
-        Beggar.gp = (Coins) startAmount.getSelectedItem();
-        Beggar.maxWait = Integer.parseInt(max.getText());
-        Beggar.minWait = Integer.parseInt(min.getText());
-        Beggar.amountChance = Integer.parseInt(timesText.getText());
-        Beggar.walkChance = Integer.parseInt(walkText.getText());
+        main.iterAmount = Objects.equals(begType.getSelectedItem(), "Incremental");
+        main.muleWorld = Integer.parseInt(mWorld.getText());
+        main.muleArea = (MuleArea) mulePos.getSelectedItem();
+        main.muleName = this.muleName.getText();
+        main.muleAmnt = Integer.parseInt(muleAmount.getText());
+        main.muleKeep = Integer.parseInt(mKeep.getText());
+        main.gpArr = begAmounts.getSelectedValuesList();
+        main.gp = (Coins) startAmount.getSelectedItem();
+        main.maxWait = Integer.parseInt(max.getText());
+        main.minWait = Integer.parseInt(min.getText());
+        main.amountChance = Integer.parseInt(timesText.getText());
+        main.walkChance = Integer.parseInt(walkText.getText());
 
         if (hopCheck.isSelected()) {
-            Beggar.worldHop = true;
-            Beggar.worldPop = Integer.parseInt(hopPopText.getText());
-            Beggar.hopTime = Integer.parseInt(hopTimeText.getText());
+            main.worldHop = true;
+            main.worldPop = Integer.parseInt(hopPopText.getText());
+            main.hopTime = Integer.parseInt(hopTimeText.getText());
         }
 
         if (hopCheckf2p.isSelected()) {
-            Beggar.worldHopf2p = true;
-            Beggar.worldPop = Integer.parseInt(hopPopText.getText());
-            Beggar.hopTime = Integer.parseInt(hopTimeText.getText());
+            main.worldHopf2p = true;
+            main.worldPop = Integer.parseInt(hopPopText.getText());
+            main.hopTime = Integer.parseInt(hopTimeText.getText());
         }
 
         if (readLines.contains("DEFAULT")) {
-            Beggar.defaultLines();
-            Beggar.defaultLines = true;
+            main.defaultLines();
+            main.defaultLines = true;
         } else {
-            Beggar.convertInputLines(readLines);
-            Beggar.inputLines = readLines;
-            Beggar.defaultLines = false;
+            main.convertInputLines(readLines);
+            main.inputLines = readLines;
+            main.defaultLines = false;
         }
 
         validate = false;
         frame.setVisible(false);
     }
 
-    private void openBtnHandler() {
+    /*private void openBtnHandler() {
         int returnVal = file.showOpenDialog(frame);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -259,7 +237,7 @@ public class Gui extends Task {
         } else {
             Log.severe("Open command cancelled by user.");
         }
-    }
+    }*/
 
     private void autoOpen() {
 

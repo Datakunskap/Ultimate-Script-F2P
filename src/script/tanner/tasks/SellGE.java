@@ -11,6 +11,7 @@ import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
+import script.Beggar;
 import script.tanner.Main;
 
 import java.util.Objects;
@@ -20,9 +21,18 @@ public class SellGE extends Task {
     private Main main;
     private Banking banking;
 
-    public SellGE (Main main) {
+    private Beggar beggar;
+    private StartBegging startBegging;
+
+    public SellGE (Main main, Beggar beggar) {
         this.main = main;
+        this.beggar = beggar;
         banking = new Banking(main);
+    }
+
+    private boolean checkStartBegging() {
+        startBegging = new StartBegging(main, beggar, banking);
+        return startBegging.execute();
     }
 
     @Override
@@ -58,11 +68,13 @@ public class SellGE extends Task {
         }*/
 
         // bc issues with Buraks ExGrandExchange when selling
-        if (Inventory.contains(main.LEATHER_NOTE)) {
+        if (Inventory.contains(main.LEATHER_NOTE) || Inventory.contains(main.LEATHER)) {
             Log.fine("Selling Leathers");
             GrandExchange.createOffer(RSGrandExchangeOffer.Type.SELL);
             Time.sleep(800);
             GrandExchangeSetup.setItem(main.LEATHER_NOTE);
+            if (Inventory.contains(main.LEATHER))
+                GrandExchangeSetup.setItem(main.LEATHER);
             Time.sleep(600);
             GrandExchangeSetup.setPrice(main.leatherPrice - main.decSellPrice);
             Time.sleep(600);
@@ -95,7 +107,11 @@ public class SellGE extends Task {
             main.geSet = false;
             main.decSellPrice = 0;
             main.timesPriceChanged = 0;
-            main.setHighestProfitLeather();
+            main.setHighestProfitLeather(false);
+
+            if (checkStartBegging())
+                return 1000;
+
         }
 
         if (GrandExchange.getFirstActive() == null && !GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED) &&
@@ -106,7 +122,11 @@ public class SellGE extends Task {
             main.geSet = false;
             main.decSellPrice = 0;
             main.timesPriceChanged = 0;
-            main.setHighestProfitLeather();
+            main.setHighestProfitLeather(false);
+
+            if (checkStartBegging())
+                return 1000;
+
         }
 
         // Decreases sell price if over time
@@ -122,7 +142,7 @@ public class SellGE extends Task {
                 GrandExchange.collectAll();
             }
             main.decSellPrice += main.intervalAmnt;
-            main.setPrices();
+            main.setPrices(true);
             main.startTime = System.currentTimeMillis();
             main.timesPriceChanged++;
         }
@@ -133,6 +153,7 @@ public class SellGE extends Task {
             if (!Time.sleepUntil(() -> !GrandExchangeSetup.isOpen(), 5000)) {
                 main.closeGE();
             }
+            main.startTime = System.currentTimeMillis();
         }
 
         GrandExchange.collectAll();

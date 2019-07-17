@@ -76,6 +76,7 @@ public class BuyGE extends Task {
                 banking.openAndDepositAll();
                 Bank.close();
                 Time.sleepUntil(() -> !Bank.isOpen(), 5000);
+                Time.sleep(1500);
 
                 main.teleportHome();
                 return 2000;
@@ -112,7 +113,7 @@ public class BuyGE extends Task {
                 GrandExchange.collectAll();
             }
             main.incBuyPrice += main.intervalAmnt;
-            main.setPrices();
+            main.setPrices(true);
             main.startTime = System.currentTimeMillis();
             main.buyPriceChng = true;
             main.timesPriceChanged++;
@@ -124,9 +125,11 @@ public class BuyGE extends Task {
             if (!Time.sleepUntil(() -> !GrandExchangeSetup.isOpen(), 5000)) {
                 main.closeGE();
             }
+            main.startTime = System.currentTimeMillis();
         }
 
         GrandExchange.collectAll();
+        Keyboard.pressEnter();
         return 1000;
     }
 }

@@ -1,3 +1,4 @@
+/*
 package script.casino;
 
 import org.rspeer.runetek.api.commons.BankLocation;
@@ -39,4 +40,4 @@ public class GTraverse extends Task {
         }
         return 600;
     }
-}
+}*/

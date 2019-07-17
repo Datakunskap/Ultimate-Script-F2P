@@ -27,7 +27,7 @@ public class WalkToBank extends Task {
 
     @Override
     public int execute() {
-        Log.info("Walking to AK bank");
+        //Log.info("Walking to AK bank");
         if (WalkingHelper.shouldEnableRun()) {
             WalkingHelper.enableRun();
         }

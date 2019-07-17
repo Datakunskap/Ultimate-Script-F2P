@@ -1,3 +1,4 @@
+/*
 package script.casino;
 
 import org.rspeer.runetek.api.commons.Time;
@@ -33,3 +34,4 @@ public class GRoll extends Task {
         return 5000;
     }
 }
+*/

@@ -3,43 +3,47 @@ package script.tasks;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.data.Lines;
 
 public class ChangeAmount extends Task {
 
+    private Beggar main;
+
+    public ChangeAmount(Beggar beggar){
+        main = beggar;
+    }
 
     @Override
     public boolean validate() {
-        return Beggar.changeAmount && !Beggar.trading;
+        return main.changeAmount && !main.trading;
     }
 
     @Override
     public int execute() {
         Log.info("Changing beg amount");
-        if(Beggar.iterAmount){
+        if(main.iterAmount){
             iterAmount();
         } else {
             randAmount();
         }
 
-        Beggar.reloadLines();
-        Beggar.changeAmount = false;
-        Beggar.walk = true;
-        Beggar.sendTrade = true;
-        Beggar.beg = true;
+        main.reloadLines();
+        main.changeAmount = false;
+        main.walk = true;
+        main.sendTrade = true;
+        main.beg = true;
         return 1000;
     }
 
-    public void randAmount(){
-        Beggar.gp = Beggar.gpArr.get(Beggar.randInt(0, Beggar.gpArr.size()-1));
+    private void randAmount(){
+        main.gp = main.gpArr.get(main.randInt(0, main.gpArr.size()-1));
     }
 
-    public void iterAmount(){
-        Beggar.gp = Beggar.gpArr.get(Beggar.amntIndex);
-        Beggar.amntIndex++;
-        if(Beggar.amntIndex >= (Beggar.gpArr.size()-1) / 2){
-            Beggar.iterAmount = false;
-            Beggar.amntIndex = 0;
+    private void iterAmount(){
+        main.gp = main.gpArr.get(main.amntIndex);
+        main.amntIndex++;
+        if(main.amntIndex >= (main.gpArr.size()-1) / 2){
+            main.iterAmount = false;
+            main.amntIndex = 0;
         }
     }
 }

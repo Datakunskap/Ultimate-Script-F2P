@@ -51,7 +51,7 @@ public class Banking {
     private void calcSpendAmount() {
         // Calculate GP to spend
         main.gp = Bank.getCount(995);
-        main.setPrices();
+        main.setPrices(true);
 
         // Keep X gp for tanning
         int tanningGp;

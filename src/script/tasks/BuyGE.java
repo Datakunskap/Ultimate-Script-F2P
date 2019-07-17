@@ -3,7 +3,6 @@ package script.tasks;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.GrandExchange;
 import org.rspeer.runetek.api.component.GrandExchangeSetup;
 import org.rspeer.runetek.api.component.Interfaces;
@@ -15,30 +14,34 @@ import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.ExGrandExchange;
-import script.ExPriceChecker;
+import script.tanner.ExGrandExchange;
+import script.tanner.ExPriceChecker;
 
 import java.io.IOException;
 import java.util.Objects;
 
 public class BuyGE extends Task {
 
-    private boolean bought = false;
-    private final int X = Beggar.item;
+    private Beggar main;
+
+    public BuyGE(Beggar beggar){
+        main = beggar;
+    }
 
     @Override
     public boolean validate() {
-        return Inventory.getCount(true, 995) >= Beggar.randBuyGP && !Beggar.equipped;
+        return Inventory.getCount(true, 995) >= main.randBuyGP && !main.equipped;
     }
 
     @Override
     public int execute() {
         Log.info("Buying from GE & Equipping");
-        if(!bought)
+        final int X = main.item;
+        if(!main.bought)
             openGE();
 
         if (Inventory.contains(X)) {
-            bought = true;
+            main.bought = true;
             closeGE();
             if (!Tabs.isOpen(Tab.INVENTORY)){
                 Tabs.open(Tab.INVENTORY);
@@ -49,8 +52,15 @@ public class BuyGE extends Task {
                 Time.sleep(1000);
                 Tabs.open(Tab.EQUIPMENT);
                 if (Time.sleepUntil(() -> Tabs.isOpen(Tab.EQUIPMENT) && Equipment.contains(X), 5000)) {
-                    Beggar.equipped = true;
-                    Beggar.walk = true;
+                    int newRand = Inventory.getCount(true, 995) + Beggar.randInt(20000, 30000);
+                    if (newRand < 100000) {
+                        main.randBuyGP = newRand;
+                    } else {
+                        main.randBuyGP = Beggar.randInt(1500, 3500);
+                    }
+                    main.equipped = true;
+                    main.walk = true;
+                    main.item = main.items[Beggar.randInt(0, main.items.length - 1)];
                     return 1000;
                 }
             }
@@ -58,9 +68,10 @@ public class BuyGE extends Task {
 
         // Buys
         try {
-            if (!bought && GrandExchange.getFirstActive() == null && ExGrandExchange.buy(X, 1, ExPriceChecker.getOSBuddyBuyPrice(X) + 500, false)) {
+            if (!main.bought && GrandExchange.getFirstActive() == null && ExGrandExchange.buy(X, 1,
+                    ExPriceChecker.getOSBuddyBuyPrice(X, false) > 0 ? ExPriceChecker.getOSBuddyBuyPrice(X, false) + 500 : ExPriceChecker.getRSBuddyBuyPrice(X, false) + 500, false)) {
                 Log.fine("Buying");
-            } if(!bought) {
+            } if(!main.bought) {
                 Log.info("Waiting to complete");
                 openGE();
                 Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED), 2000, 10000);
@@ -72,9 +83,24 @@ public class BuyGE extends Task {
             e.printStackTrace();
         }
 
+        // Checks and handles stuck in setup
+        if (GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
+            GrandExchange.open(GrandExchange.View.OVERVIEW);
+            if (!Time.sleepUntil(() -> !GrandExchangeSetup.isOpen(), 5000)) {
+                closeGE();
+            }
+            main.startTime = System.currentTimeMillis();
+        }
+
         if (Equipment.contains(X)) {
-            Beggar.equipped = true;
-            Beggar.walk = true;
+            if (main.randBuyGP < 100000) {
+                main.randBuyGP += Beggar.randInt(20000, 30000);
+            } else {
+                main.randBuyGP = Beggar.randInt(1500, 3500);
+            }
+            main.equipped = true;
+            main.walk = true;
+            main.item = main.items[Beggar.randInt(0, main.items.length - 1)];
             return 1000;
         }
 
@@ -92,7 +118,7 @@ public class BuyGE extends Task {
         }
     }
 
-    public void closeGE() {
+    private void closeGE() {
         while(GrandExchange.isOpen() || GrandExchangeSetup.isOpen()) {
             InterfaceComponent X = Interfaces.getComponent(465, 2, 11);
             X.interact(ActionOpcodes.INTERFACE_ACTION);

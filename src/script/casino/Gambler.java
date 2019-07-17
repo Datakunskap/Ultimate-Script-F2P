@@ -1,3 +1,4 @@
+/*
 package script.casino;
 
 import org.rspeer.runetek.api.input.Keyboard;
@@ -23,3 +24,4 @@ public class Gambler extends Task {
         return 1000;
     }
 }
+*/

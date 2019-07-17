@@ -15,7 +15,7 @@ public class Lines {
         arr = lines;
     }
 
-    public String[] getArr() {
+    private String[] getArr() {
         return arr;
     }
 

@@ -1,3 +1,4 @@
+/*
 package script.casino;
 
 import org.rspeer.runetek.api.commons.Time;
@@ -46,3 +47,4 @@ class GWalkingHelper {
         return Time.sleepUntil(Movement::isRunEnabled, 500);
     }
 }
+*/

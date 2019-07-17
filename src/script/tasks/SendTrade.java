@@ -9,9 +9,15 @@ import script.Beggar;
 
 public class SendTrade extends Task {
 
+    private Beggar main;
+
+    public SendTrade(Beggar beggar){
+        main = beggar;
+    }
+
     @Override
     public boolean validate() {
-        return Beggar.setSendTrades && !Beggar.walk && !Beggar.beg && Beggar.sendTrade && !Beggar.trading;
+        return main.setSendTrades && !main.walk && !main.beg && main.sendTrade && !main.trading;
     }
 
     @Override
@@ -20,33 +26,33 @@ public class SendTrade extends Task {
         return 1000;
     }
 
-    public void sendTradeNearest() {
+    private void sendTradeNearest() {
         String name = "";
-        while (!Beggar.tradeSent && Beggar.sendTryCount < 10) {
-            if(Beggar.walk || Beggar.trading) {
+        while (!main.tradeSent && main.sendTryCount < 10) {
+            if(main.walk || main.trading) {
                 return;
             }
-            Player p = Players.getNearest(x -> x.getCombatLevel() > 3 && x != null && x.isPositionInteractable() && x.isPositionWalkable());
+            Player p = Players.getNearest(x -> x != null && x.getCombatLevel() > 3 && x.isPositionInteractable() && x.isPositionWalkable());
             if (p != null) {
                 p.interact("Trade with");
                 name = p.getName();
-                Time.sleepUntil(() -> Beggar.tradeSent, 1200);
+                Time.sleepUntil(() -> main.tradeSent, 1200);
             }
-            Beggar.sendTryCount++;
+            main.sendTryCount++;
         }
 
-        if (Beggar.sendTryCount < 10 && Beggar.tradeSent){
+        if (main.sendTryCount < 10){
             Log.info("Trade sent to " + name);
         } else {
             Log.severe("Unable to find player");
         }
-        Beggar.tradeSent = false;
-        Beggar.sendTrade = false;
-        Beggar.sendTryCount = 0;
+        main.tradeSent = false;
+        main.sendTrade = false;
+        main.sendTryCount = 0;
     }
 
     public void sendTradeLoaded() {
-        while (!Beggar.tradeSent && Beggar.sendTryCount < 10) {
+        while (!main.tradeSent && main.sendTryCount < 10) {
             Player[] players = Players.getLoaded(x -> x != null && x.isPositionInteractable() && x.isPositionWalkable());
             Player currNearest = null;
             for (Player p : players) {
@@ -59,16 +65,16 @@ public class SendTrade extends Task {
             if (currNearest != null) {
                 currNearest.interact("Trade with");
             }
-            Beggar.sendTryCount++;
+            main.sendTryCount++;
         }
 
-        if (Beggar.sendTryCount <= 10){
+        if (main.sendTryCount <= 10){
             Log.info("Trade sent");
         } else {
             Log.severe("Unable to find player");
         }
-        Beggar.tradeSent = false;
-        Beggar.sendTrade = false;
-        Beggar.sendTryCount = 0;
+        main.tradeSent = false;
+        main.sendTrade = false;
+        main.sendTryCount = 0;
     }
 }

@@ -29,7 +29,7 @@ public class TanHide extends Task {
     @Override
     public int execute() {
         if (cc.tanInterfaceIsOpen()) {
-            InterfaceComponent leatherComponent = null;
+            InterfaceComponent leatherComponent;
             if (main.LEATHER == 1741) {
                 leatherComponent = Interfaces.getComponent(324, 124);
             } else {

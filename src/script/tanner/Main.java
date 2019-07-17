@@ -87,8 +87,8 @@ public class Main {
     private static Main tanner;
     private static Beggar beggar;
 
-    private Main(Beggar beggar) {
-        this.beggar = beggar;
+    private Main(Beggar script) {
+        beggar = script;
     }
 
     //method to return instance of class
@@ -100,14 +100,10 @@ public class Main {
         return tanner;
     }
 
-    public int getCurrProfit() {
-        return leatherPrice - cowhidePrice;
-    }
-
-    public void setHighestProfitLeather() {
+    public void setHighestProfitLeather (boolean refreshPrice) {
         Log.fine("Setting Most Profitable Leather");
         int currLeather = LEATHER;
-        int currProfit = leatherPrice - cowhidePrice;
+        int currProfit = (LEATHER == 1741) ? leatherPrice - cowhidePrice : leatherPrice - cowhidePrice - 2;
 
         // switch to other leather
         if (LEATHER == 1741) {
@@ -116,34 +112,49 @@ public class Main {
             LEATHER = 1741;
         }
 
-        setPrices();
+        setPrices(refreshPrice);
         if ((LEATHER == 1741 && (leatherPrice - cowhidePrice) < currProfit) ||
-                (LEATHER == 1743 && (leatherPrice - cowhidePrice) - 3 < currProfit)) {
+                (LEATHER == 1743 && (leatherPrice - cowhidePrice) - 2 < currProfit)) {
             LEATHER = currLeather;
+            setPrices(false);
         }
 
         LEATHER_NOTE = LEATHER + 1;
         printLeather();
     }
 
-    public void setPrices() {
+    public void setPrices(boolean refresh) {
         {
             try {
                 Log.info("Setting prices");
-                leatherPrice = ExPriceChecker.getOSBuddySellPrice(LEATHER) - subLeatherPrice;
-                cowhidePrice = ExPriceChecker.getOSBuddyBuyPrice(COWHIDE) + addHidePrice;
+                leatherPrice = ExPriceChecker.getOSBuddySellPrice(LEATHER, refresh) - subLeatherPrice;
+                cowhidePrice = ExPriceChecker.getOSBuddyBuyPrice(COWHIDE, refresh) + addHidePrice;
+                Log.fine("Using OSBuddy prices");
             } catch (IOException e) {
-                Log.severe("Failed getting price");
+                Log.severe("Failed getting OSBuddy price");
                 e.printStackTrace();
             } finally {
-                //Fall-back prices
-                if (leatherPrice < 70) {
-                    Log.info("Using fall-back leather price");
-                    leatherPrice = ExPriceChecker.getRSBuddyPrice(LEATHER, 70);
-                }
-                if (cowhidePrice < 50) {
-                    Log.info("Using fall-back cowhide price");
-                    cowhidePrice = ExPriceChecker.getRSBuddyPrice(COWHIDE, 150);
+                try {
+                    if (leatherPrice < 70) {
+                        leatherPrice = ExPriceChecker.getRSBuddySellPrice(LEATHER, refresh);
+                    }
+                    if (cowhidePrice < 50) {
+                        cowhidePrice = ExPriceChecker.getRSBuddyBuyPrice(COWHIDE, refresh);
+                        Log.fine("Using RSBuddy prices");
+                    }
+                } catch (IOException e) {
+                    Log.severe("Failed getting RSBuddy price");
+                    e.printStackTrace();
+                } finally {
+                    //Fall-back prices
+                    if (leatherPrice < 70) {
+                        Log.severe("Using fall-back leather price");
+                        leatherPrice = 70;
+                    }
+                    if (cowhidePrice < 50) {
+                        Log.severe("Using fall-back cowhide price");
+                        cowhidePrice = 170;
+                    }
                 }
             }
         }
@@ -153,7 +164,7 @@ public class Main {
 
     public void start() {
         beggar.removeAll();
-        setPrices();
+        setPrices(true);
 
         javax.swing.SwingUtilities.invokeLater(() ->
                 new Gui(tanner)
@@ -166,7 +177,7 @@ public class Main {
                 new LootHide(tanner),
                 new AttackCow(tanner),
                 new WalkToGE(tanner),
-                new SellGE(tanner),
+                new SellGE(tanner, beggar),
                 new BuyGE(tanner),
                 new WalkToBank(tanner),
                 new BankAK(tanner),
@@ -234,7 +245,7 @@ public class Main {
         g.drawString(str, x, y); // draw string
     }
 
-    private int[] getStats() {
+    public int[] getStats() {
         final Duration durationRunning = timeRan == null ? Duration.ofSeconds(0) : timeRan.getElapsed();
 
         int totalLeatherValue = totalTanned * leatherPrice;
@@ -246,6 +257,12 @@ public class Main {
                 hourlyProfit,
                 amntMuled
         };
+    }
+
+    public int getPPH() {
+        setPrices(true);
+        final Duration durationRunning = timeRan == null ? Duration.ofSeconds(0) : timeRan.getElapsed();
+        return getHourlyRate(durationRunning) * (leatherPrice - cowhidePrice);
     }
 
     public int randInt(int min, int max) {
@@ -285,9 +302,10 @@ public class Main {
 
     public void teleportHome() {
         if (Tabs.open(Tab.MAGIC)) {
+            Time.sleep(1500);
             Log.fine("Teleporting Home");
             Magic.cast(Spell.Modern.HOME_TELEPORT);
-            Time.sleep(20000);
+            Time.sleep(18000);
         }
     }
 }

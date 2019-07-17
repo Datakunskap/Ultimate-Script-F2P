@@ -22,7 +22,7 @@ public class CheckRestock extends Task {
 
     @Override
     public boolean validate() {
-        return main.restock && main.checkRestock;
+        return main.restock && main.checkRestock && !main.isMuling;
     }
 
     @Override
@@ -72,9 +72,10 @@ public class CheckRestock extends Task {
 
             Bank.close();
             Time.sleepUntil(() -> !Bank.isOpen(), 5000);
-            if(BankLocation.getNearest().equals(BankLocation.AL_KHARID)) {
+            /*if(BankLocation.getNearest().equals(BankLocation.AL_KHARID)) {
+                Time.sleep(1500);
                 main.teleportHome();
-            }
+            }*/
 
             main.restock = true;
         } else {

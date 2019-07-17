@@ -26,7 +26,7 @@ public class WalkToTanner extends Task {
 
     @Override
     public int execute() {
-        Log.info("Walking to tanner");
+        //Log.info("Walking to tanner");
         if (WalkingHelper.shouldEnableRun()) {
             WalkingHelper.enableRun();
         }
