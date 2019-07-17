@@ -225,7 +225,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         if (currWorld != -1) {
             Log.info("World Removed");
-            removeCurrBegWorld();
+            removeCurrBegWorld((Worlds.getCurrent() > 0) ? Worlds.getCurrent() : currWorld);
         }
 
         if (!disableChain && !GAMBLER) {
@@ -693,7 +693,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
     }
 
-    public void removeCurrBegWorld(){
+    public void removeCurrBegWorld(int currentWorld){
         BufferedReader reader;
         try {
             File inputFile = new File(CURR_WORLD_PATH);
@@ -705,7 +705,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             reader = new BufferedReader(new FileReader(inputFile));
             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 
-            String lineToRemove = Integer.toString(currWorld);
+            String lineToRemove = Integer.toString(currentWorld);
             String currentLine;
 
             while((currentLine = reader.readLine()) != null) {
@@ -720,13 +720,13 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             if (inputFile.exists() && !inputFile.delete()) {
                 Log.severe("Could not delete file | Retrying...");
                 Thread.sleep(5000);
-                removeCurrBegWorld();
+                removeCurrBegWorld(currentWorld);
             }
 
             if (tempFile.exists() && !tempFile.renameTo(inputFile)) {
                 Log.severe("Could not rename file | Retrying...");
                 Thread.sleep(5000);
-                removeCurrBegWorld();
+                removeCurrBegWorld(currentWorld);
             }
 
         } catch (Exception e) {

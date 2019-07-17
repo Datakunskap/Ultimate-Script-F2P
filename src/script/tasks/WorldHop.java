@@ -48,13 +48,11 @@ public class WorldHop extends Task {
                 WorldHopper.hopTo(301);
             }
             else if(main.currWorld != 308 && actualWorld != 308 && (!containsTwoWorlds(308) &&
-                    Worlds.get(308).getPopulation() > 1000) ||
-                    (!main.OTHER_BEG_WORLDS.contains(308) && Worlds.get(308).getPopulation() > main.worldPop)){
+                    Worlds.get(308).getPopulation() > 1000) || (!main.OTHER_BEG_WORLDS.contains(308) && Worlds.get(308).getPopulation() > main.worldPop)){
                 WorldHopper.hopTo(308);
             }
             else if(main.currWorld != 393 && actualWorld != 393 &&
-                    (!containsTwoWorlds(393) && Worlds.get(393).getPopulation() > 1000) ||
-                    (!main.OTHER_BEG_WORLDS.contains(393) && Worlds.get(393).getPopulation() > main.worldPop)){
+                    (!containsTwoWorlds(393) && Worlds.get(393).getPopulation() > 1000) || (!main.OTHER_BEG_WORLDS.contains(393) && Worlds.get(393).getPopulation() > main.worldPop)){
                 WorldHopper.hopTo(393);
             }
             else {
@@ -74,11 +72,11 @@ public class WorldHop extends Task {
             Time.sleep(5000);
         }
 
-        if (Time.sleepUntil(() -> (main.currWorld > 0) ? Worlds.getCurrent() != main.currWorld : Worlds.getCurrent() != actualWorld, 10000)) {
+        if (Time.sleepUntil(() -> (main.currWorld > 0) ? Worlds.getCurrent() != main.currWorld : Worlds.getCurrent() != actualWorld, 12000)) {
             Log.fine("World hopped to world: " + Worlds.getCurrent());
             Time.sleep(3000, 5000);
 
-            main.removeCurrBegWorld();
+            main.removeCurrBegWorld((main.currWorld > 0) ? main.currWorld : actualWorld);
 
             main.startTime = System.currentTimeMillis();
             main.currWorld = Worlds.getCurrent();

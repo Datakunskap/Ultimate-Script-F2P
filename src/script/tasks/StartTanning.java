@@ -76,7 +76,7 @@ public class StartTanning extends Task {
 
         main.tanner = tanner;
         main.isTanning = true;
-        main.removeCurrBegWorld();
+        main.removeCurrBegWorld(Worlds.getCurrent());
         tanner.start();
         return 5000;
     }
