@@ -56,7 +56,7 @@ public class StartOther extends Task {
     }
 
     private void compareOtherPPH(boolean refresh) {
-        if (main.getTannerPPH(TANS_PER_HR, refresh) > main.getChocolatePPH(CHOC_PER_HR, refresh)) {
+        if (main.getTannerPPH(TANS_PER_HR, refresh) > main.getChocolatePPH(CHOC_PER_HR, false)) {
             main.isTanning = true;
         } else {
             main.isChoc = true;
