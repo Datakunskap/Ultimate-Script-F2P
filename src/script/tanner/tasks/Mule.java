@@ -81,7 +81,7 @@ public class Mule extends Task {
 
     @Override
     public boolean validate() {
-        return Inventory.getCount(true, 995) >= main.muleAmnt || Bank.getCount(995) >= main.muleAmnt || muleing; }
+        return main.sold && (Inventory.getCount(true, 995) >= main.muleAmnt || Bank.getCount(995) >= main.muleAmnt || muleing); }
 
     @Override
     public int execute() {
@@ -170,6 +170,7 @@ public class Mule extends Task {
                             logoutMule();
                             muleing = false;
                             main.amntMuled += (Coins - main.muleKeep);
+                            main.setRandMuleKeep(85000, 100000);
                             if(begWorld != -1) {
                                 WorldHopper.hopTo(begWorld);
                                 Time.sleepUntil(() -> Worlds.getCurrent() == begWorld, 10000);

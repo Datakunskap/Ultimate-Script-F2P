@@ -1,7 +1,8 @@
-package script.tanner.tasks;
+package script.chocolate.tasks;
 
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.api.commons.Time;
+import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.GrandExchange;
 import org.rspeer.runetek.api.component.GrandExchangeSetup;
@@ -11,32 +12,45 @@ import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
+import script.Beggar;
+import script.chocolate.Main;
 import script.tanner.ExGrandExchange;
-import script.tanner.Main;
+import script.tanner.data.Location;
 
 import java.util.Objects;
 
 public class BuyGE extends Task {
 
-    private int buyQuantity;
     private Main main;
+    private Beggar beggar;
     private Banking banking;
+    private int buyQuantity;
 
-    public BuyGE (Main main) {
+    public BuyGE (Main main, Beggar beggar) {
         this.main = main;
+        this.beggar = beggar;
         banking = new Banking(main);
     }
 
     @Override
     public boolean validate() {
-        return main.sold && main.restock && main.GE_LOCATION.containsPlayer() && !main.isMuling;
+        return main.sold && main.restock && Location.GE_AREA.containsPlayer() && !main.isMuling;
     }
 
     @Override
     public int execute() {
+
         if (!main.checkedBank) {
-            banking.execute();
+            if (main.atGELimit) {
+                StartTanning.execute(main, beggar);
+            }
+
             main.checkedBank = true;
+            return banking.execute();
+        }
+
+        if (Inventory.contains(Main.KNIFE) || Inventory.contains(Main.KNIFE + 1)) {
+            main.hasKnife = true;
         }
 
         if (!GrandExchange.isOpen()) {
@@ -48,21 +62,25 @@ public class BuyGE extends Task {
             return 1000;
         }
 
-        if(main.gp < main.cowhidePrice && GrandExchange.getOffers() == null && GrandExchangeSetup.getItem() == null) {
-            Log.severe("Not enough moneys");
-            main.sold = false;
-            main.checkedBank = false;
-            main.restock = false;
-            main.closeGE();
+        if (!main.hasKnife && GrandExchange.getFirst(x -> x != null && x.getItemId() == Main.KNIFE) == null) {
+            buyKnife();
+            main.justBoughtKnife = true;
         }
 
         // sets quantity to buy
-        buyQuantity = main.gp / (main.cowhidePrice + main.incBuyPrice);
+        buyQuantity = main.gp / (main.buyPrice + main.incBuyPrice);
+        if (StartTanning.validate(main.totalMade, buyQuantity)) {
+            buyQuantity = (main.totalMade + buyQuantity) - Main.BAR_GE_LIMIT;
+            Log.severe("AT GE LIMIT");
+            main.atGELimit = true;
+        }
 
         // Checks if done buying
-        if (GrandExchange.getFirstActive() == null && (Inventory.contains(main.COWHIDE) || Inventory.contains(main.COWHIDE+1))) {
-            if (Time.sleepUntil(() -> (Inventory.getCount(true, main.COWHIDE) +
-                    Inventory.getCount(true, main.COWHIDE+1)) >= buyQuantity, 5000)) {
+        if (GrandExchange.getFirstActive() == null && (Inventory.contains(Main.BAR) ||
+                Inventory.contains(Main.BAR + 1)) && main.hasKnife) {
+
+            if (Time.sleepUntil(() -> (Inventory.getCount(true, Main.BAR) +
+                    Inventory.getCount(true, Main.BAR + 1)) >= buyQuantity, 5000)) {
                 Log.fine("Done buying");
                 main.sold = false;
                 main.checkedBank = false;
@@ -73,23 +91,20 @@ public class BuyGE extends Task {
                     main.incBuyPrice = main.incBuyPrice / (main.timesPriceChanged * main.intervalAmnt);
                     main.buyPriceChng = false;
                 }
+
                 banking.openAndDepositAll();
+                fallbackGEPrice();
                 Bank.close();
                 Time.sleepUntil(() -> !Bank.isOpen(), 5000);
-                Time.sleep(1500);
-
-                main.teleportHome();
-                return 2000;
+                main.justBoughtKnife = false;
+                //main.teleportHome();
+                return 800;
             }
         }
 
-        // Lowers quantity if some bought before price change
-        //if (main.buyPriceChng && (Inventory.contains(main.COWHIDE) || Inventory.contains(main.COWHIDE+1)))
-            //buyQuantity -= (Inventory.getCount(true, x -> x != null && x.getId() == main.COWHIDE) + Inventory.getCount(true, x -> x != null && x.getId() == main.COWHIDE+1));
-
         // Buys hides -> having issues with Buraks toBank param so handled manually
-        if (GrandExchange.getFirstActive() == null && ExGrandExchange.buy(main.COWHIDE, buyQuantity, (main.cowhidePrice + main.incBuyPrice), false)) {
-            Log.fine("Buying Hides");
+        if (GrandExchange.getFirstActive() == null && ExGrandExchange.buy(Main.BAR, buyQuantity, (main.buyPrice + main.incBuyPrice), false)) {
+            Log.fine("Buying Bars");
         } else {
             Log.info("Waiting to complete  |  Time: " + main.elapsedSeconds / 60 + "min(s)  |  Price changed " + main.timesPriceChanged + " time(s)");
             if (!GrandExchange.isOpen()) {
@@ -104,8 +119,8 @@ public class BuyGE extends Task {
 
         // Increases buy price if over time
         main.checkTime();
-        if (main.elapsedSeconds > main.resetGeTime * 60 && GrandExchange.getFirstActive() != null) {
-            Log.fine("Increasing hide price by: " + main.intervalAmnt);
+        if (main.elapsedSeconds > main.resetGeTime * 60 && GrandExchange.getFirstActive() != null && main.hasKnife) {
+            Log.fine("Increasing bar price by: " + main.intervalAmnt);
             while(GrandExchange.getFirstActive() != null) {
                 Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).abort(), 1000, 5000);
                 GrandExchange.collectAll();
@@ -114,7 +129,8 @@ public class BuyGE extends Task {
             }
             main.incBuyPrice += main.intervalAmnt;
             //main.setPrices(true);
-            banking.calcSpendAmount((Inventory.getCount(true, x -> x != null && x.getId() == main.COWHIDE) + Inventory.getCount(true, x -> x != null && x.getId() == main.COWHIDE+1)));
+            banking.calcSpendAmount((Inventory.getCount(true, x -> x != null && x.getId() == Main.BAR) +
+                    Inventory.getCount(true, x -> x != null && x.getId() == Main.BAR + 1)));
             main.startTime = System.currentTimeMillis();
             main.buyPriceChng = true;
             main.timesPriceChanged++;
@@ -132,5 +148,28 @@ public class BuyGE extends Task {
         GrandExchange.collectAll();
         Keyboard.pressEnter();
         return 1000;
+    }
+
+    private void buyKnife() {
+        Log.fine("Buying Knife");
+        if (ExGrandExchange.buy(Main.KNIFE, 1, main.knifePrice, false)) {
+            Time.sleep(600);
+            GrandExchange.collectAll();
+            Time.sleep(Random.mid(300, 600));
+            GrandExchange.collectAll();
+            Time.sleep(Random.mid(300, 600));
+        }
+    }
+
+    private void fallbackGEPrice() {
+
+        if (main.usingBuyFallback && Bank.isOpen() && Bank.contains(995)) {
+            int expectedGP = main.gp - (buyQuantity * main.buyPrice);
+            int actualGP = main.justBoughtKnife ? Bank.getCount(995) - main.knifePrice : Bank.getCount(995);
+            if (actualGP > expectedGP) {
+                main.lastPrices[1] = main.buyPrice - ((actualGP - expectedGP) / buyQuantity);
+                Log.fine("GE buy price found: " + main.lastPrices[1]);
+            }
+        }
     }
 }

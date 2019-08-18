@@ -20,6 +20,9 @@ public class Beg extends Task {
 
     @Override
     public int execute() {
+        /*if (main.isBadInstanceTime())
+            new StartupChecks(main).instanceCheck();*/
+
         Log.info("Begging");
         Keyboard.sendText(main.lines.getRandLine());
         Keyboard.pressEnter();

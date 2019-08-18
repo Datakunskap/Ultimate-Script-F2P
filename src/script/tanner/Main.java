@@ -12,8 +12,8 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.event.types.RenderEvent;
 import org.rspeer.ui.Log;
 import script.Beggar;
+import script.data.MuleArea;
 import script.tanner.data.Location;
-import script.tanner.data.MuleArea;
 import script.tanner.tasks.*;
 import script.tanner.ui.Gui;
 
@@ -50,7 +50,7 @@ public class Main {
     // Mules in-game name
     public String muleName = "";
     // GE area to mule
-    public MuleArea muleArea = MuleArea.GE_NE;
+    public MuleArea muleArea = MuleArea.COOKS_GUILD;
     // Mules World
     public int muleWorld = 301;
 
@@ -83,6 +83,7 @@ public class Main {
     public final int TANNER_ID = 3231;
     public int leatherPrice = 0;
     public int cowhidePrice = 0;
+    private int[] lastPrices = new int[2];
 
     private static Main tanner;
     private static Beggar beggar;
@@ -148,12 +149,28 @@ public class Main {
                 } finally {
                     //Fall-back prices
                     if (leatherPrice < 70) {
-                        Log.severe("Using fall-back leather price");
-                        leatherPrice = 70;
+                        if (lastPrices != null && lastPrices[0] >= 70) {
+                            Log.fine("Using previous leather price");
+                            leatherPrice = lastPrices[0];
+                        } else {
+                            Log.severe("Using fall-back leather price");
+                            leatherPrice = 70;
+                        }
+                    } else {
+                        if (leatherPrice != 70)
+                            lastPrices[0] = leatherPrice;
                     }
                     if (cowhidePrice < 50) {
-                        Log.severe("Using fall-back cowhide price");
-                        cowhidePrice = 170;
+                        if (lastPrices != null && lastPrices[1] >= 50) {
+                            Log.fine("Using previous cowhide price");
+                            cowhidePrice = lastPrices[1];
+                        } else {
+                            Log.severe("Using fall-back cowhide price");
+                            cowhidePrice = 170;
+                        }
+                    } else {
+                        if (cowhidePrice != 170)
+                            lastPrices[1] = cowhidePrice;
                     }
                 }
             }
@@ -185,6 +202,11 @@ public class Main {
                 new TanHide(tanner));
 
         Combat.toggleAutoRetaliate(true);
+    }
+
+    public void setRandMuleKeep(int min, int max){
+        muleKeep = randInt(min, max);
+        muleAmnt = (muleKeep + 100000);
     }
 
     private int getHourlyRate(Duration sw) {

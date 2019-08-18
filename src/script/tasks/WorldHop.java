@@ -8,6 +8,7 @@ import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.WorldHopper;
 import org.rspeer.runetek.api.component.tab.Tab;
 import org.rspeer.runetek.api.component.tab.Tabs;
+import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.providers.RSWorld;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
@@ -31,12 +32,15 @@ public class WorldHop extends Task {
 
     @Override
     public int execute() {
-        int actualWorld = Worlds.getCurrent();
         main.atMinPop = false;
         resetMinPop();
+        openWorldSwitcher();
         main.OTHER_BEG_WORLDS = getWorldsFromFile();
 
-        openWorldSwitcher();
+        if (main.runningClients != null && main.runningClients.size() > 0 &&
+                main. runningClients.size() >= Beggar.ALLOWED_INSTANCES && main.OTHER_BEG_WORLDS.size() > main.runningClients.size() - 1)
+            new File(Beggar.CURR_WORLD_PATH).delete();
+
 
         if (main.worldHop) {
             WorldHopper.randomHop(x -> x != null && !main.OTHER_BEG_WORLDS.contains(x.getId()) && x.getPopulation() >= main.worldPop &&
@@ -44,18 +48,18 @@ public class WorldHop extends Task {
         }
 
         if (main.worldHopf2p) {
-            if(main.currWorld != 301 && actualWorld != 301 && !containsTwoWorlds(301)){
-                WorldHopper.hopTo(301);
-            }
-            else if(main.currWorld != 308 && actualWorld != 308 && (!containsTwoWorlds(308) &&
-                    Worlds.get(308).getPopulation() > 1000) || (!main.OTHER_BEG_WORLDS.contains(308) && Worlds.get(308).getPopulation() > main.worldPop)){
-                WorldHopper.hopTo(308);
-            }
-            else if(main.currWorld != 393 && actualWorld != 393 &&
-                    (!containsTwoWorlds(393) && Worlds.get(393).getPopulation() > 1000) || (!main.OTHER_BEG_WORLDS.contains(393) && Worlds.get(393).getPopulation() > main.worldPop)){
-                WorldHopper.hopTo(393);
-            }
-            else {
+            if (main.currWorld != main.popWorldsArr[0] && !containsTwoOrMoreWorlds(main.popWorldsArr[0])) {
+
+                WorldHopper.hopTo(main.popWorldsArr[0]);
+            } else if (main.currWorld != main.popWorldsArr[1] && ((!containsTwoOrMoreWorlds(main.popWorldsArr[1]) && Worlds.get(main.popWorldsArr[1]).getPopulation() > 950) ||
+                    (!main.OTHER_BEG_WORLDS.contains(main.popWorldsArr[1]) && Worlds.get(main.popWorldsArr[1]).getPopulation() >= main.worldPop))) {
+
+                WorldHopper.hopTo(main.popWorldsArr[1]);
+            } else if (main.currWorld != main.popWorldsArr[2] && ((!containsTwoOrMoreWorlds(main.popWorldsArr[2]) && Worlds.get(main.popWorldsArr[2]).getPopulation() > 950) ||
+                    (!main.OTHER_BEG_WORLDS.contains(main.popWorldsArr[2]) && Worlds.get(main.popWorldsArr[2]).getPopulation() >= main.worldPop))) {
+
+                WorldHopper.hopTo(main.popWorldsArr[2]);
+            } else {
                 WorldHopper.randomHop(x -> x != null && !main.OTHER_BEG_WORLDS.contains(x.getId()) && x.getPopulation() >= main.worldPop &&
                         !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
             }
@@ -63,35 +67,43 @@ public class WorldHop extends Task {
 
         Time.sleep(1000);
 
+        InterfaceComponent sti = Interfaces.getComponent(193, 0, 3);
+        if (sti != null && sti.isVisible()) {
+            sti.interact(ActionOpcodes.INTERFACE_ACTION);
+            Time.sleepUntil(() -> !sti.isVisible() && !Dialog.isProcessing(), 10000);
+            Time.sleep(5000);
+        }
+
         if (Dialog.isOpen()) {
-            if (Dialog.canContinue()){
+            if (Dialog.canContinue()) {
                 Dialog.processContinue();
             }
-            Dialog.process("Switch to it");
+            Dialog.process(x -> x != null && x.toLowerCase().contains("future"));
+            Dialog.process(x -> x != null && (x.toLowerCase().contains("switch") || x.toLowerCase().contains("yes")));
             Time.sleepUntil(() -> !Dialog.isProcessing(), 10000);
             Time.sleep(5000);
         }
 
-        if (Time.sleepUntil(() -> (main.currWorld > 0) ? Worlds.getCurrent() != main.currWorld : Worlds.getCurrent() != actualWorld, 12000)) {
+        if (Time.sleepUntil(() -> Worlds.getCurrent() != main.currWorld, 12000)) {
             Log.fine("World hopped to world: " + Worlds.getCurrent());
             Time.sleep(3000, 5000);
 
-            main.removeCurrBegWorld((main.currWorld > 0) ? main.currWorld : actualWorld);
+            main.removeCurrBegWorld(main.currWorld);
+            main.currWorld = Worlds.getCurrent();
 
             main.startTime = System.currentTimeMillis();
-            main.currWorld = Worlds.getCurrent();
             main.hopTimeExpired = false;
             main.hopTryCount = 0;
 
             main.worldPop = 800;
-            writeWorldToFile();
+            main.writeWorldToFile(main.currWorld);
             return 1000;
         } else {
             Log.info("World hop failed... Retrying");
             main.hopTryCount++;
         }
 
-        if (main.hopTryCount > 10 || main.atMinPop) {
+        if ((main.hopTryCount > 10 || main.atMinPop) && Worlds.getCurrent() == main.currWorld) {
             Log.severe("World Hop Failed");
             resetMinPop();
 
@@ -99,7 +111,7 @@ public class WorldHop extends Task {
             main.hopTimeExpired = false;
             main.hopTryCount = 0;
         }
-        return 500;
+        return 800;
     }
 
     private void openWorldSwitcher() {
@@ -126,7 +138,7 @@ public class WorldHop extends Task {
                     x.getPopulation() >= main.worldPop && !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
 
             if (f2pCriteriaWorlds == null || f2pCriteriaWorlds.length == 0) {
-                if (main.worldPop >= 300) {
+                if (main.worldPop >= main.minPop) {
                     main.worldPop -= 10;
                     Log.info("Decreasing set world pop");
                 } else {
@@ -135,17 +147,6 @@ public class WorldHop extends Task {
                     break;
                 }
             }
-        }
-    }
-
-    private void writeWorldToFile() {
-        try (FileWriter fw = new FileWriter(new File(Beggar.CURR_WORLD_PATH), true);
-             BufferedWriter bw = new BufferedWriter(fw);
-             PrintWriter out = new PrintWriter(bw)) {
-
-            out.println(main.currWorld);
-        } catch (IOException e) {
-            Log.severe("File not found");
         }
     }
 
@@ -166,23 +167,26 @@ public class WorldHop extends Task {
             String line = br.readLine();
             while (line != null) {
                 line = line.trim();
-                if(!line.equals("") && !line.equals(" "))
+                if (!line.equals("") && !line.equals(" ") && !line.equals(System.lineSeparator())) {
                     worlds.add(Integer.parseInt(line));
-
+                }
                 line = br.readLine();
             }
             br.close();
         } catch (IOException e) {
             Log.info("No other beggar FNF");
+            main.writeToErrorFile("FNF: getWorldsFromFile()");
             return new ArrayList<>();
         }
 
         return worlds;
     }
 
-    private boolean containsTwoWorlds(int world) {
-        if (main.OTHER_BEG_WORLDS == null)
+    private boolean containsTwoOrMoreWorlds(int world) {
+        if (main.OTHER_BEG_WORLDS == null) {
+            main.writeToErrorFile("OTHER_BEG_WORLDS == null: containsTwoWorlds(int world)");
             return false;
+        }
 
         boolean one = false;
         for (int x : main.OTHER_BEG_WORLDS) {

@@ -177,8 +177,9 @@ public class Gui extends Task {
         main.muleWorld = Integer.parseInt(mWorld.getText());
         main.muleArea = (MuleArea) mulePos.getSelectedItem();
         main.muleName = this.muleName.getText();
-        main.muleAmnt = Integer.parseInt(muleAmount.getText());
-        main.muleKeep = Integer.parseInt(mKeep.getText());
+        //main.muleAmnt = Integer.parseInt(muleAmount.getText());
+        main.setRandMuleKeep(2500, 10000);
+        //main.muleKeep = Integer.parseInt(mKeep.getText());
         main.gpArr = begAmounts.getSelectedValuesList();
         main.gp = (Coins) startAmount.getSelectedItem();
         main.maxWait = Integer.parseInt(max.getText());

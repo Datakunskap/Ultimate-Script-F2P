@@ -18,7 +18,7 @@ public class Banking {
         Log.info("Banking");
         openAndDepositAll();
 
-        calcSpendAmount();
+        calcSpendAmount(0);
 
         // Withdraw GP
         Time.sleep(500, 1500);
@@ -48,19 +48,20 @@ public class Banking {
         return 1000;
     }
 
-    private void calcSpendAmount() {
+    public void calcSpendAmount(int qBought) {
         // Calculate GP to spend
-        main.gp = Bank.getCount(995);
+        main.gp = (Bank.isOpen()) ? Bank.getCount(995) : Inventory.getCount(true, 995);
         main.setPrices(true);
 
         // Keep X gp for tanning
         int tanningGp;
         if (main.LEATHER == 1741) {
             tanningGp = main.gp / main.cowhidePrice;
+            tanningGp += qBought;
         } else {
             tanningGp = (main.gp / main.cowhidePrice) * 3;
+            tanningGp += qBought * 3;
         }
-
         main.gp -= tanningGp;
     }
 

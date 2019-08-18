@@ -3,8 +3,9 @@ package script.tanner.ui;
 import net.miginfocom.swing.MigLayout;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.StopWatch;
+import script.Beggar;
+import script.data.MuleArea;
 import script.tanner.Main;
-import script.tanner.data.MuleArea;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +19,7 @@ public class Gui extends JFrame {
     private JFrame frame;
     private JPanel p1;
     private JButton buttonStart;
-    private JComboBox restockOption;
+    private JComboBox<String> restockOption;
     private JLabel addHidePriceLabel;
     private JTextField addHidePrice;
     private JLabel subLeatherPriceLabel;
@@ -36,7 +37,7 @@ public class Gui extends JFrame {
     private JLabel muleAreaLabel;
     private JLabel muleNameLabel;
     private JTextField muleName;
-    private JComboBox muleArea;
+    private JComboBox<MuleArea> muleArea;
     private JLabel restockOptionLabel;
     private JLabel foodLabel;
     private JTextField food;
@@ -48,12 +49,11 @@ public class Gui extends JFrame {
     public Gui(Main main) {
         this.main = main;
         initComponents();
+        main.timeRan = StopWatch.start();
         this.setVisible(false);
     }
 
     private void buttonStartActionPerformed() {
-        main.timeRan = StopWatch.start();
-
         // ge restock
         if (restockOption.getSelectedItem().equals(RESTOCK_OPTIONS[0])) {
             main.killCows = false;
@@ -88,14 +88,19 @@ public class Gui extends JFrame {
         if (intervalAmnt != null && !intervalAmnt.getText().equals(""))
             main.intervalAmnt = Integer.parseInt(intervalAmnt.getText());
 
-        // handles if blank wont mule
+        // Muling - if blank wont mule
         if (muleAmnt != null && muleKeep != null && muleArea != null && muleName != null && muleWorld != null &&
                 !muleAmnt.getText().equals("") && !muleKeep.getText().equals("") && !muleWorld.getText().equals("")) {
-            main.muleAmnt = Integer.parseInt(muleAmnt.getText());
+            main.muleName = Beggar.MULE_NAME;
+            main.muleWorld = Beggar.MULE_WORLD;
+            main.muleArea.setMuleArea(Beggar.MULE_AREA.getMuleArea());
+            main.setRandMuleKeep(85000, 100000);
+
+            /*main.muleAmnt = Integer.parseInt(muleAmnt.getText());
             main.muleKeep = Integer.parseInt(muleKeep.getText());
             main.muleWorld = Integer.parseInt(muleWorld.getText());
             main.muleArea = (MuleArea) muleArea.getSelectedItem();
-            main.muleName = muleName.getText();
+            main.muleName = muleName.getText();*/
         } else {
             main.muleAmnt = Integer.MAX_VALUE;
             main.muleKeep = Integer.MAX_VALUE;
@@ -114,7 +119,7 @@ public class Gui extends JFrame {
         buttonStart = new JButton("START");
 
         restockOptionLabel = new JLabel("Hide Restock Method:");
-        restockOption = new JComboBox(RESTOCK_OPTIONS);
+        restockOption = new JComboBox<>(RESTOCK_OPTIONS);
         foodLabel = new JLabel("Food To Use:");
         food = new JTextField();
         foodAmntLabel = new JLabel("Amount Of Food To Keep In Inventory:");
@@ -139,7 +144,7 @@ public class Gui extends JFrame {
         muleKeepLabel = new JLabel("Amount To Keep From Mule:");
         muleKeep = new JTextField();
         muleAreaLabel = new JLabel("Mule Area:");
-        muleArea = new JComboBox(MuleArea.values());
+        muleArea = new JComboBox<>(MuleArea.values());
 
         // Auto-GUI Set Values
         restockOption.setSelectedIndex(0);

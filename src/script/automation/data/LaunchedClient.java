@@ -56,8 +56,8 @@ public class LaunchedClient {
         return tag;
     }
 
-    public boolean kill() throws IOException {
-        final String apiKey = Authentication.getApiKey();
+    public boolean kill(String apiKey) throws IOException {
+        //final String apiKey = Authentication.getApiKey();
         if (apiKey.isEmpty())
             throw new FileNotFoundException("Could not find api key file");
 

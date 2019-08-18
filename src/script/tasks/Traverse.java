@@ -8,6 +8,7 @@ import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
+import script.data.CheckTutIsland;
 
 public class Traverse extends Task {
 
@@ -26,10 +27,13 @@ public class Traverse extends Task {
 
     @Override
     public int execute() {
+
         int rand = Beggar.randInt(1, main.walkChance);
 
         if(!main.location.getBegArea().contains(Players.getLocal())){
             Log.info("Walking to GE");
+
+            tutIslandCheck();
 
             if (walk.shouldSetDestination()) {
                 if (Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition())) {
@@ -47,5 +51,13 @@ public class Traverse extends Task {
             return Beggar.randInt(2000, 3000);
         }
         return 600;
+    }
+
+    private void tutIslandCheck() {
+        CheckTutIsland checkT = new CheckTutIsland(main);
+
+        if (checkT.onTutIsland()) {
+            checkT.execute();
+        }
     }
 }

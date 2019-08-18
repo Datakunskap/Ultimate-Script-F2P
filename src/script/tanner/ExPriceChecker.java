@@ -38,8 +38,12 @@ public class ExPriceChecker {
     }
 
     public static int getRSBuddySellPrice(int id, boolean refresh) throws IOException {
-        if (RSBUDDY_SUMMARY_JSON == null || refresh)
+        if (RSBUDDY_SUMMARY_JSON == null || refresh) {
             setRSBuddySummaryJson();
+        }
+        if (RSBUDDY_SUMMARY_JSON == null) {
+            return 0;
+        }
 
         final JsonObject json_objects = RSBUDDY_SUMMARY_JSON.getAsJsonObject(Integer.toString(id));
         if (json_objects == null)
@@ -49,8 +53,12 @@ public class ExPriceChecker {
     }
 
     public static int getRSBuddyBuyPrice(int id, boolean refresh) throws IOException {
-        if (RSBUDDY_SUMMARY_JSON == null || refresh)
+        if (RSBUDDY_SUMMARY_JSON == null || refresh) {
             setRSBuddySummaryJson();
+        }
+        if (RSBUDDY_SUMMARY_JSON == null) {
+            return 0;
+        }
 
         final JsonObject json_objects = RSBUDDY_SUMMARY_JSON.getAsJsonObject(Integer.toString(id));
         if (json_objects == null)
@@ -64,7 +72,7 @@ public class ExPriceChecker {
      */
     private static void setOSBuddySummaryJson() throws IOException {
         final Request request = new Request.Builder()
-                .url("https://storage.googleapis.com/osbuddy-exchange/summary.json")
+                .url("https://storage.googleapis.com/osb-exchange/summary.json")
                 .get()
                 .build();
         final Response response = HTTP_CLIENT.newCall(request).execute();
@@ -86,8 +94,12 @@ public class ExPriceChecker {
      * @return The price of the item; 0 otherwise.
      */
     public static int getOSBuddySellPrice(int id, boolean refresh) throws IOException {
-        if (OSBUDDY_SUMMARY_JSON == null || refresh)
+        if (OSBUDDY_SUMMARY_JSON == null || refresh) {
             setOSBuddySummaryJson();
+        }
+        if (OSBUDDY_SUMMARY_JSON == null) {
+            return 0;
+        }
 
         final JsonObject json_objects = OSBUDDY_SUMMARY_JSON.getAsJsonObject(Integer.toString(id));
         if (json_objects == null)
@@ -97,8 +109,12 @@ public class ExPriceChecker {
     }
 
     public static int getOSBuddyBuyPrice(int id, boolean refresh) throws IOException {
-        if (OSBUDDY_SUMMARY_JSON == null || refresh)
+        if (OSBUDDY_SUMMARY_JSON == null || refresh) {
             setOSBuddySummaryJson();
+        }
+        if (OSBUDDY_SUMMARY_JSON == null) {
+            return 0;
+        }
 
         final JsonObject json_objects = OSBUDDY_SUMMARY_JSON.getAsJsonObject(Integer.toString(id));
         if (json_objects == null)

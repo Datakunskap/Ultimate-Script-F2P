@@ -1,4 +1,4 @@
-package script.tanner.tasks;
+package script.chocolate.tasks;
 
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;

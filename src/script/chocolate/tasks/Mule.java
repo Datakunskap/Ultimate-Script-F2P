@@ -1,4 +1,4 @@
-package script.tasks;
+package script.chocolate.tasks;
 
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Login;
@@ -12,8 +12,7 @@ import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.Script;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
-import script.data.Chocolate;
+import script.chocolate.Main;
 
 import java.io.*;
 import java.util.NavigableMap;
@@ -22,26 +21,22 @@ import java.util.TreeMap;
 public class Mule extends Task {
 
     private int Gold;
-    private int Gold2;
-    private int gold3;
-    private String status1;
-    String user;
+    private int Gold2 = 0;
     private String status = "needgold";
-    private String Username;
-    private String Password;
+    private static String Username = null;
+    private static String Password = null;
     private boolean muleing = false;
     private int begWorld = -1;
     private static final String MULE_FILE_PATH = Script.getDataDirectory() + "\\mule.txt";
 
-    private Beggar main;
-    private Chocolate chocolate;
+    private Main main;
 
-    public Mule(Beggar beggar, Chocolate chocolate) {
-        main = beggar;
-        this.chocolate = chocolate;
+    public Mule(Main main) {
+        this.main = main;
     }
 
     private void loginMule() {
+        String status1;
         try {
             File file = new File(MULE_FILE_PATH);
 
@@ -64,7 +59,6 @@ public class Mule extends Task {
             Log.info("File not found");
         }
 
-        user = main.muleName;
     }
 
     public static void logoutMule() {
@@ -87,48 +81,43 @@ public class Mule extends Task {
 
     @Override
     public boolean validate() {
-        if (main.muted && !atMuleAmnt(Beggar.MUTED_MULE_AMNT)) {
-            main.disableChain = false;
-            main.setStopping(true);
-        }
-        if (main.startChocolate) {
-            return chocolate.sold && (Inventory.getCount(true, 995) >= main.muleAmnt || Bank.getCount(995) >= main.muleAmnt || muleing);
-        }
-        return atMuleAmnt(main.muleAmnt) || (main.muted && atMuleAmnt(Beggar.MUTED_MULE_AMNT)) || muleing;
-    }
-
-    private boolean atMuleAmnt(int amnt) {
-        return Inventory.contains(995) && Inventory.getCount(true, 995) >= amnt;
-    }
+        return main.sold && (Inventory.getCount(true, 995) >= main.muleAmnt || Bank.getCount(995) >= main.muleAmnt || muleing); }
 
     @Override
     public int execute() {
         main.isMuling = true;
+		if (Bank.isOpen() && Bank.getCount(995) >= main.muleAmnt) {
+			Bank.withdrawAll(995);
+			Time.sleepUntil(() -> !Bank.contains(995), 5000);
+		}
+		
         loginMule();
 
-        if (Worlds.getCurrent() != main.muleWorld) {
+        if(Worlds.getCurrent() != main.muleWorld){
             begWorld = Worlds.getCurrent();
             WorldHopper.hopTo(main.muleWorld);
             Time.sleepUntil(() -> Worlds.getCurrent() == main.muleWorld, 10000);
-            main.currWorld = main.muleWorld;
         }
 
         if (status != null) {
             status = status.trim();
         }
-        if (org.rspeer.runetek.api.component.Dialog.canContinue()) {
+        if (Dialog.canContinue()) {
             Dialog.processContinue();
             Time.sleep(1000);
         }
         if (!main.muleArea.getMuleArea().contains(Players.getLocal())) {
-            Movement.setWalkFlag(main.muleArea.getMuleArea().getTiles().get(Beggar.randInt(0, main.muleArea.getMuleArea().getTiles().size() - 1)));
+            if (script.chocolate.tasks.WalkingHelper.shouldEnableRun()) {
+                script.chocolate.tasks.WalkingHelper.enableRun();
+            }
+            Movement.setWalkFlag(main.muleArea.getMuleArea().getTiles().get(main.randInt(0, main.muleArea.getMuleArea().getTiles().size()-1)));
         }
 
         if (Inventory.getFirst(995) != null) {
             Gold = Inventory.getFirst(995).getStackSize();
         }
 
-        gold3 = Gold2 - Gold;
+        int gold3 = Gold2 - Gold;
 
         if (status.contains("needgold")) {
             if (!Game.isLoggedIn() && Username != null && Password != null) {
@@ -141,8 +130,8 @@ public class Mule extends Task {
                 Time.sleep(200);
                 Keyboard.pressEnter();
             }
-            if (Players.getNearest(user) != null && !Trade.isOpen()) {
-                Players.getNearest(user).interact("Trade with");
+            if (Players.getNearest(main.muleName) != null && !Trade.isOpen()) {
+                Players.getNearest(main.muleName).interact("Trade with");
                 Time.sleep(3000);
             }
             if (Inventory.getFirst(995) != null) {
@@ -162,10 +151,6 @@ public class Mule extends Task {
                                 Time.sleep(1000);
                             }
                             if (Time.sleepUntil(() -> Trade.contains(true, 995), 500, 3500)) {
-                                if (Beggar.MULE_ITEMS) {
-                                    offerItems();
-                                }
-
                                 Log.info("Trade entered & accepted");
                                 Trade.accept();
                                 Time.sleepUntil(() -> Trade.isOpen(true), 5000);
@@ -181,35 +166,17 @@ public class Mule extends Task {
                         Time.sleep(500, 1500);
                         if (Trade.accept()) {
                             Time.sleep(3000);
-                            Log.fine("Complete Shutting Down Mule");
-                            muleing = false;
+                            Log.fine("Trade completed shutting down mule");
                             logoutMule();
-                            main.changeAmount = true;
-                            main.walk = true;
-                            main.sendTrade = true;
-                            main.beg = true;
-                            //main.atGE = false;
-                            main.buildGEPath = true;
-                            main.trading = false;
+                            muleing = false;
                             main.amntMuled += (Coins - main.muleKeep);
-                            main.setRandMuleKeep(2500, 10000);
-
-                            main.equipped = false;
-                            main.bought = false;
-
-                            if (begWorld != -1) {
+                            main.setRandMuleKeep(main.minKeep, main.maxKeep);
+                            if(begWorld != -1) {
                                 WorldHopper.hopTo(begWorld);
-                                Time.sleepUntil(() -> Worlds.getCurrent() == begWorld, 20000);
-                                main.currWorld = Worlds.getCurrent();
+                                Time.sleepUntil(() -> Worlds.getCurrent() == begWorld, 10000);
                             }
                             Time.sleep(8000, 10000);
-                            main.randBuyGP = Beggar.randInt(1500, 5000);
                             main.isMuling = false;
-
-                            if (main.muted) {
-                                main.disableChain = false;
-                                main.setStopping(true);
-                            }
                         }
                         Time.sleep(700);
                     }
@@ -229,22 +196,6 @@ public class Mule extends Task {
         suffixes.put(1_000_000_000_000L, "T");
         suffixes.put(1_000_000_000_000_000L, "P");
         suffixes.put(1_000_000_000_000_000_000L, "E");
-    }
-
-    private boolean isDefaultItem(int id) {
-        for (int i : main.items) {
-            if (i == id)
-                return true;
-        }
-        return false;
-    }
-
-    private void offerItems() {
-        while (!Inventory.containsOnly(x -> x != null && x.getId() == 995 &&
-                !x.isExchangeable() && isDefaultItem(x.getId())) && !Inventory.isEmpty()) {
-            Trade.offerAll(x -> x.getId() != 995 && x.isExchangeable() && !isDefaultItem(x.getId()));
-            Time.sleep(500);
-        }
     }
 }
 

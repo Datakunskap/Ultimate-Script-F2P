@@ -125,11 +125,15 @@ public class TradePlayer extends Task {
                     }
                     main.lastTradeTime = StopWatch.start();
 
-                    if(main.preTradeGP + Inventory.getCount(true, 995) > main.randBuyGP) {
+                    int coins = Inventory.getCount(true, 995);
+
+                    if (coins > main.randBuyGP) {
                         main.equipped = false;
                         main.bought = false;
                     }
-                    main.refreshPrices = true;
+
+                    if (coins < main.muleAmnt || StartOther.TAN_START_GP >= main.muleAmnt || StartOther.CHOC_START_GP >= main.muleAmnt)
+                        main.refreshPrices = true;
                 }
 
                 main.walk = false;

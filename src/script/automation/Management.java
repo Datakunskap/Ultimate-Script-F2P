@@ -147,14 +147,14 @@ public class Management {
         return gson.fromJson(body.string(), clientType);
     }
 
-    public static List<LaunchedClient> getRunningClients() throws IOException {
-        final String apiKey = Authentication.getApiKey();
-        if (apiKey.isEmpty())
+    public static List<LaunchedClient> getRunningClients(String API_KEY) throws IOException {
+        //final String apiKey = Authentication.getApiKey();
+        if (API_KEY.isEmpty())
             throw new FileNotFoundException("Could not find api key file");
 
         final Request request = new Request.Builder()
                 .url("https://services.rspeer.org/api/botLauncher/connectedClients")
-                .header("ApiClient", apiKey)
+                .header("ApiClient", API_KEY)
                 .get()
                 .build();
 
