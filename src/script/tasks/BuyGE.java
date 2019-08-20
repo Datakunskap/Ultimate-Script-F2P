@@ -13,7 +13,8 @@ import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.data.Chocolate;
+import script.chocolate.Main;
+import script.chocolate.tasks.StartTanning;
 import script.tanner.ExGrandExchange;
 import script.tanner.data.Location;
 
@@ -21,32 +22,36 @@ import java.util.Objects;
 
 public class BuyGE extends Task {
 
+    private Main main;
     private Beggar beggar;
-    private Chocolate chocolate;
     private Banking banking;
     private int buyQuantity;
 
-    public BuyGE(Beggar beggar, Chocolate chocolate) {
-        this.chocolate = chocolate;
+    public BuyGE(Main main, Beggar beggar) {
+        this.main = main;
         this.beggar = beggar;
-        banking = new Banking(chocolate);
+        banking = new Banking(main);
     }
 
     @Override
     public boolean validate() {
-        return chocolate.sold && chocolate.restock && Location.GE_AREA.containsPlayer() && !beggar.isMuling;
+        return main.sold && main.restock && Location.GE_AREA.containsPlayer() && !main.isMuling && !beggar.muleChocBeg;
     }
 
     @Override
     public int execute() {
 
-        if (!chocolate.checkedBank) {
-            chocolate.checkedBank = true;
+        if (!main.checkedBank) {
+            if (main.atGELimit) {
+                StartTanning.execute(main, beggar);
+            }
+
+            main.checkedBank = true;
             return banking.executeChocolate();
         }
 
-        if (Inventory.contains(Chocolate.KNIFE) || Inventory.contains(Chocolate.KNIFE + 1)) {
-            chocolate.hasKnife = true;
+        if (Inventory.contains(Main.KNIFE) || Inventory.contains(Main.KNIFE + 1)) {
+            main.hasKnife = true;
         }
 
         if (!GrandExchange.isOpen()) {
@@ -58,49 +63,63 @@ public class BuyGE extends Task {
             return 1000;
         }
 
-        if (!chocolate.hasKnife && GrandExchange.getFirst(x -> x != null && x.getItemId() == Chocolate.KNIFE) == null) {
+        if (!main.hasKnife && GrandExchange.getFirst(x -> x != null && x.getItemId() == Main.KNIFE) == null) {
             buyKnife();
-            chocolate.justBoughtKnife = true;
+            main.justBoughtKnife = true;
         }
 
         // sets quantity to buy
-        buyQuantity = chocolate.gp / (chocolate.buyPrice + chocolate.incBuyPrice);
+        buyQuantity = main.gp / (main.buyPrice + main.incBuyPrice);
+
+        // Checks if at GE limit
+        if (main.timesPriceChanged >= 3 && main.elapsedSeconds > 60) {
+            buyQuantity = (main.totalMade + buyQuantity) - Main.BAR_GE_LIMIT;
+            Log.severe("AT GE LIMIT");
+            while(GrandExchange.getFirstActive() != null) {
+                Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).abort(), 1000, 5000);
+                GrandExchange.collectAll();
+                Time.sleep(5000);
+                GrandExchange.collectAll();
+            }
+            main.atGELimit = true;
+            main.sold = false;
+        }
 
         // Checks if done buying
-        if (GrandExchange.getFirstActive() == null && (Inventory.contains(Chocolate.BAR) ||
-                Inventory.contains(Chocolate.BAR + 1)) && chocolate.hasKnife) {
+        if (GrandExchange.getFirstActive() == null && (Inventory.contains(Main.BAR) ||
+                Inventory.contains(Main.BAR + 1)) && main.hasKnife) {
 
-            if (Time.sleepUntil(() -> (Inventory.getCount(true, Chocolate.BAR) +
-                    Inventory.getCount(true, Chocolate.BAR + 1)) >= buyQuantity, 5000)) {
+            if (Time.sleepUntil(() -> (Inventory.getCount(true, Main.BAR) +
+                    Inventory.getCount(true, Main.BAR + 1)) >= buyQuantity, 5000)) {
                 Log.fine("Done buying");
-                chocolate.sold = false;
-                chocolate.checkedBank = false;
-                chocolate.restock = false;
-                chocolate.closeGE();
-                chocolate.startTime = System.currentTimeMillis();
-                if (chocolate.buyPriceChng) {
-                    chocolate.incBuyPrice = chocolate.incBuyPrice / (chocolate.timesPriceChanged * chocolate.intervalAmnt);
-                    chocolate.buyPriceChng = false;
+                main.sold = false;
+                main.checkedBank = false;
+                main.restock = false;
+                main.closeGE();
+                main.startTime = System.currentTimeMillis();
+                if (main.buyPriceChng) {
+                    main.incBuyPrice = main.incBuyPrice / (main.timesPriceChanged * main.intervalAmnt);
+                    main.buyPriceChng = false;
                 }
 
                 banking.openAndDepositAll();
                 fallbackGEPrice();
                 Bank.close();
                 Time.sleepUntil(() -> !Bank.isOpen(), 5000);
-                chocolate.justBoughtKnife = false;
-                //chocolate.teleportHome();
+                main.justBoughtKnife = false;
+                //main.teleportHome();
                 return 800;
             }
         }
 
         // Buys hides -> having issues with Buraks toBank param so handled manually
-        if (GrandExchange.getFirstActive() == null && ExGrandExchange.buy(Chocolate.BAR, buyQuantity, (chocolate.buyPrice + chocolate.incBuyPrice), false)) {
+        if (GrandExchange.getFirstActive() == null && ExGrandExchange.buy(Main.BAR, buyQuantity, (main.buyPrice + main.incBuyPrice), false)) {
             Log.fine("Buying Bars");
         } else {
-            Log.info("Waiting to complete  |  Time: " + chocolate.elapsedSeconds / 60 + "min(s)  |  Price changed " + chocolate.timesPriceChanged + " time(s)");
+            Log.info("Waiting to complete  |  Time: " + main.elapsedSeconds / 60 + "min(s)  |  Price changed " + main.timesPriceChanged + " time(s)");
             if (!GrandExchange.isOpen()) {
                 Npcs.getNearest("Grand Exchange Clerk").interact("Exchange");
-                Time.sleep(chocolate.randInt(700, 1300));
+                Time.sleep(main.randInt(700, 1300));
             }
             Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED), 2000, 10000);
             GrandExchange.collectAll();
@@ -109,31 +128,31 @@ public class BuyGE extends Task {
         }
 
         // Increases buy price if over time
-        chocolate.checkTime();
-        if (chocolate.elapsedSeconds > chocolate.resetGeTime * 60 && GrandExchange.getFirstActive() != null && chocolate.hasKnife) {
-            Log.fine("Increasing bar price by: " + chocolate.intervalAmnt);
+        main.checkTime();
+        if (main.elapsedSeconds > main.resetGeTime * 60 && GrandExchange.getFirstActive() != null && main.hasKnife) {
+            Log.fine("Increasing bar price by: " + main.intervalAmnt);
             while(GrandExchange.getFirstActive() != null) {
                 Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).abort(), 1000, 5000);
                 GrandExchange.collectAll();
                 Time.sleep(5000);
                 GrandExchange.collectAll();
             }
-            chocolate.incBuyPrice += chocolate.intervalAmnt;
-            //chocolate.setPrices(true);
-            banking.calcSpendAmount((Inventory.getCount(true, x -> x != null && x.getId() == Chocolate.BAR) +
-                    Inventory.getCount(true, x -> x != null && x.getId() == Chocolate.BAR + 1)));
-            chocolate.startTime = System.currentTimeMillis();
-            chocolate.buyPriceChng = true;
-            chocolate.timesPriceChanged++;
+            main.incBuyPrice += main.intervalAmnt;
+            //main.setPrices(true);
+            banking.calcSpendAmount((Inventory.getCount(true, x -> x != null && x.getId() == Main.BAR) +
+                    Inventory.getCount(true, x -> x != null && x.getId() == Main.BAR + 1)));
+            main.startTime = System.currentTimeMillis();
+            main.buyPriceChng = true;
+            main.timesPriceChanged++;
         }
 
         // Checks and handles stuck in setup
-        if (chocolate.elapsedSeconds > (chocolate.resetGeTime + 1) * 60 && GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
+        if (main.elapsedSeconds > (main.resetGeTime + 1) * 60 && GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
             GrandExchange.open(GrandExchange.View.OVERVIEW);
             if (!Time.sleepUntil(() -> !GrandExchangeSetup.isOpen(), 5000)) {
-                chocolate.closeGE();
+                main.closeGE();
             }
-            chocolate.startTime = System.currentTimeMillis();
+            main.startTime = System.currentTimeMillis();
         }
 
         GrandExchange.collectAll();
@@ -142,8 +161,8 @@ public class BuyGE extends Task {
     }
 
     private void buyKnife() {
-        Log.fine("Buying Knife");
-        if (ExGrandExchange.buy(Chocolate.KNIFE, 1, chocolate.knifePrice, false)) {
+        if (ExGrandExchange.buy(Main.KNIFE, 1, main.knifePrice, false)) {
+            Log.fine("Buying Knife");
             Time.sleep(600);
             GrandExchange.collectAll();
             Time.sleep(Random.mid(300, 600));
@@ -154,14 +173,12 @@ public class BuyGE extends Task {
 
     private void fallbackGEPrice() {
 
-        if (chocolate.usingBuyFallback && Bank.isOpen() && Bank.contains(995)) {
-            int expectedGP = chocolate.gp - (buyQuantity * chocolate.buyPrice);
-            int actualGP = chocolate.justBoughtKnife ? Bank.getCount(995) - chocolate.knifePrice : Bank.getCount(995);
-            actualGP -= Beggar.SAVE_BEG_GP;
-
+        if (main.usingBuyFallback && Bank.isOpen() && Bank.contains(995)) {
+            int expectedGP = main.gp - (buyQuantity * main.buyPrice);
+            int actualGP = main.justBoughtKnife ? Bank.getCount(995) - main.knifePrice : Bank.getCount(995);
             if (actualGP > expectedGP) {
-                chocolate.lastPrices[1] = chocolate.buyPrice - ((actualGP - expectedGP) / buyQuantity);
-                Log.fine("GE buy price found: " + chocolate.lastPrices[1]);
+                main.lastPrices[1] = main.buyPrice - ((actualGP - expectedGP) / buyQuantity);
+                Log.fine("GE buy price found: " + main.lastPrices[1]);
             }
         }
     }

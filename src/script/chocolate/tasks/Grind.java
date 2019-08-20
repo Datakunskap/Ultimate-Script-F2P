@@ -29,7 +29,7 @@ public class Grind extends Task {
 
         if (Inventory.containsAnyExcept(Main.KNIFE, Main.BAR, Main.DUST) ||
                 Inventory.containsOnly(Main.KNIFE, Main.DUST) ||
-                Inventory.containsOnly(Main.KNIFE) || Inventory.containsOnly(Main.DUST) || Inventory.containsOnly(Main.BAR) ||
+                Inventory.containsOnly(Main.KNIFE) || Inventory.containsOnly(Main.BAR) ||
                 Inventory.isEmpty()) {
 
             if (!Bank.isOpen()) {

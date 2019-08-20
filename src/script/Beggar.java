@@ -115,10 +115,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public boolean muted = false;
     public MuleArea muleArea;
     private int[] lastPrices = new int[4];
-    private Chocolate chocolate;
-    public boolean startChocolate = false;
+    public boolean startChocBeg = false;
+    public boolean muleChocBeg = false;
     public static final int SAVE_BEG_GP = 10000;
-    public script.chocolate.Main choc;
+    public script.chocolate.Main chocolate;
     public boolean isChoc = false;
 
 
@@ -131,6 +131,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final int ALLOWED_INSTANCES = 8;
     public final String API_KEY = "JV5ML4DE4M9W8Z5KBE00322RDVNDGGMTMU1EH9226YCVGFUBE6J6OY1Q2NJ0RA8YAPKO70";
     public static final int NUM_BACKLOG_ACCOUNTS = 40;
+    public static final int START_CB_AMNT = 5500000;
+    public static final boolean BUY_GEAR = true;
 
     @Override
     public void onStart() {
@@ -144,8 +146,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         runtime = StopWatch.start();
         startC = Inventory.getCount(true, 995);
-        /*if (startC >= 55)
-            startChocolate = true;*/
         location = Location.GE_AREA;
 
         submit(new Gui(this));
@@ -156,7 +156,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         startTime = (worldHop || worldHopf2p) ? System.currentTimeMillis() : 0;
         setRandMuleKeep(2500, 10000);
 
-        chocolate = new Chocolate();
+        chocolate = new script.chocolate.Main(this);
+        if (startC > START_CB_AMNT)
+            startChocBeg = true;
 
         if (GAMBLER) {
             /*submit(new GTradePlayer(),
@@ -178,7 +180,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         submit(new StartupChecks(this),
                 new TradePlayer(this),
                 new SellGE(chocolate, this),
-                new BuyGE(this, chocolate),
+                new BuyGE(chocolate, this),
                 new WaitTrade(this, chocolate),
                 new StartOther(this),
                 new Mule(this, chocolate),
@@ -229,7 +231,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         Log.severe("Script Stopped");
         removeAll();
 
-        if (isMuling || (isTanning && tanner.isMuling) || (isChoc && choc.isMuling)) {
+        if (isMuling || (isTanning && tanner.isMuling) || (isChoc && chocolate.isMuling)) {
             Mule.logoutMule();
         }
 
@@ -533,7 +535,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         // If not in a trade and a player trades you...
         if (!Trade.isOpen() && msg.getType().equals(ChatMessageType.TRADE) && !isMuling) {
             if (msg.getSource().equals(traderName)) {
-                sameTraderCount++;
+                sameTraderCount ++;
             } else {
                 sameTraderCount = 0;
             }
@@ -574,7 +576,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             tanner.render(e);
         }
         if (isChoc) {
-            choc.render(e);
+            chocolate.render(e);
         }
     }
 
@@ -876,18 +878,18 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     private void setChocolatePrices(boolean refresh) {
         try {
-            sellPrice = ExPriceChecker.getOSBuddySellPrice(Chocolate.DUST, refresh);
-            buyPrice = ExPriceChecker.getOSBuddyBuyPrice(Chocolate.BAR, refresh);
+            sellPrice = ExPriceChecker.getOSBuddySellPrice(script.chocolate.Main.DUST, refresh);
+            buyPrice = ExPriceChecker.getOSBuddyBuyPrice(script.chocolate.Main.BAR, refresh);
         } catch (IOException e) {
             Log.severe("Failed getting OSBuddy price");
             e.printStackTrace();
         } finally {
             try {
                 if (sellPrice < SELL_PL) {
-                    sellPrice = ExPriceChecker.getRSBuddySellPrice(Chocolate.DUST, refresh);
+                    sellPrice = ExPriceChecker.getRSBuddySellPrice(script.chocolate.Main.DUST, refresh);
                 }
                 if (buyPrice < BUY_PL) {
-                    buyPrice = ExPriceChecker.getRSBuddyBuyPrice(Chocolate.BAR, refresh);
+                    buyPrice = ExPriceChecker.getRSBuddyBuyPrice(script.chocolate.Main.BAR, refresh);
                 }
             } catch (IOException e) {
                 Log.severe("Failed getting RSBuddy price");

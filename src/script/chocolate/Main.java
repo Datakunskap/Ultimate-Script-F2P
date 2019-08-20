@@ -13,12 +13,9 @@ import org.rspeer.script.ScriptMeta;
 import org.rspeer.script.task.TaskScript;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.chocolate.tasks.Grind;
+import script.chocolate.tasks.*;
 import script.data.MuleArea;
 import script.tanner.ExPriceChecker;
-import script.chocolate.tasks.BuyGE;
-import script.chocolate.tasks.Mule;
-import script.chocolate.tasks.SellGE;
 
 import java.awt.*;
 import java.io.IOException;
@@ -40,7 +37,7 @@ public class Main {
     // Amount of GP gained to mule at
     public int muleGainedGP = 100000;
     // Max amount to keep from mule
-    public int maxKeep = 200000;
+    public int maxKeep = 150000;
     // Min amount to keep from mule
     public int minKeep = 100000;
 
@@ -81,21 +78,21 @@ public class Main {
     public boolean usingBuyFallback = false;
     public boolean usingSellFallback = false;
 
-    private static script.chocolate.Main chocolate;
+    //private static script.chocolate.Main chocolate;
     private static Beggar beggar;
 
-    private Main(Beggar script) {
+    public Main(Beggar script) {
         beggar = script;
     }
 
-    //method to return instance of class
+    /*//method to return instance of class
     public static Main getInstance(Beggar script) {
         if (chocolate == null) {
             // if instance is null, initialize
             chocolate = new Main(script);
         }
         return chocolate;
-    }
+    }*/
 
     public void start() {
         beggar.removeAll();
@@ -109,10 +106,11 @@ public class Main {
         setRandMuleKeep(minKeep, maxKeep);
         timeRan = StopWatch.start();
 
-        beggar.submit(new Mule(chocolate),
-                new SellGE(chocolate),
-                new BuyGE(chocolate, beggar),
-                new Grind(chocolate));
+        beggar.submit(new Mule(this),
+                new Traverse(this),
+                new SellGE(this),
+                new BuyGE(this, beggar),
+                new Grind(this));
     }
 
     public void setPrices(boolean refresh) {

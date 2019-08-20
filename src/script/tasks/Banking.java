@@ -7,18 +7,18 @@ import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.data.Chocolate;
+import script.chocolate.Main;
 
 public class Banking extends Task {
 
     private Beggar main;
-    private Chocolate chocolate;
+    private Main chocolate;
 
     public Banking(Beggar beggar){
         main = beggar;
     }
 
-    public Banking(Chocolate chocolate) { this.chocolate = chocolate; }
+    public Banking(Main chocolate) { this.chocolate = chocolate; }
 
     @Override
     public boolean validate() {
@@ -38,6 +38,10 @@ public class Banking extends Task {
         Time.sleep(2000);
         Bank.withdrawAll(995);
         Time.sleep(5000);
+/*        if (Bank.contains(Main.KNIFE) && Bank.contains(Main.DUST, Main.KNIFE))
+            main.startChocBeg = true;
+        if (Inventory.contains(Main.KNIFE) && Inventory.contains(Main.DUST, Main.KNIFE))
+            main.startChocBeg = true;*/
         main.banked = true;
         Bank.close();
         Time.sleepUntil(() -> !Bank.isOpen(), 2000);
@@ -50,6 +54,11 @@ public class Banking extends Task {
         Log.fine("Banking");
         openAndDepositAll();
 
+        if (checkAtMuleAmnt()) {
+            main.muleChocBeg = true;
+            return 1000;
+        }
+
         if (!needRestock())
             return 1000;
 
@@ -61,11 +70,11 @@ public class Banking extends Task {
         Time.sleepUntil(() -> !Bank.contains(995), 5000);
 
         // Withdraw leathers to sell
-        if (Bank.contains(Chocolate.DUST)) {
+        if (Bank.contains(Main.DUST)) {
             Bank.setWithdrawMode(Bank.WithdrawMode.NOTE);
             Time.sleepUntil(() -> Bank.getWithdrawMode().equals(Bank.WithdrawMode.NOTE), 5000);
-            Bank.withdrawAll(Chocolate.DUST);
-            Time.sleepUntil(() -> !Bank.contains(Chocolate.DUST), 5000);
+            Bank.withdrawAll(Main.DUST);
+            Time.sleepUntil(() -> !Bank.contains(Main.DUST), 5000);
         }
 
         Bank.close();
@@ -94,25 +103,32 @@ public class Banking extends Task {
         Bank.depositInventory();
         Time.sleepUntil(Inventory::isEmpty, 5000);
 
-        if (Bank.contains(Chocolate.BAR)) {
-            chocolate.barCount = Bank.getCount(Chocolate.BAR);
+        if (Bank.contains(Main.BAR)) {
+            chocolate.barCount = Bank.getCount(Main.BAR);
         }
     }
 
     boolean needRestock() {
-        if (Bank.contains(Chocolate.KNIFE)) {
+        if (Bank.contains(Main.KNIFE)) {
             chocolate.hasKnife = true;
-            if (Bank.contains(Chocolate.BAR)) {
+            if (Bank.contains(Main.BAR)) {
                 Log.info("Restock Unnecessary");
                 chocolate.sold = false;
                 chocolate.checkedBank = false;
                 chocolate.restock = false;
                 chocolate.closeGE();
                 chocolate.startTime = System.currentTimeMillis();
-                chocolate.barCount = Bank.getCount(Chocolate.BAR);
+                chocolate.barCount = Bank.getCount(Main.BAR);
                 return false;
             }
         }
         return true;
+    }
+
+    boolean checkAtMuleAmnt() {
+        if (Bank.contains(995) && Bank.getCount(995) >= main.muleAmnt) {
+            return true;
+        }
+        return false;
     }
 }

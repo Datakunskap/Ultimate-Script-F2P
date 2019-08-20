@@ -30,13 +30,16 @@ public class BuyEquip extends Task {
 
     @Override
     public boolean validate() {
-        return Inventory.getCount(true, 995) >= main.randBuyGP && !main.equipped;
+        return Beggar.BUY_GEAR && Inventory.getCount(true, 995) >= main.randBuyGP && !main.equipped;
     }
 
     @Override
     public int execute() {
         Log.info("Buying from GE & Equipping");
         final int X = main.item;
+
+       // new Banking(main).execute();
+
         if(!main.bought)
             openGE();
 

@@ -13,20 +13,20 @@ import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.data.Chocolate;
+import script.chocolate.Main;
 import script.tanner.data.Location;
 
 import java.util.Objects;
 
 public class SellGE extends Task {
 
-    private Chocolate chocolate;
+    private Main chocolate;
     private Banking banking;
 
     private Beggar beggar;
     //private StartChocolate startBegging;
 
-    public SellGE(Chocolate chocolate, Beggar beggar) {
+    public SellGE(Main chocolate, Beggar beggar) {
         this.chocolate = chocolate;
         this.beggar = beggar;
         banking = new Banking(chocolate);
@@ -39,7 +39,7 @@ public class SellGE extends Task {
 
     @Override
     public boolean validate() {
-        return beggar.startChocolate && chocolate.restock && !chocolate.sold && Location.GE_AREA.containsPlayer() && !beggar.isMuling;
+        return beggar.startChocBeg && chocolate.restock && !chocolate.sold && Location.GE_AREA.containsPlayer() && !beggar.isMuling && !beggar.muleChocBeg;
     }
 
     @Override
@@ -70,13 +70,13 @@ public class SellGE extends Task {
         }*/
 
         // bc issues with Buraks ExGrandExchange when selling
-        if (Inventory.contains(Chocolate.DUST_NOTE) || Inventory.contains(Chocolate.DUST)) {
+        if (Inventory.contains(Main.DUST_NOTE) || Inventory.contains(Main.DUST)) {
             Log.fine("Selling dust");
             GrandExchange.createOffer(RSGrandExchangeOffer.Type.SELL);
             Time.sleep(800);
-            GrandExchangeSetup.setItem(Chocolate.DUST_NOTE);
-            if (Inventory.contains(Chocolate.DUST))
-                GrandExchangeSetup.setItem(Chocolate.DUST);
+            GrandExchangeSetup.setItem(Main.DUST_NOTE);
+            if (Inventory.contains(Main.DUST))
+                GrandExchangeSetup.setItem(Main.DUST);
             Time.sleepUntil(() -> GrandExchangeSetup.getItem() != null,5000);
             fallbackGEPrice();
             GrandExchangeSetup.setPrice(chocolate.sellPrice - chocolate.decSellPrice);
@@ -98,7 +98,7 @@ public class SellGE extends Task {
         }
 
         if (GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED) &&
-                !Inventory.contains(Chocolate.DUST_NOTE) && !Inventory.contains(Chocolate.DUST)) {
+                !Inventory.contains(Main.DUST_NOTE) && !Inventory.contains(Main.DUST)) {
             GrandExchange.collectAll();
             Time.sleep(Random.mid(300, 600));
             GrandExchange.collectAll();
@@ -117,7 +117,7 @@ public class SellGE extends Task {
 
         }
 
-        if (GrandExchange.getFirstActive() == null && !GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED) && !Inventory.contains(Chocolate.DUST_NOTE) && !Inventory.contains(Chocolate.DUST)){
+        if (GrandExchange.getFirstActive() == null && !GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED) && !Inventory.contains(Main.DUST_NOTE) && !Inventory.contains(Main.DUST)){
             Log.info("Done selling 2");
             chocolate.sold = true;
             chocolate.checkedBank = false;
@@ -137,7 +137,7 @@ public class SellGE extends Task {
         if(chocolate.elapsedSeconds > chocolate.resetGeTime * 60 &&
                 GrandExchange.getFirstActive() != null) {
             Log.fine("Decreasing leather price by: " + chocolate.intervalAmnt);
-            while(!Inventory.contains(Chocolate.DUST) && GrandExchange.getFirstActive() != null) {
+            while(!Inventory.contains(Main.DUST) && GrandExchange.getFirstActive() != null) {
                 Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).abort(), 1000, 5000);
                 GrandExchange.collectAll();
                 Time.sleep(5000);

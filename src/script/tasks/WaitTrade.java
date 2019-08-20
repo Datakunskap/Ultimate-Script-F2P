@@ -2,18 +2,20 @@ package script.tasks;
 
 import org.rspeer.runetek.adapter.component.Item;
 import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Bank;
+import org.rspeer.runetek.api.component.GrandExchange;
+import org.rspeer.runetek.api.component.GrandExchangeSetup;
 import org.rspeer.runetek.api.component.Trade;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.component.tab.Tab;
 import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.runetek.api.input.menu.ActionOpcodes;
+import org.rspeer.runetek.api.movement.Movement;
+import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.chocolate.Main;
-import script.data.Chocolate;
 
 public class WaitTrade extends Task {
 
@@ -22,16 +24,16 @@ public class WaitTrade extends Task {
     private boolean waitSet = false;
 
     private Beggar main;
-    private Chocolate chocolate;
+    private Main chocolate;
 
-    public WaitTrade(Beggar beggar, Chocolate chocolate){
+    public WaitTrade(Beggar beggar, Main chocolate) {
         main = beggar;
         this.chocolate = chocolate;
     }
 
     @Override
     public boolean validate() {
-        return !main.beg && !main.walk && !main.trading; //&& !main.sendTrade;
+        return !main.beg && !main.walk && !main.trading && !main.muleChocBeg; //&& !main.sendTrade;
     }
 
     @Override
@@ -46,18 +48,21 @@ public class WaitTrade extends Task {
             waitSet = true;
         }
 
+        if (Tabs.isOpen(Tab.INVENTORY))
+            Tabs.open(Tab.INVENTORY);
+
         int timeout = Beggar.randInt(min, max);
         Log.info("Waiting " + (timeout / 1000) + "s for a trade");
-        int grindTimeout = timeout - 16;
+        int grindTimeout = 16000;
         timeout -= grindTimeout;
 
         /*while (!main.trading && !Trade.isOpen(false) && validateGrind()) {
             Time.sleep(executeGrind());
         }*/
 
-        if (Time.sleepUntil(() -> main.trading || Trade.isOpen(false), grindTimeout) ||
-                Time.sleepUntil(() -> executeGrind() && (main.trading || Trade.isOpen(false)), 500, timeout)) {
-            if(Trade.isOpen()){
+        if (Time.sleepUntil(() -> main.trading || Trade.isOpen(false) || main.isStopping(), timeout) ||
+                Time.sleepUntil(() -> executeGrind() && (main.trading || Trade.isOpen(false)), 2000, grindTimeout)) {
+            if (Trade.isOpen()) {
                 main.sentTradeInit = true;
             }
             main.trading = true;
@@ -85,16 +90,16 @@ public class WaitTrade extends Task {
         if (validateGrind()) {
             chocolate.closeGE();
 
-            if (Inventory.containsAnyExcept(Chocolate.KNIFE, Chocolate.BAR, Chocolate.DUST, 995) ||
-                    Inventory.containsOnly(Chocolate.KNIFE, Chocolate.DUST, 995) || Inventory.isEmpty()) {
+            if (!hasSupplies()) {
+
                 if (!Bank.isOpen()) {
                     Bank.open();
                 } else {
                     Bank.depositInventory();
                     Time.sleepUntil(Inventory::isEmpty, 5000);
-                    if (Bank.contains(Chocolate.BAR)) {
-                        Time.sleepUntil(() -> Bank.getCount(Chocolate.BAR) > 0, 5000);
-                        chocolate.barCount = Bank.getCount(Chocolate.BAR);
+                    if (Bank.contains(Main.BAR)) {
+                        Time.sleepUntil(() -> Bank.getCount(Main.BAR) > 0, 5000);
+                        chocolate.barCount = Bank.getCount(Main.BAR);
                         Log.info("Bars left: " + chocolate.barCount + "  |  Dust made: " + chocolate.totalMade);
                         getSupplies();
                     } else {
@@ -102,25 +107,33 @@ public class WaitTrade extends Task {
                         chocolate.barCount = 0;
                         chocolate.restock = true;
                         Bank.close();
+                        Time.sleepUntil(Bank::isClosed, 5000);
                     }
                 }
-            } else if (Inventory.contains(Chocolate.KNIFE, Chocolate.BAR, 995) && Bank.isClosed()) {
-                Item knife = Inventory.getFirst(Chocolate.KNIFE);
-                for (Item i : Inventory.getItems(x -> x.getId() == Chocolate.BAR)) {
+
+            } else if (Inventory.contains(Main.KNIFE, Main.BAR, 995) && Bank.isClosed()) {
+                Item knife = Inventory.getFirst(Main.KNIFE);
+                for (Item i : Inventory.getItems(x -> x.getId() == Main.BAR)) {
 
                     knife.interact(ActionOpcodes.USE_ITEM);
                     i.interact(ActionOpcodes.ITEM_ON_ITEM);
 
-                    chocolate.totalMade ++;
+                    chocolate.totalMade++;
 
                     Time.sleep(600);
 
-                    if (main.trading || Trade.isOpen(false)) {
+                    if (main.trading || Trade.isOpen(false) || main.isStopping()) {
                         break;
                     }
                     Time.sleep(600);
                 }
+
             } else {
+                if (Bank.isOpen())
+                    Bank.close();
+                if (GrandExchange.isOpen() || GrandExchangeSetup.isOpen()) {
+                    Movement.setWalkFlag(Players.getLocal());
+                }
                 Log.severe("FAILED Grinding");
             }
 
@@ -129,13 +142,25 @@ public class WaitTrade extends Task {
         return true;
     }
 
+    private boolean hasSupplies() {
+        if (Inventory.containsAnyExcept(Main.KNIFE, Main.BAR, Main.DUST, 995) ||
+                Inventory.containsOnly(Main.KNIFE, Main.DUST, 995) ||
+                Inventory.containsOnly(Main.KNIFE, Main.DUST) || Inventory.containsOnly(Main.KNIFE, 995) ||
+                Inventory.containsOnly(Main.KNIFE) || Inventory.containsOnly(Main.BAR) || Inventory.containsOnly(995) ||
+                Inventory.isEmpty()) {
+
+            return false;
+        }
+        return true;
+    }
+
     private void getSupplies() {
         Bank.withdrawAll(995);
         Time.sleepUntil(() -> Inventory.contains(995), 5000);
-        Bank.withdraw(Chocolate.KNIFE, 1);
-        Time.sleepUntil(() -> Inventory.contains(Chocolate.KNIFE), 5000);
-        Bank.withdrawAll(Chocolate.BAR);
-        Time.sleepUntil(() -> Inventory.contains(Chocolate.BAR), 5000);
+        Bank.withdraw(Main.KNIFE, 1);
+        Time.sleepUntil(() -> Inventory.contains(Main.KNIFE), 5000);
+        Bank.withdrawAll(Main.BAR);
+        Time.sleepUntil(() -> Inventory.contains(Main.BAR), 5000);
         Bank.close();
         Time.sleepUntil(Bank::isClosed, 5000);
     }

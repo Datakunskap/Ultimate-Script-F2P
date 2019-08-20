@@ -13,7 +13,7 @@ import org.rspeer.script.Script;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.data.Chocolate;
+import script.chocolate.Main;
 
 import java.io.*;
 import java.util.NavigableMap;
@@ -34,9 +34,9 @@ public class Mule extends Task {
     private static final String MULE_FILE_PATH = Script.getDataDirectory() + "\\mule.txt";
 
     private Beggar main;
-    private Chocolate chocolate;
+    private Main chocolate;
 
-    public Mule(Beggar beggar, Chocolate chocolate) {
+    public Mule(Beggar beggar, Main chocolate) {
         main = beggar;
         this.chocolate = chocolate;
     }
@@ -91,8 +91,8 @@ public class Mule extends Task {
             main.disableChain = false;
             main.setStopping(true);
         }
-        if (main.startChocolate) {
-            return chocolate.sold && (Inventory.getCount(true, 995) >= main.muleAmnt || Bank.getCount(995) >= main.muleAmnt || muleing);
+        if (main.startChocBeg) {
+            return main.muleChocBeg || muleing;
         }
         return atMuleAmnt(main.muleAmnt) || (main.muted && atMuleAmnt(Beggar.MUTED_MULE_AMNT)) || muleing;
     }
@@ -210,6 +210,9 @@ public class Mule extends Task {
                                 main.disableChain = false;
                                 main.setStopping(true);
                             }
+
+                            main.startChocBeg = false;
+                            main.muleChocBeg = false;
                         }
                         Time.sleep(700);
                     }

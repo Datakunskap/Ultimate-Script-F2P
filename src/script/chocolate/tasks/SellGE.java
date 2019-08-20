@@ -62,11 +62,11 @@ public class SellGE extends Task {
             main.geSet = false;
         }
 
-        // needs older account
-        /*if (!sellRemainingHides()) {
+        // Handles GE Limit
+        if (!sellRemainingBars()) {
             GrandExchange.collectAll();
             return 1000;
-        }*/
+        }
 
         // bc issues with Buraks ExGrandExchange when selling
         if (Inventory.contains(Main.DUST_NOTE) || Inventory.contains(Main.DUST)) {
@@ -168,6 +168,52 @@ public class SellGE extends Task {
             main.sellPrice = Integer.parseInt(Interfaces.getComponent(465, 24, 39).getText().split(" ")[0]);
             main.lastPrices[0] = main.sellPrice;
             Log.fine("GE sell price set: " + main.sellPrice);
+        }
+    }
+
+    private boolean sellRemainingBars() {
+        if (main.atGELimit && Inventory.contains(Main.BAR) || Inventory.contains(Main.BAR_NOTE)) {
+            Log.fine("Selling Remaining Bars");
+            GrandExchange.createOffer(RSGrandExchangeOffer.Type.SELL);
+            Time.sleep(800);
+            GrandExchangeSetup.setItem(Main.BAR_NOTE);
+            if (Inventory.contains(Main.BAR))
+                GrandExchangeSetup.setItem(Main.BAR);
+            Time.sleepUntil(() -> GrandExchangeSetup.getItem() != null,5000);
+            fallbackGEPrice();
+            GrandExchangeSetup.setPrice(main.buyPrice);
+            Time.sleep(600);
+            GrandExchangeSetup.setQuantity(9999999);
+            Time.sleep(600);
+            GrandExchangeSetup.confirm();
+            Time.sleep(600);
+            if(GrandExchangeSetup.getItem() != null) {
+                main.geSet = true;
+            }
+
+            GrandExchange.collectAll();
+            Time.sleep(Random.mid(300, 600));
+            GrandExchange.collectAll();
+            Time.sleep(Random.mid(300, 600));
+            Keyboard.pressEnter();
+            main.startTime = System.currentTimeMillis();
+
+            if (GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED) && !Inventory.contains(Main.BAR) && !Inventory.contains(Main.BAR_NOTE)) {
+                GrandExchange.collectAll();
+                Time.sleep(Random.mid(300, 600));
+                GrandExchange.collectAll();
+                Time.sleep(Random.mid(300, 600));
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        if (GrandExchange.getFirst(x -> x != null && x.getItemId() == Main.BAR) != null) {
+            return false;
+        } else {
+            GrandExchange.collectAll();
+            return true;
         }
     }
 }

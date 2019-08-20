@@ -134,6 +134,9 @@ public class TradePlayer extends Task {
 
                     if (coins < main.muleAmnt || StartOther.TAN_START_GP >= main.muleAmnt || StartOther.CHOC_START_GP >= main.muleAmnt)
                         main.refreshPrices = true;
+
+                    if (coins > Beggar.START_CB_AMNT)
+                        main.startChocBeg = true;
                 }
 
                 main.walk = false;

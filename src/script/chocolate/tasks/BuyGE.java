@@ -69,10 +69,19 @@ public class BuyGE extends Task {
 
         // sets quantity to buy
         buyQuantity = main.gp / (main.buyPrice + main.incBuyPrice);
-        if (StartTanning.validate(main.totalMade, buyQuantity)) {
+
+        // Checks if at GE limit
+        if (main.timesPriceChanged >= 3 && main.elapsedSeconds > 60) {
             buyQuantity = (main.totalMade + buyQuantity) - Main.BAR_GE_LIMIT;
             Log.severe("AT GE LIMIT");
+            while(GrandExchange.getFirstActive() != null) {
+                Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).abort(), 1000, 5000);
+                GrandExchange.collectAll();
+                Time.sleep(5000);
+                GrandExchange.collectAll();
+            }
             main.atGELimit = true;
+            main.sold = false;
         }
 
         // Checks if done buying

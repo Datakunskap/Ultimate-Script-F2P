@@ -20,7 +20,7 @@ public class StartOther extends Task {
 
     public static final int CHOC_START_GP = 85000;
     private final int CHOC_MIN_START_GP = 55000;
-    private final int CHOC_PER_HR = 3500;
+    private final int CHOC_PER_HR = 3750;
 
     private Beggar main;
 
@@ -116,14 +116,13 @@ public class StartOther extends Task {
         }
 
         if (main.isChoc && !main.isTanning) {
-            script.chocolate.Main choc = script.chocolate.Main.getInstance(main);
+            main.chocolate = new script.chocolate.Main(main);
 
-            main.choc = choc;
             main.removeCurrBegWorld(main.currWorld);
             if (main.isMuling) {
                 Mule.logoutMule();
             }
-            choc.start();
+            main.chocolate.start();
             return 5000;
         }
         return 1000;

@@ -37,13 +37,12 @@ public class StartChocolate {
             beggar.isChoc = true;
             beggar.timesTanned ++;
 
-            script.chocolate.Main choc = script.chocolate.Main.getInstance(beggar);
-            beggar.choc = choc;
+            beggar.chocolate = new script.chocolate.Main(beggar);
             if (tanner.isMuling) {
                 Mule.logoutMule();
             }
 
-            choc.start();
+            beggar.chocolate.start();
             return true;
         }
         return false;
