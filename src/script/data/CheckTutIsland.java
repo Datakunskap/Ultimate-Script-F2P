@@ -2,21 +2,21 @@ package script.data;
 
 import org.rspeer.RSPeer;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
-import org.rspeer.runetek.adapter.scene.SceneObject;
+import org.rspeer.runetek.api.Varps;
 import org.rspeer.runetek.api.Worlds;
-import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Interfaces;
-import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.scene.Players;
-import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.ui.Log;
 import script.Beggar;
+import script.tutorial_island.TutorialIsland;
 
 import java.io.*;
 
 public class CheckTutIsland {
 
     private Beggar main;
+    private static final int MAX_TUT_PROGRESS = 670;
+    private static final int MAX_TUT_SECTION = 20;
 
     public CheckTutIsland(Beggar beggar) {
         main = beggar;
@@ -24,62 +24,45 @@ public class CheckTutIsland {
 
     public boolean onTutIsland() {
         InterfaceComponent tutBar = Interfaces.getComponent(614, 21);
-        if (tutBar != null && tutBar.isVisible()) {
-            fixSmithing();
-        }
 
-        return (tutBar != null && tutBar.isVisible()) || main.TUTORIAL_ISLAND_AREA.contains(Players.getLocal());
-    }
-
-    private void fixSmithing() {
-        SceneObject anvil = SceneObjects.getNearest(2097);
-
-            if (anvil == null) {
-                anvil = SceneObjects.getNearest(x -> x.getName().contains("Anvil"));
-            }
-            if (anvil != null) {
-                anvil.interact("Smith");
-                Time.sleepUntil(() -> Interfaces.getComponent(312, 9, 0) != null &&
-                        Interfaces.getComponent(312, 9, 0).isVisible(), 5000);
-            }
-
-        InterfaceComponent smith = Interfaces.getComponent(312, 9);
-
-        if (smith != null && smith.isVisible()) {
-            Log.fine("Smithing");
-            if (smith.interact(ActionOpcodes.INTERFACE_ACTION))
-                Log.fine("Smithed");
-            Time.sleepUntil(() -> !smith.isVisible() && !Players.getLocal().isAnimating(), 5000);
-            Time.sleep(5000);
-        }
+        return (Varps.get(281) <= MAX_TUT_PROGRESS && Varps.get(406) <= MAX_TUT_SECTION) ||
+                (tutBar != null && tutBar.isVisible()) ||
+                main.TUTORIAL_ISLAND_AREA.contains(Players.getLocal());
     }
 
     public void execute() {
-        if (main.currWorld != -1 && !main.isTanning) {
-            Log.info("World Removed");
-            main.removeCurrBegWorld(main.currWorld);
-        }
 
-        File file1 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\TutIsland1.json");
-        File file2 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\Beggar1.json");
-        int[] IDs = writeJson(file1, file2, RSPeer.getGameAccount().getUsername());
+        if (true) {
+            TutorialIsland.getInstance(main).start();
 
-        String path1 = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\TutIsland";
-        String path2 = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\Beggar";
-        int sleep = Beggar.randInt(360000, 660000);
-        String javaVersion = "java";//"\"C:\\Program Files\\Java\\jdk1.8.0_201\\bin\\java.exe\"";
-        String launcher = javaVersion + " -jar C:\\Users\\bllit\\OneDrive\\Desktop\\BegLauncher.jar "
-                + IDs[0] + " " + IDs[1] + " " + path1 + " " + path2 + " " + sleep + " && exit";
+        } else {
 
-        try {
-            Runtime.getRuntime().exec(
-                    "cmd /c start cmd.exe /K \"" + launcher + "\"");
+            if (main.currWorld != -1 && !main.isTanning) {
+                Log.info("World Removed");
+                main.removeCurrBegWorld(main.currWorld);
+            }
 
-            System.exit(0);
+            File file1 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\TutIsland1.json");
+            File file2 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\Beggar1.json");
+            int[] IDs = writeJson(file1, file2, RSPeer.getGameAccount().getUsername());
 
-        } catch (Exception e) {
-            System.out.println("HEY Buddy ! U r Doing Something Wrong ");
-            e.printStackTrace();
+            String path1 = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\TutIsland";
+            String path2 = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\Beggar";
+            int sleep = Beggar.randInt(360000, 660000);
+            String javaVersion = "java";//"\"C:\\Program Files\\Java\\jdk1.8.0_201\\bin\\java.exe\"";
+            String launcher = javaVersion + " -jar C:\\Users\\bllit\\OneDrive\\Desktop\\BegLauncher.jar "
+                    + IDs[0] + " " + IDs[1] + " " + path1 + " " + path2 + " " + sleep + " && exit";
+
+            try {
+                Runtime.getRuntime().exec(
+                        "cmd /c start cmd.exe /K \"" + launcher + "\"");
+
+                System.exit(0);
+
+            } catch (Exception e) {
+                System.out.println("HEY Buddy ! U r Doing Something Wrong ");
+                e.printStackTrace();
+            }
         }
     }
 

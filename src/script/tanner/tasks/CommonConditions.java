@@ -32,7 +32,9 @@ class CommonConditions {
 
     boolean gotEnoughCoins() {
         Item coins = Inventory.getFirst("Coins");
-        return coins != null && coins.getStackSize() >= 1;
+        if (main.LEATHER == 1741)
+            return coins != null && coins.getStackSize() >= 1;
+        return coins != null && coins.getStackSize() >= 3;
     }
 
     boolean nearTanner() {

@@ -1,9 +1,9 @@
 /*
 package script.casino;
 
-import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.input.Keyboard;
-import org.rspeer.script.task.Task;
+import org.fighter.runetek.api.commons.Time;
+import org.fighter.runetek.api.input.Keyboard;
+import org.fighter.script.task.Task;
 import script.Beggar;
 
 public class GRoll extends Task {

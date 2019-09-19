@@ -1,21 +1,13 @@
 package script.tasks;
 
-import org.rspeer.runetek.adapter.component.Item;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
-import org.rspeer.runetek.api.component.GrandExchange;
-import org.rspeer.runetek.api.component.GrandExchangeSetup;
 import org.rspeer.runetek.api.component.Trade;
-import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.component.tab.Tab;
 import org.rspeer.runetek.api.component.tab.Tabs;
-import org.rspeer.runetek.api.input.menu.ActionOpcodes;
-import org.rspeer.runetek.api.movement.Movement;
-import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.chocolate.Main;
 
 public class WaitTrade extends Task {
 
@@ -24,11 +16,9 @@ public class WaitTrade extends Task {
     private boolean waitSet = false;
 
     private Beggar main;
-    private Main chocolate;
 
-    public WaitTrade(Beggar beggar, Main chocolate) {
+    public WaitTrade(Beggar beggar) {
         main = beggar;
-        this.chocolate = chocolate;
     }
 
     @Override
@@ -53,15 +43,10 @@ public class WaitTrade extends Task {
 
         int timeout = Beggar.randInt(min, max);
         Log.info("Waiting " + (timeout / 1000) + "s for a trade");
-        int grindTimeout = 16000;
-        timeout -= grindTimeout;
+        //int grindTimeout = 16000;
+        //timeout -= grindTimeout;
 
-        /*while (!main.trading && !Trade.isOpen(false) && validateGrind()) {
-            Time.sleep(executeGrind());
-        }*/
-
-        if (Time.sleepUntil(() -> main.trading || Trade.isOpen(false) || main.isStopping(), timeout) ||
-                Time.sleepUntil(() -> executeGrind() && (main.trading || Trade.isOpen(false)), 2000, grindTimeout)) {
+        if (Time.sleepUntil(() -> main.trading || Trade.isOpen(false) || main.isStopping(), 2000, timeout)) {
             if (Trade.isOpen()) {
                 main.sentTradeInit = true;
             }
@@ -82,11 +67,11 @@ public class WaitTrade extends Task {
         return 500;
     }
 
-    private boolean validateGrind() {
+    /*private boolean validateGrind() {
         return !chocolate.restock && !main.isMuling && chocolate.barCount > 0;
-    }
+    }*/
 
-    private boolean executeGrind() {
+    /*private boolean executeGrind() {
         if (validateGrind()) {
             chocolate.closeGE();
 
@@ -163,7 +148,7 @@ public class WaitTrade extends Task {
         Time.sleepUntil(() -> Inventory.contains(Main.BAR), 5000);
         Bank.close();
         Time.sleepUntil(Bank::isClosed, 5000);
-    }
+    }*/
 
     private void setMinMaxWait() {
         min = main.minWait * 1000;

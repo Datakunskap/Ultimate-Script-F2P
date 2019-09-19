@@ -1,10 +1,10 @@
 /*
 package script.casino;
 
-import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.commons.math.Random;
-import org.rspeer.runetek.api.movement.Movement;
-import org.rspeer.runetek.api.scene.Players;
+import org.fighter.runetek.api.commons.Time;
+import org.fighter.runetek.api.commons.math.Random;
+import org.fighter.runetek.api.movement.Movement;
+import org.fighter.runetek.api.scene.Players;
 
 class GWalkingHelper {
     static boolean shouldSetDestination() {

@@ -1,13 +1,13 @@
 /*
 package script.casino;
 
-import org.rspeer.runetek.api.commons.BankLocation;
-import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.commons.math.Random;
-import org.rspeer.runetek.api.movement.Movement;
-import org.rspeer.runetek.api.scene.Players;
-import org.rspeer.script.task.Task;
-import org.rspeer.ui.Log;
+import org.fighter.runetek.api.commons.BankLocation;
+import org.fighter.runetek.api.commons.Time;
+import org.fighter.runetek.api.commons.math.Random;
+import org.fighter.runetek.api.movement.Movement;
+import org.fighter.runetek.api.scene.Players;
+import org.fighter.script.task.Task;
+import org.fighter.ui.Log;
 import script.Beggar;
 
 public class GTraverse extends Task {

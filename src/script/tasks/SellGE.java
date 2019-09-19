@@ -1,5 +1,7 @@
+/*
 package script.tasks;
 
+import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
@@ -8,6 +10,7 @@ import org.rspeer.runetek.api.component.GrandExchangeSetup;
 import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
+import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
@@ -32,10 +35,12 @@ public class SellGE extends Task {
         banking = new Banking(chocolate);
     }
 
-    /*private boolean checkStartBegging() {
+    */
+/*private boolean checkStartBegging() {
         startBegging = new StartChocolate(chocolate, beggar, banking);
         return startBegging.execute();
-    }*/
+    }*//*
+
 
     @Override
     public boolean validate() {
@@ -64,10 +69,12 @@ public class SellGE extends Task {
         }
 
         // needs older account
-        /*if (!sellRechocolateingHides()) {
+        */
+/*if (!sellRechocolateingHides()) {
             GrandExchange.collectAll();
             return 1000;
-        }*/
+        }*//*
+
 
         // bc issues with Buraks ExGrandExchange when selling
         if (Inventory.contains(Main.DUST_NOTE) || Inventory.contains(Main.DUST)) {
@@ -112,8 +119,10 @@ public class SellGE extends Task {
             chocolate.timesPriceChanged = 0;
             //chocolate.setHighestProfitLeather(false);
 
-            /*if (checkStartBegging())
-                return 1000;*/
+            */
+/*if (checkStartBegging())
+                return 1000;*//*
+
 
         }
 
@@ -126,8 +135,10 @@ public class SellGE extends Task {
             chocolate.timesPriceChanged = 0;
             //chocolate.setHighestProfitLeather(false);
 
-            /*if (checkStartBegging())
-                return 1000;*/
+            */
+/*if (checkStartBegging())
+                return 1000;*//*
+
 
         }
 
@@ -142,6 +153,20 @@ public class SellGE extends Task {
                 GrandExchange.collectAll();
                 Time.sleep(5000);
                 GrandExchange.collectAll();
+
+
+                InterfaceComponent i = Interfaces.getComponent(465,23,2);
+                Time.sleepUntil(() -> i != null && i.isVisible() &&
+                        (i.getName().toLowerCase().contains("coins") || i.getName().toLowerCase().contains("chocolate dust") || i.getName().toLowerCase().contains("chocolate bar")), 5000);
+                if (i != null) {
+                    i.interact(ActionOpcodes.INTERFACE_ACTION);
+                }
+                InterfaceComponent i2 = Interfaces.getComponent(465,23,3);
+                Time.sleepUntil(() -> i2 != null && i2.isVisible() &&
+                        (i2.getName().toLowerCase().contains("coins") || i2.getName().toLowerCase().contains("chocolate dust")| i2.getName().toLowerCase().contains("chocolate bar")), 5000);
+                if (i2 != null) {
+                    i2.interact(ActionOpcodes.INTERFACE_ACTION);
+                }
             }
             chocolate.decSellPrice += chocolate.intervalAmnt;
             chocolate.setPrices(true);
@@ -172,3 +197,4 @@ public class SellGE extends Task {
         }
     }
 }
+*/

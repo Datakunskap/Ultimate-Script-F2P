@@ -2,10 +2,12 @@ package script.tasks;
 
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Worlds;
+import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import script.Beggar;
 import script.data.CheckInstances;
 import script.data.CheckTutIsland;
+import script.tutorial_island.TutorialIsland;
 
 public class StartupChecks extends Task {
 
@@ -22,7 +24,11 @@ public class StartupChecks extends Task {
 
     @Override
     public int execute() {
+        if (!Game.isLoggedIn() || Players.getLocal() == null)
+            return 2000;
+
         tutIslandCheck();
+        fighterCheck();
         instanceCheck();
         addWorldToFile();
         main.startupChecks = true;
@@ -37,10 +43,15 @@ public class StartupChecks extends Task {
         }
     }
 
+    private void fighterCheck() {
+        if (Players.getLocal() != null && Players.getLocal().getCombatLevel() <= 3)
+            TutorialIsland.startFighter(main);
+    }
+
     public void instanceCheck() {
         CheckInstances checkI = new CheckInstances(main);
         while (checkI.validate()) {
-            checkI.execute();
+            checkI.execute(main.readAccount(true));
         }
 
         main.runningClients = checkI.getRunningClients();

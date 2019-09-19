@@ -1,13 +1,13 @@
 /*
 package script.casino;
 
-import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.component.Bank;
-import org.rspeer.runetek.api.component.Trade;
-import org.rspeer.runetek.api.component.tab.Tab;
-import org.rspeer.runetek.api.component.tab.Tabs;
-import org.rspeer.script.task.Task;
-import org.rspeer.ui.Log;
+import org.fighter.runetek.api.commons.Time;
+import org.fighter.runetek.api.component.Bank;
+import org.fighter.runetek.api.component.Trade;
+import org.fighter.runetek.api.component.tab.Tab;
+import org.fighter.runetek.api.component.tab.Tabs;
+import org.fighter.script.task.Task;
+import org.fighter.ui.Log;
 import script.Beggar;
 
 public class GWaitTrade extends Task {

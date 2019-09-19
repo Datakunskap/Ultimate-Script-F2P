@@ -1,15 +1,15 @@
 /*
 package script.casino;
 
-import org.rspeer.runetek.adapter.component.Item;
-import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.component.EnterInput;
-import org.rspeer.runetek.api.component.Trade;
-import org.rspeer.runetek.api.component.tab.Inventory;
-import org.rspeer.runetek.api.input.Keyboard;
-import org.rspeer.runetek.api.scene.Players;
-import org.rspeer.script.task.Task;
-import org.rspeer.ui.Log;
+import org.fighter.runetek.adapter.component.Item;
+import org.fighter.runetek.api.commons.Time;
+import org.fighter.runetek.api.component.EnterInput;
+import org.fighter.runetek.api.component.Trade;
+import org.fighter.runetek.api.component.tab.Inventory;
+import org.fighter.runetek.api.input.Keyboard;
+import org.fighter.runetek.api.scene.Players;
+import org.fighter.script.task.Task;
+import org.fighter.ui.Log;
 import script.Beggar;
 
 public class GTradePlayer extends Task {

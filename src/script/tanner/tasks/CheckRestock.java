@@ -1,6 +1,5 @@
 package script.tanner.tasks;
 
-import org.rspeer.runetek.api.commons.BankLocation;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.GrandExchange;
@@ -47,7 +46,7 @@ public class CheckRestock extends Task {
                 }
             }
         } else {
-            banking.openAndDepositAll();
+            banking.openAndDepositAll(0);
 
             if (Bank.contains(main.COWHIDE)) {
                 hasH = true;

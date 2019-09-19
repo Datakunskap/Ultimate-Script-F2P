@@ -1,9 +1,9 @@
 /*
 package script.casino;
 
-import org.rspeer.runetek.api.input.Keyboard;
-import org.rspeer.script.task.Task;
-import org.rspeer.ui.Log;
+import org.fighter.runetek.api.input.Keyboard;
+import org.fighter.script.task.Task;
+import org.fighter.ui.Log;
 import script.Beggar;
 
 public class Gambler extends Task {

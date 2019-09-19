@@ -1,12 +1,15 @@
 package script.tanner.tasks;
 
+import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.GrandExchange;
 import org.rspeer.runetek.api.component.GrandExchangeSetup;
+import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
+import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
@@ -73,7 +76,7 @@ public class BuyGE extends Task {
                     main.incBuyPrice = main.incBuyPrice / (main.timesPriceChanged * main.intervalAmnt);
                     main.buyPriceChng = false;
                 }
-                banking.openAndDepositAll();
+                banking.openAndDepositAll(10);
                 Bank.close();
                 Time.sleepUntil(() -> !Bank.isOpen(), 5000);
                 Time.sleep(1500);
@@ -111,6 +114,19 @@ public class BuyGE extends Task {
                 GrandExchange.collectAll();
                 Time.sleep(5000);
                 GrandExchange.collectAll();
+
+                InterfaceComponent i = Interfaces.getComponent(465,23,2);
+                Time.sleepUntil(() -> i != null && i.isVisible() &&
+                        (i.getName().toLowerCase().contains("coins") || i.getName().toLowerCase().contains("cowhide")), 5000);
+                if (i != null) {
+                    i.interact(ActionOpcodes.INTERFACE_ACTION);
+                }
+                InterfaceComponent i2 = Interfaces.getComponent(465,23,3);
+                Time.sleepUntil(() -> i2 != null && i2.isVisible() &&
+                        (i2.getName().toLowerCase().contains("coins") || i2.getName().toLowerCase().contains("cowhide")), 5000);
+                if (i2 != null) {
+                    i2.interact(ActionOpcodes.INTERFACE_ACTION);
+                }
             }
             main.incBuyPrice += main.intervalAmnt;
             //main.setPrices(true);
@@ -121,8 +137,9 @@ public class BuyGE extends Task {
         }
 
         // Checks and handles stuck in setup
-        if (main.elapsedSeconds > (main.resetGeTime + 1) * 60 && GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
+        if (main.elapsedSeconds > 30 && GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
             GrandExchange.open(GrandExchange.View.OVERVIEW);
+            GrandExchange.collectAll();
             if (!Time.sleepUntil(() -> !GrandExchangeSetup.isOpen(), 5000)) {
                 main.closeGE();
             }

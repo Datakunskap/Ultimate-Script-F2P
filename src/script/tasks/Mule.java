@@ -4,7 +4,10 @@ import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Login;
 import org.rspeer.runetek.api.Worlds;
 import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.component.*;
+import org.rspeer.runetek.api.component.Dialog;
+import org.rspeer.runetek.api.component.EnterInput;
+import org.rspeer.runetek.api.component.Trade;
+import org.rspeer.runetek.api.component.WorldHopper;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
@@ -13,7 +16,6 @@ import org.rspeer.script.Script;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.chocolate.Main;
 
 import java.io.*;
 import java.util.NavigableMap;
@@ -34,11 +36,9 @@ public class Mule extends Task {
     private static final String MULE_FILE_PATH = Script.getDataDirectory() + "\\mule.txt";
 
     private Beggar main;
-    private Main chocolate;
 
-    public Mule(Beggar beggar, Main chocolate) {
+    public Mule(Beggar beggar) {
         main = beggar;
-        this.chocolate = chocolate;
     }
 
     private void loginMule() {

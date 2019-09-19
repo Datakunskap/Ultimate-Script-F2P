@@ -51,7 +51,7 @@ public class BankAK extends Task {
                 if (coinsInBank == null) {
                     // not enough coins to continue
                     Log.info("Out of coins");
-                    banking.openAndDepositAll();
+                    banking.openAndDepositAll(0);
                     Bank.close();
 
                     main.checkRestock = true;
@@ -84,7 +84,7 @@ public class BankAK extends Task {
                 // not enough cowhide to continue
                 Log.info(cowhideBankAmount);
                 Log.info("Out of hide");
-                banking.openAndDepositAll();
+                banking.openAndDepositAll(0);
                 Bank.close();
 
                 main.restock = true;

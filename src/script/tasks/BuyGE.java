@@ -1,13 +1,17 @@
+/*
 package script.tasks;
 
+import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.GrandExchange;
 import org.rspeer.runetek.api.component.GrandExchangeSetup;
+import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
+import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
@@ -136,7 +140,21 @@ public class BuyGE extends Task {
                 GrandExchange.collectAll();
                 Time.sleep(5000);
                 GrandExchange.collectAll();
+
+                InterfaceComponent i = Interfaces.getComponent(465,23,2);
+                Time.sleepUntil(() -> i != null && i.isVisible() &&
+                        (i.getName().toLowerCase().contains("coins") || i.getName().toLowerCase().contains("chocolate bar")), 5000);
+                if (i != null) {
+                    i.interact(ActionOpcodes.INTERFACE_ACTION);
+                }
+                InterfaceComponent i2 = Interfaces.getComponent(465,23,3);
+                Time.sleepUntil(() -> i2 != null && i2.isVisible() &&
+                        (i2.getName().toLowerCase().contains("coins") || i2.getName().toLowerCase().contains("chocolate bar")), 5000);
+                if (i2 != null) {
+                    i2.interact(ActionOpcodes.INTERFACE_ACTION);
+                }
             }
+
             main.incBuyPrice += main.intervalAmnt;
             //main.setPrices(true);
             banking.calcSpendAmount((Inventory.getCount(true, x -> x != null && x.getId() == Main.BAR) +
@@ -177,9 +195,10 @@ public class BuyGE extends Task {
             int expectedGP = main.gp - (buyQuantity * main.buyPrice);
             int actualGP = main.justBoughtKnife ? Bank.getCount(995) - main.knifePrice : Bank.getCount(995);
             if (actualGP > expectedGP) {
-                main.lastPrices[1] = main.buyPrice - ((actualGP - expectedGP) / buyQuantity);
+                main.lastPrices[1] = (main.buyPrice + main.incBuyPrice) - ((actualGP - expectedGP) / buyQuantity);
                 Log.fine("GE buy price found: " + main.lastPrices[1]);
             }
         }
     }
 }
+*/

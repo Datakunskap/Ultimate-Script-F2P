@@ -17,7 +17,7 @@ public class Download {
 
     private static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
 
-    private static boolean downloadNewJar() throws IOException {
+    public static boolean downloadNewJar() throws IOException {
         if (!shouldDownload())
             return true;
 

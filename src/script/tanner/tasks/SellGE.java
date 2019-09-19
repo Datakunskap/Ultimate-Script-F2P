@@ -1,12 +1,15 @@
 package script.tanner.tasks;
 
+import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.GrandExchange;
 import org.rspeer.runetek.api.component.GrandExchangeSetup;
+import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
+import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
@@ -22,7 +25,7 @@ public class SellGE extends Task {
     private Banking banking;
 
     private Beggar beggar;
-    private StartChocolate startBegging;
+    private StartChocolate startChocolate;
 
     public SellGE (Main main, Beggar beggar) {
         this.main = main;
@@ -31,8 +34,8 @@ public class SellGE extends Task {
     }
 
     private boolean checkStartChocolate() {
-        startBegging = new StartChocolate(main, beggar, banking);
-        return startBegging.execute();
+        startChocolate = new StartChocolate(main, beggar, banking);
+        return startChocolate.validate();
     }
 
     @Override
@@ -109,8 +112,10 @@ public class SellGE extends Task {
             main.timesPriceChanged = 0;
             main.setHighestProfitLeather(false);
 
-            if (checkStartChocolate())
+            if (checkStartChocolate()) {
+                startChocolate.execute();
                 return 1000;
+            }
 
         }
 
@@ -124,9 +129,10 @@ public class SellGE extends Task {
             main.timesPriceChanged = 0;
             main.setHighestProfitLeather(false);
 
-            if (checkStartChocolate())
+            if (checkStartChocolate()) {
+                startChocolate.execute();
                 return 1000;
-
+            }
         }
 
         // Decreases sell price if over time
@@ -140,6 +146,21 @@ public class SellGE extends Task {
                 GrandExchange.collectAll();
                 Time.sleep(5000);
                 GrandExchange.collectAll();
+
+                InterfaceComponent i = Interfaces.getComponent(465,23,2);
+                Time.sleepUntil(() -> i != null && i.isVisible() &&
+                        (i.getName().toLowerCase().contains("coins") || i.getName().toLowerCase().contains("leather") || i.getName().toLowerCase().contains("hard leather")), 5000);
+                if (i != null) {
+                    i.interact(ActionOpcodes.INTERFACE_ACTION);
+                }
+                InterfaceComponent i2 = Interfaces.getComponent(465,23,3);
+                Time.sleepUntil(() -> i2 != null && i2.isVisible() &&
+                        (i2.getName().toLowerCase().contains("coins") || i2.getName().toLowerCase().contains("leather") || i2.getName().toLowerCase().contains("hard leather")), 5000);
+                if (i2 != null) {
+                    i2.interact(ActionOpcodes.INTERFACE_ACTION);
+                }
+                GrandExchange.open();
+                GrandExchange.open(GrandExchange.View.OVERVIEW);
             }
             main.decSellPrice += main.intervalAmnt;
             main.setPrices(true);
@@ -148,8 +169,9 @@ public class SellGE extends Task {
         }
 
         // Checks and handles stuck in setup
-        if (main.elapsedSeconds > (main.resetGeTime + 1) * 60 && GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
+        if (main.elapsedSeconds > 30 && GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
             GrandExchange.open(GrandExchange.View.OVERVIEW);
+            GrandExchange.collectAll();
             if (!Time.sleepUntil(() -> !GrandExchangeSetup.isOpen(), 5000)) {
                 main.closeGE();
             }

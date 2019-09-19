@@ -26,6 +26,7 @@ public class Beg extends Task {
         Log.info("Begging");
         Keyboard.sendText(main.lines.getRandLine());
         Keyboard.pressEnter();
+        main.numBegs ++;
         main.beg = false;
         main.walk = false;
         if(!main.iterAmount) {

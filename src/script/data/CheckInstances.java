@@ -5,6 +5,7 @@ import org.rspeer.ui.Log;
 import script.Beggar;
 import script.automation.Management;
 import script.automation.data.LaunchedClient;
+import script.automation.data.QuickLaunch;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,34 +21,19 @@ public class CheckInstances {
 
     public boolean validate() {
         try {
-            runningClients = Management.getRunningClients(main.API_KEY);
+            runningClients = Management.getRunningClients(Beggar.API_KEY);
             Log.fine(runningClients.size() + " Clients Running");
 
-            if (runningClients.size() < Beggar.ALLOWED_INSTANCES) {
-                Time.sleep(10000);
-                runningClients = Management.getRunningClients(main.API_KEY);
+            for (int t = 0; t < 2; t++) {
                 if (runningClients.size() < Beggar.ALLOWED_INSTANCES) {
                     Time.sleep(10000);
-                    runningClients = Management.getRunningClients(main.API_KEY);
-                    if (runningClients.size() < Beggar.ALLOWED_INSTANCES) {
-                        Time.sleep(10000);
-                        runningClients = Management.getRunningClients(main.API_KEY);
-                        if (runningClients.size() < Beggar.ALLOWED_INSTANCES) {
-                            Time.sleep(10000);
-                            runningClients = Management.getRunningClients(main.API_KEY);
-                            if (runningClients.size() < Beggar.ALLOWED_INSTANCES) {
-                                Time.sleep(10000);
-                                runningClients = Management.getRunningClients(main.API_KEY);
-                                if (runningClients.size() < Beggar.ALLOWED_INSTANCES) {
-                                    Time.sleep(10000);
-                                    runningClients = Management.getRunningClients(main.API_KEY);
-                                    return !main.isStopping() && runningClients.size() < Beggar.ALLOWED_INSTANCES;
-                                }
-                            }
-                        }
-                    }
+                    runningClients = Management.getRunningClients(Beggar.API_KEY);
+                    Log.info(runningClients.size() + " Clients Running");
                 }
             }
+
+            return !main.isStopping() && runningClients.size() < Beggar.ALLOWED_INSTANCES;
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,39 +44,40 @@ public class CheckInstances {
         return runningClients;
     }
 
-    public int execute() {
+    public int execute(String account) {
         Log.fine("Launching another instance");
 
-        int[] IDs = main.writeJson(main.readAccount());
-
         main.generateAccount(Beggar.NUM_BACKLOG_ACCOUNTS);
-
-        String path1 = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\Simscape";
-        String path2 = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\Beggar";
-        int sleep = Beggar.randInt(900000, 1200000);
-        String javaVersion = "java";//"\"C:\\Program Files\\Java\\jdk1.8.0_201\\bin\\java.exe\"";
-        String launcher = javaVersion + " -jar C:\\Users\\bllit\\OneDrive\\Desktop\\BegLauncher.jar "
-                + IDs[0] + " " + IDs[1] + " " + path1 + " " + path2 + " " + sleep + " && exit";
+        QuickLaunch quickLaunch = main.setupQuickLauncher(account);
 
         try {
-            Runtime.getRuntime().exec(
-                    "cmd /c start cmd.exe /K \"" + launcher + "\"");
 
-        } catch (Exception e) {
-            System.out.println("HEY Buddy ! U r Doing Something Wrong ");
-            e.printStackTrace();
-        }
+            Management.startClient(0, quickLaunch.get().toString(), 0, null, 1);
 
-        try {
-            int retries = 10;
-            do {
-                runningClients = Management.getRunningClients(main.API_KEY);
-                Time.sleep(5000);
-                retries--;
-            } while (runningClients.size() <= 0 && retries > 0);
         } catch (IOException e) {
+            main.writeToErrorFile("CheckInstances.execute():  " + e.getMessage());
+            Log.severe(e);
             e.printStackTrace();
+            System.exit(1);
         }
+
+        /*main.generateAccount(Beggar.NUM_BACKLOG_ACCOUNTS);
+        int[] IDs = main.writeJson(main.readAccount(false));
+        String path = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\Beggar";
+
+        try {
+            new BegLauncher(IDs[0], path).launch();
+
+            for (LaunchedClient client : Management.getRunningClients(main.API_KEY)) {
+                if (client.getRunescapeEmail().equals(RSPeer.getGameAccount().getUsername())) {
+                    client.kill(main.API_KEY);
+                }
+            }
+        } catch (Exception e) {
+            main.writeToErrorFile("Failed Launching Client");
+            e.printStackTrace();
+        }*/
+
         return 30000;
     }
 }

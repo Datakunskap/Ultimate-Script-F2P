@@ -15,7 +15,9 @@ public enum Location {
             new Position(3164, 3473, 0),
             new Position(3152, 3477, 0))),
     COW_AREA(Area.rectangular(3253, 3255, 3264, 3297),
-                Area.rectangular(3242, 3298, 3255, 3278));
+                Area.rectangular(3242, 3298, 3255, 3278)),
+
+    TOLL_GATE(Area.rectangular(3266, 3228, 3267, 3227));
 
     private Area[] area;
 
@@ -25,6 +27,10 @@ public enum Location {
 
     public Area[] getCowArea() {
         return area;
+    }
+
+    public Area getTollArea() {
+        return area[0];
     }
 
     public boolean containsPlayer() {

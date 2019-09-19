@@ -1,5 +1,6 @@
 package script.chocolate.tasks;
 
+import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
@@ -8,6 +9,7 @@ import org.rspeer.runetek.api.component.GrandExchangeSetup;
 import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
+import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
@@ -135,12 +137,27 @@ public class SellGE extends Task {
         Log.info( "Waiting to complete  |  Time: " + main.elapsedSeconds / 60 + "min(s)  |  Price changed " + main.timesPriceChanged + " time(s)");
         if(main.elapsedSeconds > main.resetGeTime * 60 &&
                 GrandExchange.getFirstActive() != null) {
-            Log.fine("Decreasing leather price by: " + main.intervalAmnt);
+            Log.fine("Decreasing dust price by: " + main.intervalAmnt);
             while(!Inventory.contains(Main.DUST) && GrandExchange.getFirstActive() != null) {
                 Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).abort(), 1000, 5000);
                 GrandExchange.collectAll();
                 Time.sleep(5000);
                 GrandExchange.collectAll();
+
+                InterfaceComponent i = Interfaces.getComponent(465,23,2);
+                Time.sleepUntil(() -> i != null && i.isVisible() &&
+                        (i.getName().toLowerCase().contains("coins") || i.getName().toLowerCase().contains("chocolate dust") || i.getName().toLowerCase().contains("chocolate bar")), 5000);
+                if (i != null) {
+                    i.interact(ActionOpcodes.INTERFACE_ACTION);
+                }
+                InterfaceComponent i2 = Interfaces.getComponent(465,23,3);
+                Time.sleepUntil(() -> i2 != null && i2.isVisible() &&
+                        (i2.getName().toLowerCase().contains("coins") || i2.getName().toLowerCase().contains("chocolate dust")| i2.getName().toLowerCase().contains("chocolate bar")), 5000);
+                if (i2 != null) {
+                    i2.interact(ActionOpcodes.INTERFACE_ACTION);
+                }
+                GrandExchange.open();
+                GrandExchange.open(GrandExchange.View.OVERVIEW);
             }
             main.decSellPrice += main.intervalAmnt;
             main.setPrices(true);
@@ -149,8 +166,9 @@ public class SellGE extends Task {
         }
 
         // Checks and handles stuck in setup
-        if (main.elapsedSeconds > (main.resetGeTime + 1) * 60 && GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
+        if (main.elapsedSeconds > 30 && GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
             GrandExchange.open(GrandExchange.View.OVERVIEW);
+            GrandExchange.collectAll();
             if (!Time.sleepUntil(() -> !GrandExchangeSetup.isOpen(), 5000)) {
                 main.closeGE();
             }

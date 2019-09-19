@@ -23,7 +23,7 @@ public class LootHide extends Task {
     @Override
     public boolean validate() {
         if (main.restock && Inventory.isFull()) {
-            banking.openAndDepositAll();
+            banking.openAndDepositAll(0);
             return false;
         }
 

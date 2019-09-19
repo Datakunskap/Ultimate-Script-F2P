@@ -5,6 +5,8 @@ import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.tab.Inventory;
+import org.rspeer.runetek.api.component.tab.Tab;
+import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
@@ -20,7 +22,7 @@ public class Grind extends Task {
 
     @Override
     public boolean validate() {
-        return !main.restock && !main.isMuling && main.barCount > 0;
+        return !main.restock && !main.isMuling && main.barCount >= 0;
     }
 
     @Override
@@ -38,9 +40,10 @@ public class Grind extends Task {
                 Bank.depositInventory();
                 Time.sleepUntil(Inventory::isEmpty, 5000);
                 if (Bank.contains(Main.BAR)) {
-                    Time.sleepUntil(() -> Bank.getCount(Main.BAR) > 0, 5000);
-                    main.totalMade += main.barCount - Bank.getCount(Main.BAR);
-                    main.barCount = Bank.getCount(Main.BAR);
+                    if (Time.sleepUntil(() ->  Bank.getCount(Main.BAR) > 0, 10000)) {
+                        main.totalMade += main.barCount > Bank.getCount(Main.BAR) ? main.barCount - Bank.getCount(Main.BAR) : 0;
+                        main.barCount = Bank.getCount(Main.BAR);
+                    }
                     Log.info("Bars left: " + main.barCount + "  |  Dust made: " + main.totalMade);
                     getSupplies();
                 } else {
@@ -52,6 +55,8 @@ public class Grind extends Task {
                 }
             }
         } else if (Inventory.contains(Main.KNIFE, Main.BAR) && Bank.isClosed()) {
+            if (!Tabs.isOpen(Tab.INVENTORY))
+                Tabs.open(Tab.INVENTORY);
             Item knife = Inventory.getFirst(Main.KNIFE);
             for (Item i : Inventory.getItems(x -> x.getId() == Main.BAR)) {
 
@@ -72,9 +77,9 @@ public class Grind extends Task {
 
     private void getSupplies() {
         Bank.withdraw(Main.KNIFE, 1);
-        Time.sleepUntil(() -> Inventory.contains(Main.KNIFE), 5000);
+        Time.sleepUntil(() -> Inventory.contains(Main.KNIFE), 8000);
         Bank.withdrawAll(Main.BAR);
-        Time.sleepUntil(() -> Inventory.contains(Main.BAR), 5000);
+        Time.sleepUntil(() -> Inventory.contains(Main.BAR), 8000);
         Bank.close();
         Time.sleepUntil(Bank::isClosed, 5000);
     }

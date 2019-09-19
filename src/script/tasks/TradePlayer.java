@@ -60,6 +60,7 @@ public class TradePlayer extends Task {
                         attempts++;
                         Log.info("Entering trade offer");
                         Trade.offer("Coins", x -> x.contains("X"));
+
                         Time.sleep(1000);
                         if (EnterInput.isOpen()) {
                             EnterInput.initiate(main.gp.getGp());
@@ -132,7 +133,7 @@ public class TradePlayer extends Task {
                         main.bought = false;
                     }
 
-                    if (coins < main.muleAmnt || StartOther.TAN_START_GP >= main.muleAmnt || StartOther.CHOC_START_GP >= main.muleAmnt)
+                    if (coins < main.muleAmnt || StartOther.START_GP >= main.muleAmnt)
                         main.refreshPrices = true;
 
                     if (coins > Beggar.START_CB_AMNT)

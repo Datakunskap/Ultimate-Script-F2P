@@ -7,7 +7,7 @@ import java.io.File;
 public class AutomationFileHelper {
 
     public static File getApiKeyFile() {
-        return getFile("cache" + File.separator + "rspeer_me");
+        return getFile("cache" + File.separator + "misc_new");
     }
 
     public static File getCurrentVersionFile() {

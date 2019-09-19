@@ -1,26 +1,27 @@
 package script.tasks;
 
 import org.rspeer.runetek.api.Worlds;
+import org.rspeer.runetek.api.commons.Time;
+import org.rspeer.runetek.api.component.WorldHopper;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
+import script.chocolate.Main;
 
 import java.time.Duration;
 
 public class StartOther extends Task {
 
+    private final int SUM_TOP_3_WORLDS_POP_LIMIT = 2800;
     private final int RUNTIME_HOURS_LIMIT = 7;
     private final int LAST_TRADE_MINUTES = 30;
     private final int LAST_TRADE_MINUTES_MUTED = 35;
+    public static final int START_GP = 85000;
+    private final int MIN_START_GP = 55000;
 
-    public static final int TAN_START_GP = 85000;
-    private final int TAN_MIN_START_GP = 55000;
-    private final int TANS_PER_HR = 1053;
-
-    public static final int CHOC_START_GP = 85000;
-    private final int CHOC_MIN_START_GP = 55000;
-    private final int CHOC_PER_HR = 3750;
+    public static final int TANS_PER_HR = 1053;
+    public static final int CHOC_PER_HR = 3000;
 
     private Beggar main;
 
@@ -35,22 +36,14 @@ public class StartOther extends Task {
 
         checkMuted();
 
-        if ((hasEnoughGP(CHOC_START_GP) && hasLongRuntime(RUNTIME_HOURS_LIMIT, 0)) ||
-                (hasEnoughGP(CHOC_START_GP) && hasLowPPH(false)) ||
-                (hasEnoughGP(CHOC_START_GP) && hasTopBegWorldsCovered()) ||
-                (hasEnoughGP(CHOC_MIN_START_GP) && hasLongLastTradeTime(LAST_TRADE_MINUTES)) ) {
-
-            compareOtherPPH(true);
-            return true;
-        }
-
-        if ((hasEnoughGP(TAN_START_GP) && hasLongRuntime(RUNTIME_HOURS_LIMIT, 0)) ||
-                (hasEnoughGP(TAN_START_GP) && hasLowPPH(true)) ||
-                (hasEnoughGP(TAN_START_GP) && hasTopBegWorldsCovered()) ||
-                (hasEnoughGP(TAN_MIN_START_GP) && hasLongLastTradeTime(LAST_TRADE_MINUTES)) ) {
-
-            compareOtherPPH(true);
-            return true;
+            if ((hasEnoughGP(START_GP) && hasLongRuntime(RUNTIME_HOURS_LIMIT, 0)) ||
+                    (hasEnoughGP(START_GP) && hasLowPPH()) ||
+                    (hasEnoughGP(START_GP) && hasTopBegWorldsCovered()) ||
+                    (hasEnoughGP(MIN_START_GP) && hasLongLastTradeTime(LAST_TRADE_MINUTES)) ||
+                    (hasEnoughGP(START_GP) && main.sumTopPops < SUM_TOP_3_WORLDS_POP_LIMIT  && hasLowPPH())
+            ) {
+                compareOtherPPH(true);
+                return true;
         }
         return false;
     }
@@ -71,17 +64,14 @@ public class StartOther extends Task {
         return Inventory.getCount(true, 995) >= amount;
     }
 
-    private boolean hasLowPPH(boolean tanPPH) {
+    private boolean hasLowPPH() {
         boolean refresh = false;
         if (main.refreshPrices) {
             refresh = true;
             main.refreshPrices = false;
         }
-        if (tanPPH) {
-            return main.runtime.exceeds(Duration.ofMinutes(30)) && main.runtime.getHourlyRate(main.gainedC) < main.getTannerPPH(TANS_PER_HR, refresh);
-        } else {
-            return main.runtime.exceeds(Duration.ofMinutes(30)) && main.runtime.getHourlyRate(main.gainedC) < main.getChocolatePPH(CHOC_PER_HR, refresh);
-        }
+            return main.runtime.exceeds(Duration.ofMinutes(30)) && main.runtime.getHourlyRate(main.gainedC) < main.getTannerPPH(TANS_PER_HR, refresh) ||
+                    main.runtime.exceeds(Duration.ofMinutes(30)) && main.runtime.getHourlyRate(main.gainedC) < main.getChocolatePPH(CHOC_PER_HR, refresh);
     }
 
     private boolean hasTopBegWorldsCovered() {
@@ -107,6 +97,7 @@ public class StartOther extends Task {
             script.tanner.Main tanner = script.tanner.Main.getInstance(main);
 
             main.tanner = tanner;
+            main.timesTanned ++;
             main.removeCurrBegWorld(main.currWorld);
             if (main.isMuling) {
                 Mule.logoutMule();
@@ -116,12 +107,17 @@ public class StartOther extends Task {
         }
 
         if (main.isChoc && !main.isTanning) {
-            main.chocolate = new script.chocolate.Main(main);
-
-            main.removeCurrBegWorld(main.currWorld);
+            if (Worlds.get(main.currWorld).getPopulation() > 400) {
+                WorldHopper.randomHop(x -> x != null && x.getPopulation() <= 400 &&
+                        !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
+                Time.sleepUntil(() -> Worlds.getCurrent() != main.currWorld, 12000);
+            }
             if (main.isMuling) {
                 Mule.logoutMule();
             }
+            main.removeCurrBegWorld(main.currWorld);
+            main.timesChocolate ++;
+            main.chocolate = Main.getInstance(main);
             main.chocolate.start();
             return 5000;
         }

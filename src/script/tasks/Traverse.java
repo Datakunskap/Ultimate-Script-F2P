@@ -31,7 +31,7 @@ public class Traverse extends Task {
         int rand = Beggar.randInt(1, main.walkChance);
 
         if(!main.location.getBegArea().contains(Players.getLocal())){
-            Log.info("Walking to GE");
+            //Log.info("Walking to GE");
 
             tutIslandCheck();
 

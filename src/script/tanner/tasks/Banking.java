@@ -10,13 +10,13 @@ public class Banking {
 
     private Main main;
 
-    Banking(Main main) {
+    public Banking(Main main) {
         this.main = main;
     }
 
     public int execute() {
         Log.info("Banking");
-        openAndDepositAll();
+        openAndDepositAll(0);
 
         calcSpendAmount(0);
 
@@ -63,9 +63,10 @@ public class Banking {
             tanningGp += qBought * 3;
         }
         main.gp -= tanningGp;
+        main.gp -= 10;
     }
 
-    void openAndDepositAll() {
+    public void openAndDepositAll(int coinsToKeep) {
         Log.fine("Depositing Inventory");
         while (!Bank.isOpen()) {
             Bank.open();
@@ -74,6 +75,11 @@ public class Banking {
 
         Bank.depositInventory();
         Time.sleepUntil(Inventory::isEmpty, 5000);
+
+        if (coinsToKeep > 0) {
+            Bank.withdraw(995, coinsToKeep);
+            Time.sleepUntil(() -> Inventory.contains(995) && Inventory.getCount(true, 995) >= coinsToKeep, 5000);
+        }
 
         if (main.killCows && main.foodAmnt > 0 &&
                 Bank.contains(main.food) && !Inventory.contains(main.food)) {

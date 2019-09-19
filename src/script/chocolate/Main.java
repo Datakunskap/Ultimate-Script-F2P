@@ -7,15 +7,14 @@ import org.rspeer.runetek.api.component.GrandExchange;
 import org.rspeer.runetek.api.component.GrandExchangeSetup;
 import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.input.menu.ActionOpcodes;
-import org.rspeer.runetek.event.listeners.RenderListener;
 import org.rspeer.runetek.event.types.RenderEvent;
 import org.rspeer.script.ScriptMeta;
-import org.rspeer.script.task.TaskScript;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.chocolate.tasks.*;
 import script.data.MuleArea;
 import script.tanner.ExPriceChecker;
+import script.tasks.StartOther;
 
 import java.awt.*;
 import java.io.IOException;
@@ -28,7 +27,7 @@ public class Main {
     // Time(min) to increase/decrease price
     public int resetGeTime = 5;
     // Amount to increase/decrease each interval
-    public int intervalAmnt = 3;
+    public int intervalAmnt = 5;
     // Increase buying GP per item
     private int addBuyPrice = 0;
     // Decrease selling GP per item
@@ -37,9 +36,9 @@ public class Main {
     // Amount of GP gained to mule at
     public int muleGainedGP = 100000;
     // Max amount to keep from mule
-    public int maxKeep = 150000;
+    public int maxKeep = 100000;
     // Min amount to keep from mule
-    public int minKeep = 100000;
+    public int minKeep = 85000;
 
     public String muleName;
     public MuleArea muleArea = MuleArea.COOKS_GUILD;
@@ -52,7 +51,7 @@ public class Main {
     public static final int KNIFE = 946;
     public boolean atGELimit = false;
     public int knifePrice = 100;
-    private StopWatch timeRan = null;
+    public StopWatch timeRan = null;
     public boolean isMuling = false;
     public boolean restock = true;
     public int buyPrice = 0;
@@ -77,22 +76,23 @@ public class Main {
     public int[] lastPrices = new int[2];
     public boolean usingBuyFallback = false;
     public boolean usingSellFallback = false;
+    public int idleChocNum = Beggar.randInt((StartOther.CHOC_PER_HR / 2 - 500), (StartOther.CHOC_PER_HR / 2 + 500));
 
-    //private static script.chocolate.Main chocolate;
+    private static script.chocolate.Main chocolate;
     private static Beggar beggar;
 
-    public Main(Beggar script) {
+    private Main(Beggar script) {
         beggar = script;
     }
 
-    /*//method to return instance of class
+    //method to return instance of class
     public static Main getInstance(Beggar script) {
         if (chocolate == null) {
             // if instance is null, initialize
             chocolate = new Main(script);
         }
         return chocolate;
-    }*/
+    }
 
     public void start() {
         beggar.removeAll();

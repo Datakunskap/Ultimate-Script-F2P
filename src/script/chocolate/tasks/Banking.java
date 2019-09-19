@@ -18,6 +18,9 @@ class Banking {
         Log.fine("Banking");
         openAndDepositAll();
 
+        if (Bank.contains(Main.DUST) && !Bank.contains(Main.BAR))
+            main.sold = false;
+
         if (!needRestock())
             return 1000;
 
@@ -62,6 +65,7 @@ class Banking {
         Time.sleepUntil(Inventory::isEmpty, 5000);
 
         if (Bank.contains(Main.BAR)) {
+            Time.sleepUntil(() -> Bank.getCount(Main.BAR) > 0, 5000);
             main.barCount = Bank.getCount(Main.BAR);
         }
     }

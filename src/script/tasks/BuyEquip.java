@@ -69,7 +69,7 @@ public class BuyEquip extends Task {
             } if(!main.bought) {
                 Log.info("Waiting to complete");
                 openGE();
-                Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED), 2000, 10000);
+                Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED), 2000, 25000);
                 GrandExchange.collectAll();
                 Keyboard.pressEnter();
                 Time.sleep(1500);

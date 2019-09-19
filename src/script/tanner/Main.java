@@ -16,6 +16,7 @@ import script.data.MuleArea;
 import script.tanner.data.Location;
 import script.tanner.tasks.*;
 import script.tanner.ui.Gui;
+import script.tasks.StartOther;
 
 import java.awt.*;
 import java.io.IOException;
@@ -84,6 +85,8 @@ public class Main {
     public int leatherPrice = 0;
     public int cowhidePrice = 0;
     private int[] lastPrices = new int[2];
+    public boolean paidToll = true;
+    public int idleTanNum = Beggar.randInt((StartOther.TANS_PER_HR / 2  - 200), (StartOther.TANS_PER_HR / 2  + 200));
 
     private static Main tanner;
     private static Beggar beggar;
@@ -198,6 +201,7 @@ public class Main {
                 new BuyGE(tanner),
                 new WalkToBank(tanner),
                 new BankAK(tanner),
+                new Idle(tanner),
                 new WalkToTanner(tanner),
                 new TanHide(tanner));
 
@@ -327,7 +331,12 @@ public class Main {
             Time.sleep(1500);
             Log.fine("Teleporting Home");
             Magic.cast(Spell.Modern.HOME_TELEPORT);
+            paidToll = false;
             Time.sleep(18000);
+
+            if (!Inventory.contains(995) && Inventory.getCount(true, 995) < 10) {
+                new Banking(this).openAndDepositAll(10);
+            }
         }
     }
 }
