@@ -1,5 +1,6 @@
 package script.tutorial_island;
 
+import com.dax.walker.DaxWalker;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.data.CheckTutIsland;
@@ -22,6 +23,10 @@ public final class TutorialIsland {
             main = new TutorialIsland(script);
         }
         return main;
+    }
+
+    public DaxWalker getWalker() {
+        return beggar.daxWalker;
     }
 
     public boolean onTutorialIsland() {

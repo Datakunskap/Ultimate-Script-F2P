@@ -1,5 +1,7 @@
 package script.tutorial_island;
 
+import com.dax.walker.DaxWalker;
+import com.dax.walker.Server;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.api.Game;
@@ -7,7 +9,7 @@ import org.rspeer.runetek.api.Varps;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.Interfaces;
-import org.rspeer.runetek.api.movement.Movement;
+import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
@@ -16,12 +18,16 @@ import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
 
+import java.awt.event.KeyEvent;
+
 public abstract class TutorialSection extends Task {
 
     private final String INSTRUCTOR_NAME;
+    final DaxWalker daxWalker;
 
     public TutorialSection(final String INSTRUCTOR_NAME) {
         this.INSTRUCTOR_NAME = INSTRUCTOR_NAME;
+        daxWalker = new DaxWalker(new Server("sub_DPjXXzL5DeSiPf", "PUBLIC-KEY"));
     }
 
     //public abstract void onLoop() throws InterruptedException;
@@ -39,31 +45,28 @@ public abstract class TutorialSection extends Task {
         if (i != null && i.isPositionInteractable() && i.interact("Talk-to")) {
             Log.info("Talking to instructor");
             Time.sleepUntil(this::pendingContinue, 2000, 6000);
-        } else if (i != null && i.isPositionWalkable()) {
+        } else if (i != null) {
             Log.info("Walking to instructor");
-            Movement.walkToRandomized(i.getPosition().randomize(3));
+            daxWalker.walkTo(i.getPosition().randomize(3));
         } else {
-            Movement.walkToRandomized(Players.getLocal().getPosition().randomize(6));
+            daxWalker.walkTo(Players.getLocal().getPosition().randomize(6));
             Log.severe("Cant Find Instructor: Section " + getTutorialSection() + " Progress " + getProgress());
             return false;
         }
         return true;
     }
 
-    protected Npc getInstructor() {
+    Npc getInstructor() {
         return Npcs.getNearest(INSTRUCTOR_NAME);
     }
 
     protected boolean pendingContinue() {
-        if (Dialog.isProcessing()) {
-            Time.sleepUntil(() -> !Dialog.isProcessing(), 2000, 6000);
-        }
-
         InterfaceComponent wierdContinue = Interfaces.getComponent(162, 44);
         if (wierdContinue != null && wierdContinue.isVisible()) {
             String msg = wierdContinue.getText().toLowerCase();
             if (msg.contains("someone") || msg.contains("reach") || msg.contains("already")){
                 Game.getClient().fireScriptEvent(299, 1, 1);
+                return true;
             }
         }
 
@@ -71,17 +74,18 @@ public abstract class TutorialSection extends Task {
     }
 
     protected boolean selectContinue() {
-        return Dialog.processContinue();
+        Keyboard.pressEventKey(KeyEvent.VK_SPACE);
+        return true;
     }
 
     void randWalker(Position posRequired) {
         Log.info("Walking to next section");
         while (!Script.interrupted() && !Players.getLocal().getPosition().equals(posRequired)) {
             Time.sleep(800, 1800);
-            Movement.walkToRandomized(posRequired);
+            daxWalker.walkTo(posRequired);
         }
         if (posRequired.distance(Players.getLocal()) < 4) {
-            Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
+            daxWalker.walkTo(Players.getLocal().getPosition().randomize(8));
             Time.sleep(1000);
             Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(2000, 6000));
         }
