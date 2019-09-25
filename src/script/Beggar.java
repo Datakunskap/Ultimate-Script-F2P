@@ -97,14 +97,16 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public boolean refreshPrices = false;
     public long startTime = 0;
     public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
-    public static final String ERROR_FILE_PATH = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeerErrors.txt";
     public boolean tradeGambler = false;
     public boolean roll = false;
     public int gambleAmnt = 0;
     public String gamblerName = "";
     public boolean giveGambler = false;
-    private static final String PYTHON_3_EXE = "C:\\Users\\bllit\\AppData\\Local\\Programs\\Python\\Python37\\python.exe";
-    private static final String ACC_GEN_PY = "C:\\Users\\bllit\\IdeaProjects\\OSRS-Account-Generator\\create_rs_account.py";
+    private static final String ACCOUNTS_FILE_PATH = "C:\\Users\\TheTheeMusketeers\\Desktop\\RSPeer\\f2pAccounts.txt";
+    public static final String BEG_LINES_PATH = "C:\\Users\\TheTheeMusketeers\\Desktop\\RSPeer\\BegLines.txt";
+    public static final String ERROR_FILE_PATH = "C:\\Users\\TheTheeMusketeers\\Desktop";
+    private static final String PYTHON_3_EXE = "C:\\Users\\TheTheeMusketeers\\AppData\\Local\\Programs\\Python\\Python37-32\\python.exe";
+    private static final String ACC_GEN_PY = "C:\\Users\\TheTheeMusketeers\\Desktop\\RSPeer\\create_rs_account.py";
     private static final String PASSWORD_ARG = "-p plmmlp";
     public ArrayList<Integer> OTHER_BEG_WORLDS;
     private final boolean GAMBLER = false;
@@ -123,6 +125,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public script.chocolate.Main chocolate;
     public boolean isChoc = false;
     public int sumTopPops = 0;
+    public static final boolean MULE_ITEMS = false;
     public int numBegs = 0;
     public int idleBegNum = randInt(30, 40);
     public Fighter fighter;
@@ -130,11 +133,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final String MULE_NAME = "IBear115";
     public static final MuleArea MULE_AREA = MuleArea.COOKS_GUILD;
     public static final int MULE_WORLD = 393;
-    public static final boolean MULE_ITEMS = false;
     public static final int MUTED_MULE_AMNT = 25000;
     public static final int ALLOWED_INSTANCES = 8;
-    public static final String API_KEY = "JV5ML4DE4M9W8Z5KBE00322RDVNDGGMTMU1EH9226YCVGFUBE6J6OY1Q2NJ0RA8YAPKO70";
-    public static final int NUM_BACKLOG_ACCOUNTS = 45;
+    public static final String API_KEY = "1FFY03V3M22KU5CFQ60DF9A40B3WKAU9CP0ZPCFE5KBLAMTUX61EC981FL7ZA8TLH2HFFM";
+    public static final int NUM_BACKLOG_ACCOUNTS = 10;
     public static final boolean BUY_GEAR = true;
 
     @Override
@@ -508,7 +510,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         return IDs;
     }
 
-    private static final String ACCOUNTS_FILE_PATH = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
     private List<String> accountsList;
 
     public String readAccount(boolean readFirst) {
