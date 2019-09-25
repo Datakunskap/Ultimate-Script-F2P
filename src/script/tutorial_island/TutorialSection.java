@@ -54,23 +54,23 @@ public abstract class TutorialSection extends Task {
     }
 
     protected boolean pendingContinue() {
+        if (Dialog.isProcessing()) {
+            Time.sleepUntil(() -> !Dialog.isProcessing(), 2000, 6000);
+        }
+
         InterfaceComponent wierdContinue = Interfaces.getComponent(162, 44);
-        if (wierdContinue != null && wierdContinue.isVisible() &&
-                (wierdContinue.getText().toLowerCase().contains("someone") ||
-                        wierdContinue.getText().toLowerCase().contains("reach") ||
-                        wierdContinue.getText().toLowerCase().contains("already"))) {
-            return true;
+        if (wierdContinue != null && wierdContinue.isVisible()) {
+            String msg = wierdContinue.getText().toLowerCase();
+            if (msg.contains("someone") || msg.contains("reach") || msg.contains("already")){
+                Game.getClient().fireScriptEvent(299, 1, 1);
+            }
         }
 
         return Dialog.isOpen() && Dialog.canContinue();
     }
 
     protected boolean selectContinue() {
-        if (pendingContinue()) {
-            Game.getClient().fireScriptEvent(299, 1, 1);
-            return Dialog.processContinue();
-        }
-        return false;
+        return Dialog.processContinue();
     }
 
     void randWalker(Position posRequired) {
