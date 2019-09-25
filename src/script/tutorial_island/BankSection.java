@@ -12,6 +12,7 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
+import script.Beggar;
 
 import java.util.Arrays;
 import java.util.List;
@@ -67,9 +68,7 @@ public final class BankSection extends TutorialSection {
         switch (getProgress()) {
             case 510:
                 if (!BANK_AREA.contains(Players.getLocal())) {
-                    if (Movement.walkToRandomized(BANK_AREA.getCenter())) {
-                        //Movement.walkTo(BANK_AREA.getCenter());
-                    }
+                    daxWalker.walkTo(BANK_AREA.getTiles().get(Beggar.randInt(0, BANK_AREA.getTiles().size() -1)));
                 } else if (Dialog.isOpen() && Dialog.isViewingChatOptions()) {
                     Dialog.process("Yes.");
                 } else if (SceneObjects.getNearest("Bank booth").interact("Use")) {
