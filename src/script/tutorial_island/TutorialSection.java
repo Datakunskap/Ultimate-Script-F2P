@@ -11,6 +11,7 @@ import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
+import org.rspeer.script.Script;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
@@ -74,12 +75,14 @@ public abstract class TutorialSection extends Task {
     }
 
     void randWalker(Position posRequired) {
-        Time.sleep(1000, 1500);
-        Time.sleepUntil(() -> Movement.walkToRandomized(posRequired) && Players.getLocal().getPosition().equals(posRequired), 1000, 8000);
+        Log.info("Walking to next section");
+        while (!Script.interrupted() && !Players.getLocal().getPosition().equals(posRequired)) {
+            Time.sleep(800, 1800);
+            Movement.walkToRandomized(posRequired);
+        }
         if (posRequired.distance(Players.getLocal()) < 4) {
-            Log.info("Random walk");
-            Movement.walkToRandomized(Players.getLocal().getPosition().randomize(6));
-            Time.sleep(2000);
+            Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
+            Time.sleep(1000);
             Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(2000, 6000));
         }
     }
