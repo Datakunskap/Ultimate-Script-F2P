@@ -1,5 +1,7 @@
 package script;
 
+import com.dax.walker.DaxWalker;
+import com.dax.walker.Server;
 import org.rspeer.RSPeer;
 import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.Game;
@@ -129,6 +131,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public int numBegs = 0;
     public int idleBegNum = randInt(30, 40);
     public Fighter fighter;
+    public DaxWalker daxWalker;
 
     public static final String MULE_NAME = "IBear115";
     public static final MuleArea MULE_AREA = MuleArea.COOKS_GUILD;
@@ -160,6 +163,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         startTime = (worldHop || worldHopf2p) ? System.currentTimeMillis() : 0;
         setRandMuleKeep(2500, 10000);
+        daxWalker = new DaxWalker(new Server("sub_DPjXXzL5DeSiPf", "PUBLIC-KEY"));
 
         CheckTutIsland checkT = new CheckTutIsland(this);
 

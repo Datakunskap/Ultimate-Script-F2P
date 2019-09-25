@@ -7,6 +7,7 @@ import org.rspeer.runetek.api.Varps;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.Interfaces;
+import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
@@ -15,6 +16,8 @@ import org.rspeer.script.Script;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
+
+import java.awt.event.KeyEvent;
 
 public abstract class TutorialSection extends Task {
 
@@ -55,15 +58,12 @@ public abstract class TutorialSection extends Task {
     }
 
     protected boolean pendingContinue() {
-        if (Dialog.isProcessing()) {
-            Time.sleepUntil(() -> !Dialog.isProcessing(), 2000, 6000);
-        }
-
         InterfaceComponent wierdContinue = Interfaces.getComponent(162, 44);
         if (wierdContinue != null && wierdContinue.isVisible()) {
             String msg = wierdContinue.getText().toLowerCase();
             if (msg.contains("someone") || msg.contains("reach") || msg.contains("already")){
                 Game.getClient().fireScriptEvent(299, 1, 1);
+                return true;
             }
         }
 
@@ -71,7 +71,8 @@ public abstract class TutorialSection extends Task {
     }
 
     protected boolean selectContinue() {
-        return Dialog.processContinue();
+        Keyboard.pressEventKey(KeyEvent.VK_SPACE);
+        return true;
     }
 
     void randWalker(Position posRequired) {
