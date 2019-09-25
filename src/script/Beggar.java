@@ -126,7 +126,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public int numBegs = 0;
     public int idleBegNum = randInt(30, 40);
     public Fighter fighter;
-//
+
     public static final String MULE_NAME = "IBear115";
     public static final MuleArea MULE_AREA = MuleArea.COOKS_GUILD;
     public static final int MULE_WORLD = 393;
