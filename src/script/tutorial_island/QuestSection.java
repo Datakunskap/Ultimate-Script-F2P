@@ -61,6 +61,7 @@ public final class QuestSection extends TutorialSection {
                     }
                 } else {
                     if (Movement.walkToRandomized(QUEST_BUILDING.getCenter())) {
+
                         Time.sleepUntil(() -> getProgress() != 210, 2000,5000);
                     }
                 }
@@ -76,7 +77,7 @@ public final class QuestSection extends TutorialSection {
                 break;
             case 250:
                 if (SceneObjects.getNearest("Ladder").interact("Climb-down")) {
-                    Time.sleepUntil(() -> getProgress() != 250, 2000,5000);
+                    Time.sleepUntil(() -> (SceneObjects.getNearest("Ladder") != null && !SceneObjects.getNearest("Ladder").containsAction("Climb-down")) || getProgress() != 250, 2000,5000);
                     Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
                     Time.sleepUntil(() -> !Players.getLocal().isMoving(), Beggar.randInt(3500, 6500));
                 }

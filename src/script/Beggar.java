@@ -3,15 +3,18 @@ package script;
 import org.rspeer.RSPeer;
 import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.Game;
+import org.rspeer.runetek.api.Login;
 import org.rspeer.runetek.api.Worlds;
 import org.rspeer.runetek.api.commons.StopWatch;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Trade;
 import org.rspeer.runetek.api.component.tab.Inventory;
+import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.event.listeners.*;
 import org.rspeer.runetek.event.types.*;
 import org.rspeer.runetek.providers.RSWorld;
+import org.rspeer.script.GameAccount;
 import org.rspeer.script.Script;
 import org.rspeer.script.ScriptMeta;
 import org.rspeer.script.events.LoginScreen;
@@ -222,6 +225,14 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         submitTasks();
     }
 
+    public void startFighter() {
+        //logoutAndSwitchAcc();
+        resetRender();
+        removeAll();
+        fighter = new Fighter(this, randInt(720_000, 1_200_000)); // 12 - 20
+        fighter.onStart();
+    }
+
     @Override
     public void notify(LoginResponseEvent loginResponseEvent) {
         if (loginResponseEvent.getResponse().equals(LoginResponseEvent.Response.ACCOUNT_DISABLED) ||
@@ -401,6 +412,24 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             for (int g = 0; g < (numToGen <= 5 ? numToGen : 5); g++) {
                 executeGenerator(10);
                 Time.sleep(2000);
+            }
+        }
+    }
+
+    public void logoutAndSwitchAcc() {
+        String currAcc = RSPeer.getGameAccount().getUsername();
+        writeAccount(currAcc);
+
+        if (Game.logout()) {
+            RSPeer.setGameAccount(new GameAccount(readAccount(true), "plmmlp"));
+            if (Time.sleepUntil(() -> !RSPeer.getGameAccount().getUsername().equals(currAcc), 20000))
+                Log.fine("Account Switched");
+
+            while(!Game.isLoggedIn() && !Login.getResponseLines()[0].toLowerCase().contains("disabled")) {
+                Login.enterCredentials(RSPeer.getGameAccount().getUsername(), RSPeer.getGameAccount().getPassword());
+                Time.sleep(200);
+                Keyboard.pressEnter();
+                Time.sleepUntil(() -> Game.isLoggedIn() || Login.getResponseLines()[0].toLowerCase().contains("disabled"), 2000, 10000);
             }
         }
     }

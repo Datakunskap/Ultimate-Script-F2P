@@ -1,15 +1,8 @@
 package script.tutorial_island;
 
-import org.rspeer.RSPeer;
-import org.rspeer.runetek.api.Game;
-import org.rspeer.runetek.api.Login;
-import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.input.Keyboard;
-import org.rspeer.script.GameAccount;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.data.CheckTutIsland;
-import script.fighter.Fighter;
 
 public final class TutorialIsland {
 
@@ -37,40 +30,6 @@ public final class TutorialIsland {
         }
         Log.fine("Tutorial Island Complete");
         return false;
-    }
-
-    public void logoutAndSwitchAcc() {
-        String currAcc = RSPeer.getGameAccount().getUsername();
-        beggar.writeAccount(currAcc);
-
-        if (Game.logout()) {
-            RSPeer.setGameAccount(new GameAccount(beggar.readAccount(true), "plmmlp"));
-            if (Time.sleepUntil(() -> !RSPeer.getGameAccount().getUsername().equals(currAcc), 20000))
-                Log.fine("Account Switched");
-
-            while(!Game.isLoggedIn() && !Login.getResponseLines()[0].toLowerCase().contains("disabled")) {
-                Login.enterCredentials(RSPeer.getGameAccount().getUsername(), RSPeer.getGameAccount().getPassword());
-                Time.sleep(200);
-                Keyboard.pressEnter();
-                Time.sleepUntil(() -> Game.isLoggedIn() || Login.getResponseLines()[0].toLowerCase().contains("disabled"), 2000, 10000);
-            }
-        }
-    }
-
-    public void startFighter() {
-        //logoutAndSwitchAcc();
-        beggar.resetRender();
-        beggar.removeAll();
-        beggar.fighter = new Fighter(beggar, Beggar.randInt(720_000, 1_200_000)); // 12 - 20
-        beggar.fighter.onStart();
-    }
-
-    public void startFighter(Beggar script) {
-        //logoutAndSwitchAcc();
-        script.resetRender();
-        script.removeAll();
-        beggar.fighter = new Fighter(beggar, Beggar.randInt(720_000, 1_200_000)); // 12 - 20
-        beggar.fighter.onStart();
     }
 
     public static int getRandSleep(){

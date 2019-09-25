@@ -36,8 +36,10 @@ public abstract class TutorialSection extends Task {
     protected final boolean talkToInstructor() {
         Npc i = getInstructor();
         if (i != null && i.isPositionInteractable() && i.interact("Talk-to")) {
+            Log.info("Talking to instructor");
             Time.sleepUntil(this::pendingContinue, 2000, 5000);
         } else if (i != null && i.isPositionWalkable()) {
+            Log.info("Walking to instructor");
             Movement.walkToRandomized(i.getPosition().randomize(3));
         } else {
             Movement.walkToRandomized(Players.getLocal().getPosition().randomize(6));
@@ -56,7 +58,7 @@ public abstract class TutorialSection extends Task {
         if (wierdContinue != null && wierdContinue.isVisible() &&
                 (wierdContinue.getText().toLowerCase().contains("someone") ||
                         wierdContinue.getText().toLowerCase().contains("reach") ||
-                            wierdContinue.getText().toLowerCase().contains("already"))) {
+                        wierdContinue.getText().toLowerCase().contains("already"))) {
             return true;
         }
 
@@ -73,7 +75,6 @@ public abstract class TutorialSection extends Task {
 
     void randWalker(Position posRequired) {
         Time.sleep(1000, 1500);
-        Log.info("Walking to next section");
         Time.sleepUntil(() -> Movement.walkToRandomized(posRequired) && Players.getLocal().getPosition().equals(posRequired), 1000, 8000);
         if (posRequired.distance(Players.getLocal()) < 4) {
             Log.info("Random walk");
@@ -82,5 +83,4 @@ public abstract class TutorialSection extends Task {
             Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(2000, 6000));
         }
     }
-
 }

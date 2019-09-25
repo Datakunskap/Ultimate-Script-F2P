@@ -7,7 +7,6 @@ import org.rspeer.script.task.Task;
 import script.Beggar;
 import script.data.CheckInstances;
 import script.data.CheckTutIsland;
-import script.tutorial_island.TutorialIsland;
 
 public class StartupChecks extends Task {
 
@@ -45,7 +44,7 @@ public class StartupChecks extends Task {
 
     private void fighterCheck() {
         if (Players.getLocal().getCombatLevel() <= 3)
-            TutorialIsland.getInstance(main).startFighter(main);
+            main.startFighter();
     }
 
     public void instanceCheck() {
