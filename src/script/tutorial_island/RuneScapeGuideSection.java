@@ -22,16 +22,14 @@ public final class RuneScapeGuideSection extends TutorialSection{
 
 
     private InterfaceComponent nameAcceptedWidget;//.getFirst()w -> w.getMessage().contains("Great!"));
-
     private InterfaceComponent nameLookupWidget;
-        //(w -> w.getMessage().contains("Look up name"));
     private InterfaceComponent nameInputWidget;//(w -> w.getMessage().contains("unique"));
     private InterfaceComponent nameSetWidget;
     private InterfaceComponent nameScreenDetectionWidget; //("Choose display name");
-
     private InterfaceComponent creationScreenWidget = Interfaces.getComponent(269, 120);
-    //private final CachedWidget experienceWidget = new CachedWidget("What's your experience with Old School Runescape?");
     private boolean isAudioDisabled;
+    private final char[] vowels = "aeiouAEIOU".toCharArray();
+    private final char[] nonVowels = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ".toCharArray();
 
     public RuneScapeGuideSection() {
         super("Gielinor Guide");
@@ -139,7 +137,7 @@ public final class RuneScapeGuideSection extends TutorialSection{
         StringBuilder salt = new StringBuilder();
         salt.append(randomPrefix());
         java.util.Random rnd = new java.util.Random();
-        int strLen = Beggar.randInt(minLength, maxLength) - salt.length();
+        int strLen = Beggar.randInt(minLength, maxLength);
 
         while (salt.length() < strLen) { // length of the random string.
             int index = (int) (rnd.nextFloat() * SALTCHARS.length());
@@ -156,9 +154,11 @@ public final class RuneScapeGuideSection extends TutorialSection{
             case 0:
                 salt.append(vowels[Beggar.randInt(0, (vowels.length - 1))]);
                 salt.append(nonVowels[Beggar.randInt(0, (nonVowels.length - 1))]);
+                salt.append(vowels[Beggar.randInt(0, (vowels.length - 1))]);
             case 1:
                 salt.append(nonVowels[Beggar.randInt(0, (nonVowels.length - 1))]);
                 salt.append(vowels[Beggar.randInt(0, (vowels.length - 1))]);
+                salt.append(nonVowels[Beggar.randInt(0, (nonVowels.length - 1))]);
         }
         return salt.toString();
     }

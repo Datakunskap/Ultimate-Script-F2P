@@ -4,6 +4,9 @@ import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.adapter.scene.PathingEntity;
 import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.commons.Time;
+import org.rspeer.runetek.api.component.tab.Magic;
+import org.rspeer.runetek.api.component.tab.Tab;
+import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
 import script.fighter.CombatStore;
@@ -70,7 +73,7 @@ public class FightNode extends Node {
             return Fighter.getLoopReturn();
         }
         NpcResult target = CombatStore.getCurrentTarget();
-        if(CombatWrapper.isDead(target.getNpc())) {
+        if(target == null || CombatWrapper.isDead(target.getNpc())) {
             status = "Target has died.";
             CombatStore.setCurrentTarget(null);
             return Fighter.getLoopReturn();
@@ -140,11 +143,23 @@ public class FightNode extends Node {
         if(Movement.isInteractable(npc, false)) {
             status = "Attacking " + npc.getName() + " (" + npc.getIndex() + ").";
             Logger.debug("Attacking target: " + npc.getIndex());
-            npc.interact("Attack");
+            if (Config.getProgressive().getSpell() == null) {
+                npc.interact("Attack");
+            } else {
+                castSpell(npc);
+            }
             Time.sleepUntil(() -> Players.getLocal().getTargetIndex() > 0, 1500);
             return;
         }
         status = "Walking to target.";
         Movement.walkTo(npc);
+    }
+
+    private void castSpell(Npc npc) {
+        if (!Tabs.isOpen(Tab.MAGIC)) {
+            Tabs.open(Tab.MAGIC);
+            Time.sleepUntil(() -> Tabs.isOpen(Tab.MAGIC), 100, 1000);
+        }
+        Magic.cast(Config.getProgressive().getSpell(), npc);
     }
 }

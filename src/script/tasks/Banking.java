@@ -35,13 +35,10 @@ public class Banking extends Task {
         }
         Bank.isOpen();
         Bank.depositInventory();
-        Time.sleep(2000);
+        Time.sleepUntil(Inventory::isEmpty,5000);
         Bank.withdrawAll(995);
-        Time.sleep(5000);
-/*        if (Bank.contains(Main.KNIFE) && Bank.contains(Main.DUST, Main.KNIFE))
-            main.startChocBeg = true;
-        if (Inventory.contains(Main.KNIFE) && Inventory.contains(Main.DUST, Main.KNIFE))
-            main.startChocBeg = true;*/
+        Time.sleepUntil(() -> Inventory.contains(995),5000);
+
         main.banked = true;
         Bank.close();
         Time.sleepUntil(() -> !Bank.isOpen(), 2000);

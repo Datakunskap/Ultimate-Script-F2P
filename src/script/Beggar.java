@@ -118,14 +118,14 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public boolean muted = false;
     public MuleArea muleArea;
     private int[] lastPrices = new int[4];
-    public boolean startChocBeg = false;
     public boolean muleChocBeg = false;
     public static final int SAVE_BEG_GP = 10000;
     public script.chocolate.Main chocolate;
     public boolean isChoc = false;
     public int sumTopPops = 0;
     public int numBegs = 0;
-    public int idleBegNum = randInt(60, 80);
+    public int idleBegNum = randInt(30, 40);
+    public Fighter fighter;
 
     public static final String MULE_NAME = "IBear115";
     public static final MuleArea MULE_AREA = MuleArea.COOKS_GUILD;
@@ -134,8 +134,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final int MUTED_MULE_AMNT = 25000;
     public static final int ALLOWED_INSTANCES = 8;
     public static final String API_KEY = "JV5ML4DE4M9W8Z5KBE00322RDVNDGGMTMU1EH9226YCVGFUBE6J6OY1Q2NJ0RA8YAPKO70";
-    public static final int NUM_BACKLOG_ACCOUNTS = 40;
-    public static final int START_CB_AMNT = 5500000;
+    public static final int NUM_BACKLOG_ACCOUNTS = 45;
     public static final boolean BUY_GEAR = true;
 
     @Override
@@ -184,6 +183,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         submit(new StartupChecks(this),
                 new TradePlayer(this),
                 new WaitTrade(this),
+                new SellGE(this),
                 new StartOther(this),
                 new Mule(this),
                 new WorldHop(this),
@@ -244,13 +244,14 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
     }
 
+    private int stopRetries = 5;
+
     @Override
     public void onStop() {
         Log.severe("Script Stopped");
         removeAll();
 
         if (isFighterRunning) {
-            Fighter fighter = Fighter.getInstance(this, 0); // 12 - 18
             fighter.onStop(true, 10);
         }
 
@@ -266,8 +267,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         if (!disableChain && !GAMBLER) {
             Log.fine("Chaining");
             try {
-                Thread.sleep(randInt(0, 300000));
+                Thread.sleep(randInt(5000, 300000));
             } catch (InterruptedException e) {
+                writeToErrorFile("Interrupted sleep while chaining");
                 e.printStackTrace();
             }
 
@@ -275,7 +277,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 Game.logout();
 
 
-            generateAccount(NUM_BACKLOG_ACCOUNTS);
+            generateAccounts(NUM_BACKLOG_ACCOUNTS);
             QuickLaunch quickLaunch = setupQuickLauncher(readAccount(true));
 
             try {
@@ -283,11 +285,14 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 Management.startClient(0, quickLaunch.get().toString(), 0, null, 1);
                 killClient();
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 writeToErrorFile("onStop():  " + e.getMessage());
                 Log.severe(e);
                 e.printStackTrace();
-                System.exit(1);
+                if (stopRetries > 0) {
+                    stopRetries --;
+                    onStop();
+                }
             }
             //manualLauncher();
         }
@@ -335,7 +340,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     }
 
     private void manualLauncher() {
-        generateAccount(NUM_BACKLOG_ACCOUNTS);
+        generateAccounts(NUM_BACKLOG_ACCOUNTS);
         int[] IDs = writeJson(readAccount(false));
         String path = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\Beggar";
 
@@ -356,14 +361,19 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         System.exit(0);
     }
 
-    private void executeGenerator() {
+    private void executeGenerator(int retries) {
         String randEmailArg = "-e " + getRandString() + "@gmail.com";
 
         try {
             Runtime.getRuntime().exec(
                     "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + randEmailArg + " " + PASSWORD_ARG + " && exit" + "\"");
         } catch (Exception e) {
+            writeToErrorFile("executeGenerator()  |  " + e.getMessage());
+            Log.severe("executeGenerator()  |  " + e.getMessage());
             e.printStackTrace();
+            if (retries > 0) {
+                executeGenerator(retries - 1);
+            }
         }
     }
 
@@ -381,12 +391,15 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         return salt.toString();
     }
 
-    public void generateAccount(int setNumBacklogged) {
+    public void generateAccounts(int setNumBacklogged) {
         int numToGen = setNumBacklogged - getNumAccsBacklogged();
 
-        for (int g = 0; g < (numToGen <= 10 ? numToGen : 10); g++) {
-            executeGenerator();
-            Time.sleep(2000);
+        if (numToGen > 0) {
+            Log.fine("Generating " + numToGen + " Accounts");
+            for (int g = 0; g < (numToGen <= 5 ? numToGen : 5); g++) {
+                executeGenerator(10);
+                Time.sleep(2000);
+            }
         }
     }
 
@@ -599,7 +612,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     @Override
     public void notify(ChatMessageEvent msg) {
-        if (!isFighterRunning) {
+        if(msg.getType() == ChatMessageType.PUBLIC || msg.getType() == ChatMessageType.PRIVATE_RECEIVED)
+            return;
+
+        if (!isFighterRunning && !isChoc && !isTanning) {
             // If not in a trade and a player trades you...
             if (!Trade.isOpen() && msg.getType().equals(ChatMessageType.TRADE) && !isMuling) {
                 if (msg.getSource().equals(traderName)) {
@@ -626,23 +642,47 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 //walk = true;
                 //beg = true;
             }
-        } else {
-            Fighter.getInstance(this, 0).notify(msg);
+
+        } else if (isChoc || isTanning) {
+            if (msg.getMessage().toLowerCase().contains("that offer costs")) {
+                if (isTanning){
+                    tanner.sold = false;
+                    tanner.checkedBank = false;
+                    tanner.closeGE();
+                }
+                if (isChoc) {
+                    chocolate.sold = false;
+                    chocolate.checkedBank = false;
+                    chocolate.closeGE();
+                }
+            }
+        }
+
+        else {
+            fighter.notify(msg);
         }
     }
+
+    public static int timesIdled = 0;
+    public static long itemsSoldProfitAmount = 0;
 
     @Override
     public void notify(RenderEvent e) {
         if (!isFighterRunning) {
             Graphics g = e.getSource();
-            gainedC = Inventory.getCount(true, 995) + amntMuled;
-            gainedC -= startC;
+            if (!isTanning && !isChoc) {
+                gainedC = Inventory.getCount(true, 995) + amntMuled;
+                gainedC -= startC;
+            }
             g.drawString("Runtime: " + runtime.toElapsedString(), 20, 40);
-            g.drawString(lastTradeTime == null ? "Last trade completed: " + "00:00:00" : "Last trade completed: " + lastTradeTime.toElapsedString(), 20, 60);
-            g.drawString("Gp gained: " + format(gainedC), 20, 80);
-            g.drawString("Gp /h: " + format((long) runtime.getHourlyRate(gainedC)), 20, 100);
-            g.drawString("Times tanned: " + timesTanned, 20, 120);
-            g.drawString("Times chocolate: " + timesChocolate, 20, 160);
+            g.drawString(lastTradeTime == null ? "Last Trade Completed: " + "00:00:00" : "Last Trade Completed: " + lastTradeTime.toElapsedString(), 20, 60);
+            g.drawString("Begging Profit: " + format(gainedC), 20, 80);
+            g.drawString("GP / H: " + format((long) runtime.getHourlyRate(gainedC)), 20, 100);
+            g.drawString("Sold Items Profit: " + format(itemsSoldProfitAmount), 20, 120);
+            g.drawString("Times Tanned: " + timesTanned, 20, 140);
+            g.drawString("Times Chocolate: " + timesChocolate, 20, 160);
+            g.drawString("Times Idled: " + timesIdled, 20, 180);
+            g.drawString("Sum Top Worlds: " + sumTopPops, 20, 200);
 
             if (isTanning) {
                 tanner.render(e);
@@ -651,7 +691,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 chocolate.render(e);
             }
         } else {
-            Fighter.getInstance(this, 0).notify(e);
+            fighter.notify(e);
         }
     }
 
@@ -710,28 +750,29 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
     }
 
-    public void randSpecialLines() {
-        for (int i = 0; i < linesArr.length; i ++) {
+    public String[] randSpecialLines(String[] arr) {
+        for (int i = 0; i < arr.length; i ++) {
             if (randInt(1, 5) == 1) { // 20%
                 switch (randInt(0, 4)) {
                     case 0:
-                        linesArr[i] = "Flash2:" + linesArr[i];
+                        arr[i] = "Flash2:" + arr[i];
                         break;
                     case 1:
-                        linesArr[i] = "Flash3:" + linesArr[i];
+                        arr[i] = "Flash3:" + arr[i];
                         break;
                     case 2:
-                        linesArr[i] = "Glow1:" + linesArr[i];
+                        arr[i] = "Glow1:" + arr[i];
                         break;
                     case 3:
-                        linesArr[i] = "Glow2:" + linesArr[i];
+                        arr[i] = "Glow2:" + arr[i];
                         break;
                     case 4:
-                        linesArr[i] = "Glow3:" + linesArr[i];
+                        arr[i] = "Glow3:" + arr[i];
                         break;
                 }
             }
         }
+        return arr;
     }
 
     public void defaultLines() {
@@ -795,7 +836,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             }
         }
 
-        randSpecialLines();
+        linesArr = randSpecialLines(linesArr);
         lines = new Lines(linesArr);
     }
 
@@ -1105,14 +1146,14 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     @Override
     public void notify(DeathEvent deathEvent) {
         if (isFighterRunning) {
-            Fighter.getInstance(this, 0).notify(deathEvent);
+            fighter.notify(deathEvent);
         }
     }
 
     @Override
     public void notify(TargetEvent targetEvent) {
         if (isFighterRunning) {
-            Fighter.getInstance(this, 0).notify(targetEvent);
+            fighter.notify(targetEvent);
         }
     }
 

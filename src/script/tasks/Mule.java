@@ -91,9 +91,7 @@ public class Mule extends Task {
             main.disableChain = false;
             main.setStopping(true);
         }
-        if (main.startChocBeg) {
-            return main.muleChocBeg || muleing;
-        }
+
         return atMuleAmnt(main.muleAmnt) || (main.muted && atMuleAmnt(Beggar.MUTED_MULE_AMNT)) || muleing;
     }
 
@@ -109,6 +107,16 @@ public class Mule extends Task {
         if (Worlds.getCurrent() != main.muleWorld) {
             begWorld = Worlds.getCurrent();
             WorldHopper.hopTo(main.muleWorld);
+
+            if (Dialog.isOpen()) {
+                if (Dialog.canContinue()) {
+                    Dialog.processContinue();
+                }
+                Dialog.process(x -> x != null && x.toLowerCase().contains("future"));
+                Dialog.process(x -> x != null && (x.toLowerCase().contains("switch") || x.toLowerCase().contains("yes")));
+                Time.sleepUntil(() -> !Dialog.isProcessing(), 10000);
+            }
+
             Time.sleepUntil(() -> Worlds.getCurrent() == main.muleWorld, 10000);
             main.currWorld = main.muleWorld;
         }
@@ -210,9 +218,6 @@ public class Mule extends Task {
                                 main.disableChain = false;
                                 main.setStopping(true);
                             }
-
-                            main.startChocBeg = false;
-                            main.muleChocBeg = false;
                         }
                         Time.sleep(700);
                     }

@@ -47,14 +47,14 @@ public class CheckInstances {
     public int execute(String account) {
         Log.fine("Launching another instance");
 
-        main.generateAccount(Beggar.NUM_BACKLOG_ACCOUNTS);
+        main.generateAccounts(Beggar.NUM_BACKLOG_ACCOUNTS);
         QuickLaunch quickLaunch = main.setupQuickLauncher(account);
 
         try {
 
             Management.startClient(0, quickLaunch.get().toString(), 0, null, 1);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             main.writeToErrorFile("CheckInstances.execute():  " + e.getMessage());
             Log.severe(e);
             e.printStackTrace();

@@ -3,6 +3,7 @@ package script.tutorial_island;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
+import org.rspeer.script.events.LoginScreen;
 import org.rspeer.ui.Log;
 import script.fighter.Fighter;
 
@@ -43,26 +44,26 @@ public class Idle extends TutorialSection {
 
     @Override
     public int execute() {
-        Log.fine("Idling");
-
         if(idleTill == 0) {
-            idleTill = System.currentTimeMillis() + Random.low(20000, 180000);
+            idleTill = System.currentTimeMillis() + Random.low(20000, 65000);
+            Log.fine("Idling for " + getIdleFor() + " seconds");
             return Fighter.getLoopReturn();
         }
         long timeout = getIdleFor();
         if(timeout > 60 && Game.isLoggedIn()) {
             Log.fine("Logging out....");
+            main.beggar.removeBlockingEvent(LoginScreen.class);
             Game.logout();
             Time.sleep(200, 500);
         }
         if(timeout > 0) {
-            Log.fine("Idling for " + getIdleFor() + " seconds.");
             return Fighter.getLoopReturn();
         }
         max = 0;
         main.hasIdled = true;
-        //main.totalTanned = 0;
-        //main.idleTanNum += Random.high(main.idleTanNum - 100, main.idleTanNum + 100);
+        if (main.beggar.getBlockingEvent(LoginScreen.class) == null) {
+            main.beggar.addBlockingEvent(new LoginScreen(main.beggar));
+        }
         return Fighter.getLoopReturn();
     }
 }

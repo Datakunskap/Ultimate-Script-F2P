@@ -42,14 +42,16 @@ public final class FightingSection extends TutorialSection {
 
         InterfaceComponent VIEW_EQUIPMENT_STATS_WIDGET = Interfaces.getComponent(387, 17);
 
+        SceneObject gate = SceneObjects.getNearest("Gate");
+        if (getInstructor() == null && gate != null) {
+            gate.interact("Open");
+            Log.info("Opening gate");
+            Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, 6000);
+        }
+
         switch (getProgress()) {
             case 370:
                 talkToInstructor();
-                SceneObject gate = SceneObjects.getNearest("Gate");
-                if (gate != null && gate.getPosition().distance(Players.getLocal()) <= 1) {
-                    gate.interact("Open");
-                    Log.info("Opening gate");
-                }
                 break;
             case 390:
                 Tabs.open(Tab.EQUIPMENT);

@@ -1,9 +1,7 @@
 package script.tanner.tasks;
 
 import org.rspeer.runetek.api.Worlds;
-import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
-import org.rspeer.runetek.api.component.WorldHopper;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.tanner.Main;
@@ -28,7 +26,7 @@ public class StartChocolate {
         if (tanner.isMuling)
             return false;
 
-        return tanner.getPPH() < beggar.getChocolatePPH(StartOther.CHOC_PER_HR, false) && tanner.timeRan.exceeds(Duration.ofMinutes(60));
+        return tanner.getPPH() < beggar.getChocolatePPH(StartOther.CHOC_PER_HR, false) && tanner.timeRan.exceeds(Duration.ofMinutes(45));
         /*return (tanner.getPPH() < 45000 && tanner.timeRan.exceeds(Duration.ofHours(8))) ||
                 (tanner.getPPH() < 40000 && tanner.timeRan.exceeds(Duration.ofHours(6))) ||
                 (tanner.getPPH() < 35000 && tanner.timeRan.exceeds(Duration.ofHours(4)));*/
@@ -41,17 +39,18 @@ public class StartChocolate {
 
         int currWorld = Worlds.getCurrent();
         if (Worlds.get(currWorld).getPopulation() > 400) {
-            WorldHopper.randomHop(x -> x != null && x.getPopulation() <= 400 &&
-                    !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
-            Time.sleepUntil(() -> Worlds.getCurrent() != currWorld, 12000);
+            StartOther.hopToLowPopWorld(400, currWorld);
         }
+
+
         if (tanner.isMuling) {
             Mule.logoutMule();
         }
         beggar.removeCurrBegWorld(beggar.currWorld);
         beggar.isChoc = true;
-        beggar.timesChocolate ++;
-        beggar.chocolate = script.chocolate.Main.getInstance(beggar);
+        beggar.isTanning = false;
+        beggar.timesChocolate++;
+        beggar.chocolate = new script.chocolate.Main(beggar);
         beggar.chocolate.amntMuled += tanner.amntMuled;
         beggar.chocolate.start();
     }

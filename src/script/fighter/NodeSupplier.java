@@ -10,6 +10,7 @@ import script.fighter.nodes.loot.BuryBones;
 import script.fighter.nodes.loot.DepositLootNode;
 import script.fighter.nodes.loot.LootNode;
 import script.fighter.nodes.progressive.ProgressionChecker;
+import script.fighter.nodes.restock.BuyGE;
 
 public class NodeSupplier {
 
@@ -27,6 +28,7 @@ public class NodeSupplier {
         BURY_BONES = new BuryBones(main);
         BACK_TO_FIGHT = new BackToFightZone(main);
         FIGHT = new FightNode(main);
+        BUY_GE = new BuyGE(main);
     }
 
     public final Task EAT;
@@ -38,8 +40,9 @@ public class NodeSupplier {
     public final Task BURY_BONES;
     public final Task BACK_TO_FIGHT;
     public final Task FIGHT;
+    public final Task BUY_GE;
 
-    public Task[] getTasks() {
+    /*public Task[] getTasks() {
         Task[] tasks = new Task[]{
                 EAT,
                 GET_FOOD,
@@ -53,5 +56,5 @@ public class NodeSupplier {
         };
 
         return tasks;
-    }
+    }*/
 }

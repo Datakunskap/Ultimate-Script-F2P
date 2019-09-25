@@ -3,6 +3,7 @@ package script.fighter.models;
 import org.rspeer.runetek.api.component.tab.Combat;
 import org.rspeer.runetek.api.component.tab.EquipmentSlot;
 import org.rspeer.runetek.api.component.tab.Skill;
+import org.rspeer.runetek.api.component.tab.Spell;
 import org.rspeer.runetek.api.movement.position.Position;
 
 import java.util.HashMap;
@@ -25,6 +26,9 @@ public class Progressive {
     private boolean buryBones;
     private boolean randomIdle;
     private int randomIdleBuffer;
+    private boolean ogress;
+    private HashSet<String> runes = new HashSet<>();
+    private Spell spell;
 
     public void setRandomIdle(boolean randomIdle) {
         this.randomIdle = randomIdle;
@@ -144,5 +148,21 @@ public class Progressive {
 
     public int getRadius() {
         return radius;
+    }
+
+    public void setOgress(boolean ogress) { this.ogress = ogress; }
+
+    public boolean isOgress() { return ogress; }
+
+    public void setRunes(HashSet<String> runes) { this.runes = runes; }
+
+    public HashSet<String> getRunes() { return runes; }
+
+    public void setSpell(Spell spell) {
+        this.spell = spell;
+    }
+
+    public Spell getSpell() {
+        return spell;
     }
 }

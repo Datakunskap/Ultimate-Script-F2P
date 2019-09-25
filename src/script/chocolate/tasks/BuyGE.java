@@ -45,7 +45,6 @@ public class BuyGE extends Task {
 
         if (!main.checkedBank) {
             if (StartTanning.validate(main, beggar)) {
-                beggar.timesTanned = 115;
                 StartTanning.execute(main, beggar);
             }
 
@@ -86,6 +85,7 @@ public class BuyGE extends Task {
             }
             main.atGELimit = true;
             main.sold = false;
+            main.checkedBank = false;
         }
 
         // Checks if done buying

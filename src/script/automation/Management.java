@@ -18,7 +18,7 @@ public class Management {
 
     private static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
 
-    public static boolean startDefaultClient(int pcIndex) throws IOException {
+    public static boolean startDefaultClient(int pcIndex) throws Exception {
         return startClient(pcIndex,
                 null,
                 "-Xmx384m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Xss2m",
@@ -28,15 +28,15 @@ public class Management {
         );
     }
 
-    public static boolean startClient(int pcIndex, int sleep, String proxy, int count) throws IOException {
+    public static boolean startClient(int pcIndex, int sleep, String proxy, int count) throws Exception {
         return startClient(pcIndex, "", sleep, proxy, count);
     }
 
-    public static boolean startClient(int pcIndex, int sleep, int count) throws IOException {
+    public static boolean startClient(int pcIndex, int sleep, int count) throws Exception {
         return startClient(pcIndex, "", sleep, "", count);
     }
 
-    public static boolean startClient(int pcIndex, String qs, int sleep, String proxy, int count) throws IOException {
+    public static boolean startClient(int pcIndex, String qs, int sleep, String proxy, int count) throws Exception {
         return startClient(
                 pcIndex,
                 qs,
@@ -47,12 +47,13 @@ public class Management {
         );
     }
 
-    public static boolean startClient(int pcIndex, String qs, String jvmArgs, int sleep, String proxy, int count) throws IOException {
+    public static boolean startClient(int pcIndex, String qs, String jvmArgs, int sleep, String proxy, int count) throws Exception {
         final String apiKey = Authentication.getApiKey();
         if (apiKey.isEmpty())
             throw new FileNotFoundException("Could not find api key file");
 
-        List<Launcher> launchers = getLaunchers();
+        List<Launcher> launchers = getLaunchers(10);
+
         final Headers headers = new Headers.Builder()
                 .add("ApiClient", apiKey)
                 .add("Content-Type", "application/json")
@@ -173,7 +174,7 @@ public class Management {
         return gson.fromJson(body.string(), type);
     }
 
-    public static List<Launcher> getLaunchers() throws IOException {
+    public static List<Launcher> getLaunchers(int retries) throws IOException, InterruptedException {
         final String apiKey = Authentication.getApiKey();
         if (apiKey.isEmpty())
             throw new FileNotFoundException("Could not find api key file");
@@ -201,6 +202,15 @@ public class Management {
             Launcher launcher = gson.fromJson(entry.getValue().getAsJsonObject(), Launcher.class);
             launcher.setSocketAddress(entry.getKey());
             launchers.add(launcher);
+        }
+
+        if (launchers.size() < 1) {
+            if (retries > 0) {
+                Thread.sleep(10000);
+                getLaunchers(retries - 1);
+            } else {
+                throw new IOException("Failed Getting Launcher");
+            }
         }
         return launchers;
     }

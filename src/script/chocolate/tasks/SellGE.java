@@ -67,6 +67,7 @@ public class SellGE extends Task {
         // Handles GE Limit
         if (!sellRemainingBars()) {
             GrandExchange.collectAll();
+            overtimePriceHandler(Main.BAR);
             return 1000;
         }
 
@@ -132,13 +133,31 @@ public class SellGE extends Task {
 
         }
 
+        overtimePriceHandler(Main.DUST);
+
+        // Checks and handles stuck in setup
+        if (main.elapsedSeconds > 30 && GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
+            GrandExchange.open(GrandExchange.View.OVERVIEW);
+            GrandExchange.collectAll();
+            if (!Time.sleepUntil(() -> !GrandExchangeSetup.isOpen(), 5000)) {
+                main.closeGE();
+            }
+            main.startTime = System.currentTimeMillis();
+        }
+
+        GrandExchange.collectAll();
+        Keyboard.pressEnter();
+        return 1000;
+    }
+
+    private void overtimePriceHandler(int itemID) {
         // Decreases sell price if over time
         main.checkTime();
         Log.info( "Waiting to complete  |  Time: " + main.elapsedSeconds / 60 + "min(s)  |  Price changed " + main.timesPriceChanged + " time(s)");
         if(main.elapsedSeconds > main.resetGeTime * 60 &&
                 GrandExchange.getFirstActive() != null) {
             Log.fine("Decreasing dust price by: " + main.intervalAmnt);
-            while(!Inventory.contains(Main.DUST) && GrandExchange.getFirstActive() != null) {
+            while(!Inventory.contains(itemID) && GrandExchange.getFirstActive() != null) {
                 Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).abort(), 1000, 5000);
                 GrandExchange.collectAll();
                 Time.sleep(5000);
@@ -159,25 +178,15 @@ public class SellGE extends Task {
                 GrandExchange.open();
                 GrandExchange.open(GrandExchange.View.OVERVIEW);
             }
-            main.decSellPrice += main.intervalAmnt;
+            if (itemID == Main.DUST) {
+                main.decSellPrice += main.intervalAmnt;
+            } else if (itemID == Main.BAR) {
+                main.incBuyPrice += main.intervalAmnt;
+            }
             main.setPrices(true);
             main.startTime = System.currentTimeMillis();
             main.timesPriceChanged++;
         }
-
-        // Checks and handles stuck in setup
-        if (main.elapsedSeconds > 30 && GrandExchange.getFirstActive() == null && GrandExchangeSetup.isOpen()) {
-            GrandExchange.open(GrandExchange.View.OVERVIEW);
-            GrandExchange.collectAll();
-            if (!Time.sleepUntil(() -> !GrandExchangeSetup.isOpen(), 5000)) {
-                main.closeGE();
-            }
-            main.startTime = System.currentTimeMillis();
-        }
-
-        GrandExchange.collectAll();
-        Keyboard.pressEnter();
-        return 1000;
     }
 
     private void fallbackGEPrice() {
@@ -199,7 +208,7 @@ public class SellGE extends Task {
                 GrandExchangeSetup.setItem(Main.BAR);
             Time.sleepUntil(() -> GrandExchangeSetup.getItem() != null,5000);
             fallbackGEPrice();
-            GrandExchangeSetup.setPrice(main.buyPrice);
+            GrandExchangeSetup.setPrice(main.buyPrice + main.incBuyPrice);
             Time.sleep(600);
             GrandExchangeSetup.setQuantity(9999999);
             Time.sleep(600);

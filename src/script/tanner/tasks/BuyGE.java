@@ -2,6 +2,7 @@ package script.tanner.tasks;
 
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
+import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.GrandExchange;
@@ -109,9 +110,9 @@ public class BuyGE extends Task {
         main.checkTime();
         if (main.elapsedSeconds > main.resetGeTime * 60 && GrandExchange.getFirstActive() != null) {
             Log.fine("Increasing hide price by: " + main.intervalAmnt);
-            while(GrandExchange.getFirstActive() != null) {
+            while(GrandExchange.getFirstActive() != null && Game.isLoggedIn()) {
                 Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).abort(), 1000, 5000);
-                GrandExchange.collectAll();
+                Keyboard.pressEnter();
                 Time.sleep(5000);
                 GrandExchange.collectAll();
 

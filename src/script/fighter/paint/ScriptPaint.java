@@ -3,8 +3,6 @@ package script.fighter.paint;
 import org.rspeer.runetek.api.component.tab.Combat;
 import org.rspeer.runetek.event.listeners.RenderListener;
 import org.rspeer.runetek.event.types.RenderEvent;
-import org.rspeer.script.ScriptMeta;
-import script.Beggar;
 import script.fighter.CombatStore;
 import script.fighter.Fighter;
 import script.fighter.Stats;
@@ -37,12 +35,11 @@ public final class ScriptPaint implements RenderListener {
 
     private Color outline;
 
-    public ScriptPaint(Fighter context, Beggar script) {
+    public ScriptPaint(Fighter context) {
         stats = new LinkedHashMap<>();
         outline = new Color(240, 0, 73);
 
-        ScriptMeta meta = script.getMeta();
-        stats.put(meta.name(), new PaintStatistic(true, () -> "v" + meta.version() + " by " + meta.developer()));
+        stats.put("Ultimate Beggar", new PaintStatistic(true, () -> "v" + "115" + " by " + "DrScatman"));
         stats.put("Runtime", new PaintStatistic(() -> context.getRuntime().toElapsedString()));
         stats.put("Status", new PaintStatistic(() -> {
             Node active = context.getActive();

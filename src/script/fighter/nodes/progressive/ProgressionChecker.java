@@ -2,10 +2,9 @@ package script.fighter.nodes.progressive;
 
 import org.rspeer.runetek.adapter.component.Item;
 import org.rspeer.runetek.api.commons.Time;
-import org.rspeer.runetek.api.component.tab.Combat;
-import org.rspeer.runetek.api.component.tab.EquipmentSlot;
-import org.rspeer.runetek.api.component.tab.Inventory;
+import org.rspeer.runetek.api.component.tab.*;
 import org.rspeer.ui.Log;
+import script.Beggar;
 import script.fighter.Fighter;
 import script.fighter.config.ProgressiveSet;
 import script.fighter.framework.BackgroundTaskExecutor;
@@ -45,6 +44,11 @@ public class ProgressionChecker extends Node {
                 continue;
             }
             String name = entry.getKey().getItemName();
+
+            if (equipment.toLowerCase().contains("bow") && Equipment.contains(equipment) &&
+                    !Equipment.isOccupied(EquipmentSlot.QUIVER) && !Inventory.contains(x -> x.getName().toLowerCase().contains("arrow"))) {
+                noAmmoSwitch();
+            }
             if (name == null || !name.equals(equipment)) {
                 Item inv = Inventory.getFirst(equipment);
                 if (inv == null) {
@@ -53,6 +57,7 @@ public class ProgressionChecker extends Node {
                 indexes.add(inv);
             }
         }
+
         return indexes;
     }
 
@@ -107,5 +112,31 @@ public class ProgressionChecker extends Node {
     @Override
     public void onScriptStop() {
         super.onScriptStop();
+    }
+
+    private void noAmmoSwitch() {
+        HashMap<EquipmentSlot, String> map = new HashMap<>();
+
+        switch (Beggar.randInt(0, 1)) {
+            case 0:
+                map.put(EquipmentSlot.MAINHAND, "Bronze sword");
+                map.put(EquipmentSlot.OFFHAND, "Wooden shield");
+                break;
+            case 1:
+                map.put(EquipmentSlot.MAINHAND, "Bronze dagger");
+                map.put(EquipmentSlot.OFFHAND, "Wooden shield");
+                break;
+        }
+        map.put(EquipmentSlot.LEGS, "Iron platelegs");
+        map.put(EquipmentSlot.CHEST, "Iron platebody");
+        map.put(EquipmentSlot.HEAD, "Iron full helm");
+        map.put(EquipmentSlot.NECK, "Amulet of strength");
+        map.put(EquipmentSlot.CAPE, "Team-17 cape");
+
+        Progressive p = ProgressiveSet.getCurrent();
+        p.setStyle(Combat.AttackStyle.ACCURATE);
+        p.setSkill(Skill.ATTACK);
+        p.setEquipmentMap(map);
+        Equipment.unequip("Shortbow");
     }
 }

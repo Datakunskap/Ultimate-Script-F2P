@@ -3,18 +3,15 @@ package script.fighter.nodes.combat;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.adapter.scene.PathingEntity;
 import org.rspeer.runetek.adapter.scene.Player;
-import org.rspeer.runetek.api.component.tab.Combat;
-import org.rspeer.runetek.api.component.tab.Equipment;
-import org.rspeer.runetek.api.component.tab.EquipmentSlot;
-import org.rspeer.runetek.api.component.tab.Skill;
+import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
+import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.runetek.event.types.ChatMessageEvent;
 import org.rspeer.runetek.event.types.ChatMessageType;
 import org.rspeer.runetek.event.types.DeathEvent;
 import org.rspeer.runetek.event.types.TargetEvent;
 import org.rspeer.ui.Log;
-import script.Beggar;
 import script.fighter.CombatStore;
 import script.fighter.NodeSupplier;
 import script.fighter.Stats;
@@ -78,11 +75,11 @@ public class CombatListener {
     public static void onChatMessage(ChatMessageEvent e) {
         if(e.getType() == ChatMessageType.PUBLIC || e.getType() == ChatMessageType.PRIVATE_RECEIVED)
             return;
-        if(e.getMessage().toLowerCase().contains("someone else is fighting that")) {
+        else if(e.getMessage().toLowerCase().contains("someone else is fighting that")) {
             Logger.debug("Someone else is fighting our target. Clearing.");
             CombatStore.setCurrentTarget(Config.isLooting() ? null : CombatWrapper.findTarget(false));
         }
-        if(e.getMessage().toLowerCase().contains("already under attack")) {
+        else if(e.getMessage().toLowerCase().contains("already under attack")) {
             Logger.debug("Already under attack.");
             HashSet<Npc> targetingMe = CombatStore.getTargetingMe();
             if(targetingMe.size() > 0) {
@@ -92,34 +89,13 @@ public class CombatListener {
 
             }
         }
-
-        if (e.getMessage().toLowerCase().contains("no ammo")) {
-            HashMap<EquipmentSlot, String> map = new HashMap<>();
-
-            switch (Beggar.randInt(0, 1)) {
-                case 0:
-                    map.put(EquipmentSlot.MAINHAND, "Bronze sword");
-                    map.put(EquipmentSlot.OFFHAND, "Wooden shield");
-                    break;
-                case 1:
-                    map.put(EquipmentSlot.MAINHAND, "Bronze dagger");
-                    map.put(EquipmentSlot.OFFHAND, "Wooden shield");
-                    break;
+        else if(e.getMessage().toLowerCase().contains("reach that!")) {
+            SceneObject gate = SceneObjects.getNearest("Gate");
+            if (gate != null && gate.isPositionInteractable()) {
+                gate.interact("Open");
             }
-            map.put(EquipmentSlot.LEGS, "Iron platelegs");
-            map.put(EquipmentSlot.CHEST, "Iron platebody");
-            map.put(EquipmentSlot.HEAD, "Iron full helm");
-            map.put(EquipmentSlot.NECK, "Amulet of strength");
-            map.put(EquipmentSlot.CAPE, "Team-17 cape");
-
-            Progressive p = ProgressiveSet.getCurrent();
-            p.setStyle(Combat.AttackStyle.ACCURATE);
-            p.setSkill(Skill.ATTACK);
-            p.setEquipmentMap(map);
-            Equipment.unequip("Shortbow");
         }
-
-        if(e.getMessage().toLowerCase().contains("the door seems to be stuck")) {
+        else if(e.getMessage().toLowerCase().contains("the door seems to be stuck")) {
             Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
         }
     }

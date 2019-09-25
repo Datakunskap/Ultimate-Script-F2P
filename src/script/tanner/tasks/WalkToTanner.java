@@ -1,9 +1,11 @@
 package script.tanner.tasks;
 
+import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Dialog;
+import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
@@ -52,6 +54,11 @@ public class WalkToTanner extends Task {
                 Time.sleepUntil(() -> !Dialog.isProcessing(), 5000);
                 Dialog.process(x -> x.toLowerCase().contains("yes"));
                 Time.sleepUntil(Dialog::canContinue, 5000);
+
+                InterfaceComponent fail = Interfaces.getComponent(217, 4);
+                if (fail != null && fail.isVisible() && fail.getText().toLowerCase().contains("oh dear")) {
+                    main.paidToll = true;
+                }
                 while (Dialog.isOpen() && Dialog.canContinue()) {
                     Dialog.processContinue();
                     Time.sleep(1000, 2000);

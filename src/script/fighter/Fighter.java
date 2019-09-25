@@ -8,7 +8,6 @@ import org.rspeer.runetek.api.component.tab.Combat;
 import org.rspeer.runetek.api.component.tab.EquipmentSlot;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.component.tab.Skill;
-import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.Projection;
@@ -41,25 +40,15 @@ public class Fighter {
     private NodeManager manager;
     private ScriptPaint paint;
     private StopWatch runtime;
-    public Progressive progressive;
+    private Progressive progressive;
 
-    private static long stopTimeMs;
-    public static long startTimeMs;
-    private static Fighter fighter;
-    private static Beggar beggar;
+    private long stopTimeMs;
+    public long startTimeMs;
+    public Beggar beggar;
 
-    private Fighter(Beggar script, long stopTimeMs) {
+    public Fighter(Beggar script, long stopTimeMs) {
         beggar = script;
-        Fighter.stopTimeMs = stopTimeMs;
-    }
-
-    //method to return instance of class
-    public static Fighter getInstance(Beggar script, long stopTimeMs) {
-        if (fighter == null) {
-            // if instance is null, initialize
-            fighter = new Fighter(script, stopTimeMs);
-        }
-        return fighter;
+        this.stopTimeMs = stopTimeMs;
     }
 
     public static int getLoopReturn() {
@@ -192,21 +181,24 @@ public class Fighter {
             progressive.setEnemies(enemies);
 
             progressive.setRandomIdle(true);
-            progressive.setRandomIdleBuffer(Beggar.randInt(15, 25));
+            progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
 
 
+            CombatStore.resetTargetingValues();
             if (!ProgressiveSet.isEmpty()) {
                 ProgressiveSet.removeAll();
             }
             ProgressiveSet.add(progressive);
-            Config.setLogLevel(LogLevel.All);
+            Config.setLogLevel(LogLevel.Debug);
             supplier = new NodeSupplier(this);
             manager = new NodeManager();
-            setupNodes();
+
             runtime = StopWatch.start();
             startTimeMs = System.currentTimeMillis();
-            paint = new ScriptPaint(this, beggar);
+            paint = new ScriptPaint(this);
             setBackgroundTasks();
+            active = null;
+            setupNodes();
 
             if(!GameCanvas.isInputEnabled()) {
                 GameCanvas.setInputEnabled(true);
@@ -228,6 +220,7 @@ public class Fighter {
                 supplier.PROGRESSION_CHECKER,
                 supplier.BURY_BONES,
                 supplier.IDLE,
+                supplier.BUY_GE,
                 supplier.FIGHT,
                 supplier.BACK_TO_FIGHT
         );
@@ -307,7 +300,7 @@ public class Fighter {
         CombatListener.onChatMessage(e);
     }
 
-    private Node active = null;
+    private Node active;
 
     public Node getActive() {
         return active;
@@ -324,15 +317,9 @@ public class Fighter {
                 Log.fine("Stopping Fighter");
                 onStop(false, 10);
             } else {
-                Log.severe("Low CB LVL Restarting Fighter");
-                beggar.isFighterRunning = false;
-                startTimeMs = System.currentTimeMillis();
-                BackgroundTaskExecutor.shutdown();
-                Time.sleep(5000);
-                beggar.removeAll();
-                Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                Time.sleep(5000);
-                onStart();
+                Log.severe("Low Combat LVL Continuing");
+                startTimeMs = System.currentTimeMillis() - (stopTimeMs / 2);
+                CombatStore.resetTargetingValues();
             }
         }
     }

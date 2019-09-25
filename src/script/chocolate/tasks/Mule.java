@@ -96,6 +96,16 @@ public class Mule extends Task {
         if(Worlds.getCurrent() != main.muleWorld){
             begWorld = Worlds.getCurrent();
             WorldHopper.hopTo(main.muleWorld);
+
+            if (Dialog.isOpen()) {
+                if (Dialog.canContinue()) {
+                    Dialog.processContinue();
+                }
+                Dialog.process(x -> x != null && x.toLowerCase().contains("future"));
+                Dialog.process(x -> x != null && (x.toLowerCase().contains("switch") || x.toLowerCase().contains("yes")));
+                Time.sleepUntil(() -> !Dialog.isProcessing(), 10000);
+            }
+
             Time.sleepUntil(() -> Worlds.getCurrent() == main.muleWorld, 10000);
         }
 

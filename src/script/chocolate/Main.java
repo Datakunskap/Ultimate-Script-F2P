@@ -78,20 +78,10 @@ public class Main {
     public boolean usingSellFallback = false;
     public int idleChocNum = Beggar.randInt((StartOther.CHOC_PER_HR / 2 - 500), (StartOther.CHOC_PER_HR / 2 + 500));
 
-    private static script.chocolate.Main chocolate;
-    private static Beggar beggar;
+    public Beggar beggar;
 
-    private Main(Beggar script) {
+    public Main(Beggar script) {
         beggar = script;
-    }
-
-    //method to return instance of class
-    public static Main getInstance(Beggar script) {
-        if (chocolate == null) {
-            // if instance is null, initialize
-            chocolate = new Main(script);
-        }
-        return chocolate;
     }
 
     public void start() {

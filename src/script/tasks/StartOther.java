@@ -4,6 +4,7 @@ import org.rspeer.runetek.api.Worlds;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.WorldHopper;
 import org.rspeer.runetek.api.component.tab.Inventory;
+import org.rspeer.runetek.providers.RSWorld;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
@@ -40,7 +41,7 @@ public class StartOther extends Task {
                     (hasEnoughGP(START_GP) && hasLowPPH()) ||
                     (hasEnoughGP(START_GP) && hasTopBegWorldsCovered()) ||
                     (hasEnoughGP(MIN_START_GP) && hasLongLastTradeTime(LAST_TRADE_MINUTES)) ||
-                    (hasEnoughGP(START_GP) && main.sumTopPops < SUM_TOP_3_WORLDS_POP_LIMIT  && hasLowPPH())
+                    (hasEnoughGP(MIN_START_GP) && main.sumTopPops < SUM_TOP_3_WORLDS_POP_LIMIT  && hasLowPPH())
             ) {
                 compareOtherPPH(true);
                 return true;
@@ -94,10 +95,11 @@ public class StartOther extends Task {
     @Override
     public int execute() {
         if (main.isTanning && !main.isChoc) {
-            script.tanner.Main tanner = script.tanner.Main.getInstance(main);
+            script.tanner.Main tanner = new script.tanner.Main(main);
 
             main.tanner = tanner;
             main.timesTanned ++;
+            main.tanner.amntMuled += main.amntMuled;
             main.removeCurrBegWorld(main.currWorld);
             if (main.isMuling) {
                 Mule.logoutMule();
@@ -108,19 +110,31 @@ public class StartOther extends Task {
 
         if (main.isChoc && !main.isTanning) {
             if (Worlds.get(main.currWorld).getPopulation() > 400) {
-                WorldHopper.randomHop(x -> x != null && x.getPopulation() <= 400 &&
-                        !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
-                Time.sleepUntil(() -> Worlds.getCurrent() != main.currWorld, 12000);
+                hopToLowPopWorld(400, main.currWorld);
             }
             if (main.isMuling) {
                 Mule.logoutMule();
             }
             main.removeCurrBegWorld(main.currWorld);
             main.timesChocolate ++;
-            main.chocolate = Main.getInstance(main);
+            main.chocolate = new Main(main);
+            main.chocolate.amntMuled += main.amntMuled;
             main.chocolate.start();
             return 5000;
         }
         return 1000;
+    }
+
+    public static void hopToLowPopWorld(int pop, int currWorld) {
+        RSWorld newWorld = Worlds.get(x -> x != null && x.getPopulation() <= pop &&
+                !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
+
+        if (newWorld != null) {
+            WorldHopper.hopTo(newWorld);
+        } else if (pop < 1000) {
+            hopToLowPopWorld(pop + 100, currWorld);
+        }
+
+        Time.sleepUntil(() -> Worlds.getCurrent() != currWorld, 12000);
     }
 }

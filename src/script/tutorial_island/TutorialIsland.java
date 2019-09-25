@@ -14,9 +14,9 @@ import script.fighter.Fighter;
 public final class TutorialIsland {
 
     private static TutorialIsland main;
-    private static Beggar beggar;
+    public Beggar beggar;
     final int idleTutSection = Beggar.randInt(0, 20);
-    boolean hasIdled = (Beggar.randInt(0, 10) != 0);
+    boolean hasIdled = (Beggar.randInt(0, 10) == 0);
 
     private TutorialIsland(Beggar script) {
         beggar = script;
@@ -31,11 +31,15 @@ public final class TutorialIsland {
         return main;
     }
 
-    public static boolean checkTutorialIsland() {
-        return new CheckTutIsland(beggar).onTutIsland();
+    public boolean onTutorialIsland() {
+        if (new CheckTutIsland(beggar).onTutIsland()) {
+            return true;
+        }
+        Log.fine("Tutorial Island Complete");
+        return false;
     }
 
-    public static void logoutAndSwitchAcc() {
+    public void logoutAndSwitchAcc() {
         String currAcc = RSPeer.getGameAccount().getUsername();
         beggar.writeAccount(currAcc);
 
@@ -53,25 +57,20 @@ public final class TutorialIsland {
         }
     }
 
-
-    public static void startFighter() {
+    public void startFighter() {
         //logoutAndSwitchAcc();
-
         beggar.resetRender();
         beggar.removeAll();
-        Fighter fighter = Fighter.getInstance(beggar, Beggar.randInt(720_000, 1_200_000)); // 12 - 20
-        Fighter.startTimeMs = System.currentTimeMillis();
-        fighter.onStart();
+        beggar.fighter = new Fighter(beggar, Beggar.randInt(720_000, 1_200_000)); // 12 - 20
+        beggar.fighter.onStart();
     }
 
-    public static void startFighter(Beggar script) {
+    public void startFighter(Beggar script) {
         //logoutAndSwitchAcc();
-
         script.resetRender();
         script.removeAll();
-        Fighter fighter = Fighter.getInstance(script, Beggar.randInt(720_000, 1_200_000)); // 12 - 20
-        Fighter.startTimeMs = System.currentTimeMillis();
-        fighter.onStart();
+        beggar.fighter = new Fighter(beggar, Beggar.randInt(720_000, 1_200_000)); // 12 - 20
+        beggar.fighter.onStart();
     }
 
     public static int getRandSleep(){
@@ -97,10 +96,9 @@ public final class TutorialIsland {
                 new FightingSection(),
                 new BankSection(),
                 new PriestSection(),
-                new WizardSection()
+                new WizardSection(this)
         );
 
-        //Time.sleepUntil(Game::isLoggedIn, 6000);
     }
 
     public TutorialIsland copy() {

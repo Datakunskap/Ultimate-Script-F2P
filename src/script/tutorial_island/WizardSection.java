@@ -12,6 +12,7 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
+import script.fighter.Fighter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,8 +46,11 @@ public final class WizardSection extends TutorialSection {
                     new Position(3144, 3088)
     );
 
-    public WizardSection() {
+    private TutorialIsland main;
+
+    public WizardSection(TutorialIsland main) {
         super("Magic Instructor");
+        this.main = main;
     }
 
     @Override
@@ -61,9 +65,10 @@ public final class WizardSection extends TutorialSection {
             return TutorialIsland.getRandSleep();
         }
 
-        if (getInstructor() == null) {
-            Time.sleepUntil(() -> Players.getLocal().isAnimating(), 2000, 5000);
+        if (getInstructor() == null && main.onTutorialIsland()) {
+            //Time.sleepUntil(() -> Players.getLocal().isAnimating(), 2000, 5000);
             Movement.walkToRandomized(WIZARD_BUILDING.getCenter());
+            return Fighter.getLoopReturn();
         }
 
         switch (getProgress()) {
@@ -94,9 +99,9 @@ public final class WizardSection extends TutorialSection {
                 break;
         }
 
-        if (!TutorialIsland.checkTutorialIsland()) {
+        if (!main.onTutorialIsland()) {
             randWalker(Players.getLocal().getPosition());
-            TutorialIsland.startFighter();
+            main.startFighter();
         }
 
         return TutorialIsland.getRandSleep();

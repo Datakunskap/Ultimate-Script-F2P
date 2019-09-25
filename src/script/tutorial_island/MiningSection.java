@@ -78,7 +78,9 @@ public final class MiningSection extends TutorialSection {
 
         switch (getProgress()) {
             case 260:
-                if (Movement.walkToRandomized(SMITH_AREA.getCenter())) {
+                if (getInstructor() == null) {
+                    Movement.walkToRandomized(SMITH_AREA.getCenter());
+                } else {
                     talkToInstructor();
                 }
                 break;

@@ -14,7 +14,7 @@ public final class StartTanning {
     }
 
     public static void execute(Main chocolate, Beggar beggar) {
-        script.tanner.Main tanner = script.tanner.Main.getInstance(beggar);
+        script.tanner.Main tanner = new script.tanner.Main(beggar);
         beggar.tanner = tanner;
         beggar.isChoc = false;
         beggar.isTanning = true;

@@ -74,4 +74,9 @@ public class CombatStore {
         targetingMe.remove(source);
     }
 
+    public static void resetTargetingValues() {
+        currentTarget = null;
+        nextTarget = null;
+        targetingMe = new HashSet<>();
+    }
 }

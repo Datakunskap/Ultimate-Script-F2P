@@ -88,21 +88,21 @@ public class Main {
     public boolean paidToll = true;
     public int idleTanNum = Beggar.randInt((StartOther.TANS_PER_HR / 2  - 200), (StartOther.TANS_PER_HR / 2  + 200));
 
-    private static Main tanner;
-    private static Beggar beggar;
+    //private Main tanner;
+    public Beggar beggar;
 
-    private Main(Beggar script) {
+    public Main(Beggar script) {
         beggar = script;
     }
 
-    //method to return instance of class
+    /*//method to return instance of class
     public static Main getInstance(Beggar script) {
         if (tanner == null) {
             // if instance is null, initialize
             tanner = new Main(script);
         }
         return tanner;
-    }
+    }*/
 
     public void setHighestProfitLeather (boolean refreshPrice) {
         Log.fine("Setting Most Profitable Leather");
@@ -187,23 +187,23 @@ public class Main {
         setPrices(true);
 
         javax.swing.SwingUtilities.invokeLater(() ->
-                new Gui(tanner)
+                new Gui(this)
         );
 
-        beggar.submit(new Mule(tanner),
-                new CheckRestock(tanner),
-                new Eat(tanner),
-                new WalkToCows(tanner),
-                new LootHide(tanner),
-                new AttackCow(tanner),
-                new WalkToGE(tanner),
-                new SellGE(tanner, beggar),
-                new BuyGE(tanner),
-                new WalkToBank(tanner),
-                new BankAK(tanner),
-                new Idle(tanner),
-                new WalkToTanner(tanner),
-                new TanHide(tanner));
+        beggar.submit(new Mule(this),
+                new CheckRestock(this),
+                new Eat(this),
+                new WalkToCows(this),
+                new LootHide(this),
+                new AttackCow(this),
+                new WalkToGE(this),
+                new SellGE(this, beggar),
+                new BuyGE(this),
+                new WalkToBank(this),
+                new BankAK(this),
+                new Idle(this),
+                new WalkToTanner(this),
+                new TanHide(this));
 
         Combat.toggleAutoRetaliate(true);
     }

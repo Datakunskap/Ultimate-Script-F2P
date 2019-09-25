@@ -18,8 +18,6 @@ import script.Beggar;
 public abstract class TutorialSection extends Task {
 
     private final String INSTRUCTOR_NAME;
-    public final char[] vowels = "aeiouyAEIOUY".toCharArray();
-    public final char[] nonVowels = "bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ".toCharArray();
 
     public TutorialSection(final String INSTRUCTOR_NAME) {
         this.INSTRUCTOR_NAME = INSTRUCTOR_NAME;
@@ -35,15 +33,18 @@ public abstract class TutorialSection extends Task {
         return Varps.get(406);
     }
 
-    protected final void talkToInstructor() {
+    protected final boolean talkToInstructor() {
         Npc i = getInstructor();
         if (i != null && i.isPositionInteractable() && i.interact("Talk-to")) {
             Time.sleepUntil(this::pendingContinue, 2000, 5000);
         } else if (i != null && i.isPositionWalkable()) {
             Movement.walkToRandomized(i.getPosition());
         } else {
-            Movement.walkToRandomized(Players.getLocal().getPosition().randomize(3));
+            Movement.walkToRandomized(Players.getLocal().getPosition().randomize(6));
+            Log.severe("Cant Find Instructor: Section-" + getTutorialSection() + " Progress-" + getProgress());
+            return false;
         }
+        return true;
     }
 
     protected Npc getInstructor() {
@@ -72,13 +73,11 @@ public abstract class TutorialSection extends Task {
 
     protected void randWalker(Position posRequired) {
         Log.info("Walking to next section");
-        while (!Players.getLocal().getPosition().equals(posRequired)) {
-            Time.sleep(800, 1800);
-            Movement.walkToRandomized(posRequired);
-        }
-        if (posRequired.distance(Players.getLocal()) < 4) {
-            Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-            Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(3000, 6000));
+        if (Time.sleepUntil(() -> Movement.walkTo(posRequired) && Players.getLocal().getPosition().equals(posRequired), 1000, 8000)) {
+            if (posRequired.distance(Players.getLocal()) < 4) {
+                Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
+                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(3000, 6000));
+            }
         }
     }
 }

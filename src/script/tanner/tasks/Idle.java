@@ -3,8 +3,10 @@ package script.tanner.tasks;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
+import org.rspeer.script.events.LoginScreen;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
+import script.Beggar;
 import script.fighter.Fighter;
 import script.tanner.Main;
 
@@ -54,6 +56,7 @@ public class Idle extends Task {
         long timeout = getIdleFor();
         if(timeout > 60 && Game.isLoggedIn()) {
             Log.fine("Logging out....");
+            main.beggar.removeBlockingEvent(LoginScreen.class);
             Game.logout();
             Time.sleep(200, 500);
         }
@@ -64,6 +67,10 @@ public class Idle extends Task {
         max = 0;
         //main.totalTanned = 0;
         main.idleTanNum += Random.high(main.idleTanNum - 100, main.idleTanNum + 100);
+        Beggar.timesIdled ++;
+        if (main.beggar.getBlockingEvent(LoginScreen.class) == null) {
+            main.beggar.addBlockingEvent(new LoginScreen(main.beggar));
+        }
         return Fighter.getLoopReturn();
     }
 }
