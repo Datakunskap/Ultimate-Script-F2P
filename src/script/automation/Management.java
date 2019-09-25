@@ -40,7 +40,7 @@ public class Management {
         return startClient(
                 pcIndex,
                 qs,
-                "-Xmx384m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Xss2m",
+                "-Xmx768m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Xss2m",
                 sleep,
                 proxy,
                 count

@@ -37,7 +37,7 @@ public abstract class TutorialSection extends Task {
         Npc i = getInstructor();
         if (i != null && i.isPositionInteractable() && i.interact("Talk-to")) {
             Log.info("Talking to instructor");
-            Time.sleepUntil(this::pendingContinue, 2000, 5000);
+            Time.sleepUntil(this::pendingContinue, 2000, 6000);
         } else if (i != null && i.isPositionWalkable()) {
             Log.info("Walking to instructor");
             Movement.walkToRandomized(i.getPosition().randomize(3));

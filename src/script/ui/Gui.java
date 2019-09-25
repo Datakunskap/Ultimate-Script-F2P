@@ -95,7 +95,7 @@ public class Gui extends Task {
         mulePos.setSelectedIndex(0);
         mKeep.setText("5000");
         min.setText("20");
-        max.setText("35");
+        max.setText("40");
         begAmounts.setSelectedIndices(new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
         begType.setSelectedIndex(0);
         timesText.setText("5");
