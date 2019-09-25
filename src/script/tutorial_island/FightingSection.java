@@ -2,7 +2,6 @@ package script.tutorial_island;
 
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
-import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.tab.Equipment;
@@ -15,7 +14,6 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
-import org.rspeer.ui.Log;
 import script.Beggar;
 
 public final class FightingSection extends TutorialSection {
@@ -42,12 +40,11 @@ public final class FightingSection extends TutorialSection {
 
         InterfaceComponent VIEW_EQUIPMENT_STATS_WIDGET = Interfaces.getComponent(387, 17);
 
-        SceneObject gate = SceneObjects.getNearest("Gate");
-        if (getInstructor() == null && gate != null) {
-            gate.interact("Open");
+        /*SceneObject gate = SceneObjects.getNearest("Gate");
+        if (getInstructor() == null && gate != null && gate.interact("Open")) {
             Log.info("Opening gate");
-            Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, 6000);
-        }
+            Time.sleepUntil(() -> getInstructor() != null, 1000, 8000);
+        }*/
 
         switch (getProgress()) {
             case 370:

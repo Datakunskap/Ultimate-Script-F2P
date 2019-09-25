@@ -1,22 +1,23 @@
 package script.tutorial_island;
 
 import org.rspeer.runetek.api.Game;
+import org.rspeer.runetek.api.Varps;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.script.events.LoginScreen;
+import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.fighter.Fighter;
 
 import java.util.concurrent.TimeUnit;
 
-public class Idle extends TutorialSection {
+public class Idle extends Task {
 
     private int max;
     private long idleTill;
     private TutorialIsland main;
 
     public Idle(TutorialIsland main) {
-        super(null);
         this.main = main;
     }
 
@@ -39,13 +40,13 @@ public class Idle extends TutorialSection {
         if(max == 0) {
             max = main.idleTutSection;
         }
-        return getTutorialSection() >= max && !main.hasIdled;
+        return Varps.get(406) >= max && !main.hasIdled;
     }
 
     @Override
     public int execute() {
         if(idleTill == 0) {
-            idleTill = System.currentTimeMillis() + Random.low(20000, 65000);
+            idleTill = System.currentTimeMillis() + Random.low(20000, 120000);
             Log.fine("Idling for " + getIdleFor() + " seconds");
             return Fighter.getLoopReturn();
         }

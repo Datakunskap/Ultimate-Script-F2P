@@ -36,12 +36,14 @@ public abstract class TutorialSection extends Task {
     protected final boolean talkToInstructor() {
         Npc i = getInstructor();
         if (i != null && i.isPositionInteractable() && i.interact("Talk-to")) {
+            Log.info("Talking to instructor");
             Time.sleepUntil(this::pendingContinue, 2000, 5000);
         } else if (i != null && i.isPositionWalkable()) {
-            Movement.walkToRandomized(i.getPosition());
+            Log.info("Walking to instructor");
+            Movement.walkToRandomized(i.getPosition().randomize(3));
         } else {
             Movement.walkToRandomized(Players.getLocal().getPosition().randomize(6));
-            Log.severe("Cant Find Instructor: Section-" + getTutorialSection() + " Progress-" + getProgress());
+            Log.severe("Cant Find Instructor: Section " + getTutorialSection() + " Progress " + getProgress());
             return false;
         }
         return true;
@@ -56,7 +58,7 @@ public abstract class TutorialSection extends Task {
         if (wierdContinue != null && wierdContinue.isVisible() &&
                 (wierdContinue.getText().toLowerCase().contains("someone") ||
                         wierdContinue.getText().toLowerCase().contains("reach") ||
-                            wierdContinue.getText().toLowerCase().contains("already"))) {
+                        wierdContinue.getText().toLowerCase().contains("already"))) {
             return true;
         }
 
@@ -71,13 +73,14 @@ public abstract class TutorialSection extends Task {
         return false;
     }
 
-    protected void randWalker(Position posRequired) {
-        Log.info("Walking to next section");
-        if (Time.sleepUntil(() -> Movement.walkTo(posRequired) && Players.getLocal().getPosition().equals(posRequired), 1000, 8000)) {
-            if (posRequired.distance(Players.getLocal()) < 4) {
-                Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(3000, 6000));
-            }
+    void randWalker(Position posRequired) {
+        Time.sleep(1000, 1500);
+        Time.sleepUntil(() -> Movement.walkToRandomized(posRequired) && Players.getLocal().getPosition().equals(posRequired), 1000, 8000);
+        if (posRequired.distance(Players.getLocal()) < 4) {
+            Log.info("Random walk");
+            Movement.walkToRandomized(Players.getLocal().getPosition().randomize(6));
+            Time.sleep(2000);
+            Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(2000, 6000));
         }
     }
 }

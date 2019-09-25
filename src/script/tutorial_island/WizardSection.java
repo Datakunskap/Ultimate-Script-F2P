@@ -101,7 +101,7 @@ public final class WizardSection extends TutorialSection {
 
         if (!main.onTutorialIsland()) {
             randWalker(Players.getLocal().getPosition());
-            main.startFighter();
+            main.beggar.startFighter();
         }
 
         return TutorialIsland.getRandSleep();
