@@ -45,6 +45,7 @@ public class Idle extends Task {
 
     @Override
     public int execute() {
+        Log.info("Idling...");
         if(idleTill == 0) {
             idleTill = System.currentTimeMillis() + Random.low(20000, 120000);
             Log.fine("Idling for " + getIdleFor() + " seconds");
