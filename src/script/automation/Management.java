@@ -21,7 +21,7 @@ public class Management {
     public static boolean startDefaultClient(int pcIndex) throws Exception {
         return startClient(pcIndex,
                 null,
-                "-Xmx384m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Xss2m",
+                "-Xmx768m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Xss2m",
                 10,
                 null,
                 1

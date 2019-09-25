@@ -295,7 +295,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
             try {
 
-                Management.startClient(0, quickLaunch.get().toString(), 0, null, 1);
+                Management.startClient(0, quickLaunch.get().toString(), 10, null, 1);
                 killClient();
 
             } catch (Exception e) {
