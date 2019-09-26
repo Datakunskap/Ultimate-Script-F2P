@@ -19,28 +19,7 @@ import java.util.List;
 
 public final class BankSection extends TutorialSection {
 
-    private static final Area BANK_AREA = Area.polygonal(
-            new Position(3125, 3121, 0),
-            new Position(3126, 3121, 0),
-            new Position(3126, 3119, 0),
-            new Position(3118, 3119, 0),
-            new Position(3118, 3121, 0),
-            new Position(3119, 3121, 0),
-            new Position(3119, 3123, 0),
-            new Position(3115, 3123, 0),
-            new Position(3115, 3128, 0),
-            new Position(3118, 3128, 0),
-            new Position(3118, 3126, 0),
-            new Position(3122, 3126, 0),
-            new Position(3122, 3130, 0),
-            new Position(3126, 3130, 0),
-            new Position(3126, 3128, 0),
-            new Position(3128, 3128, 0),
-            new Position(3128, 3126, 0),
-            new Position(3130, 3126, 0),
-            new Position(3130, 3123, 0),
-            new Position(3125, 3123, 0),
-            new Position(3125, 3121, 0));
+    private static final Area BANK_AREA = Area.rectangular(3119, 3125, 3124, 3119);
 
     private static final List<Position> PATH_TO_BANK = Arrays.asList(
             new Position(3111, 3123, 0),
@@ -68,7 +47,7 @@ public final class BankSection extends TutorialSection {
         switch (getProgress()) {
             case 510:
                 if (!BANK_AREA.contains(Players.getLocal())) {
-                    daxWalker.walkTo(BANK_AREA.getTiles().get(Beggar.randInt(0, BANK_AREA.getTiles().size() -1)));
+                    daxWalker(BANK_AREA.getTiles().get(Beggar.randInt(0, BANK_AREA.getTiles().size() -1)), BANK_AREA);
                 } else if (Dialog.isOpen() && Dialog.isViewingChatOptions()) {
                     Dialog.process("Yes.");
                 } else if (SceneObjects.getNearest("Bank booth").interact("Use")) {
