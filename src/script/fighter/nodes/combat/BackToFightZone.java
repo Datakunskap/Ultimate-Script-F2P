@@ -37,7 +37,7 @@ public class BackToFightZone extends Node {
         }
         if(Movement.getDestinationDistance() >= distRandom) {
             Time.sleep(200, 450);
-            if (!Players.getLocal().isMoving() && !Movement.isDestinationSet()) {
+            if (!Players.getLocal().isMoving()) {
                 Logger.debug("Walking to: " + startTileRandom.toString());
                 main.daxWalker.walkTo(startTileRandom, () -> startTileRandom == null);
             }

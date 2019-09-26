@@ -11,7 +11,6 @@ import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.input.Keyboard;
-import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
@@ -105,7 +104,7 @@ public abstract class TutorialSection extends Task {
     void randWalker(Position posRequired) {
         Log.info("Walking to next section");
         while (!Script.interrupted() && !Players.getLocal().getPosition().equals(posRequired)) {
-            if (!Players.getLocal().isMoving() && !Movement.isDestinationSet()) {
+            if (!Players.getLocal().isMoving()) {
                 daxWalker(posRequired);
             }
         }
