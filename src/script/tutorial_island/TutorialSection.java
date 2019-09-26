@@ -51,13 +51,12 @@ public abstract class TutorialSection extends Task {
     protected final boolean talkToInstructor() {
         Npc i = getInstructor();
         if (i != null && i.isPositionInteractable() && i.interact("Talk-to")) {
-            Log.info("Talking to instructor");
             Time.sleepUntil(this::pendingContinue, 2000, 6000);
         } else if (i != null) {
             Log.info("Walking to instructor");
-            daxWalker.walkTo(i.getPosition().randomize(3));
+            daxWalker(i.getPosition().randomize(4));
         } else {
-            daxWalker.walkTo(Players.getLocal().getPosition().randomize(6));
+            daxWalker(Players.getLocal().getPosition().randomize(6));
             Log.severe("Cant Find Instructor: Section " + getTutorialSection() + " Progress " + getProgress());
             return false;
         }
@@ -106,22 +105,31 @@ public abstract class TutorialSection extends Task {
     void randWalker(Position posRequired) {
         Log.info("Walking to next section");
         while (!Script.interrupted() && !Players.getLocal().getPosition().equals(posRequired)) {
-            Time.sleep(800, 1800);
-            daxWalker.walkTo(posRequired);
+            if (!Players.getLocal().isMoving() && !Movement.isDestinationSet()) {
+                daxWalker(posRequired);
+            }
         }
         if (posRequired.distance(Players.getLocal()) < 4) {
-            getEmptyPosition().ifPresent(position -> {
-                if (Movement.getDestinationDistance() > 0)
-                    daxWalker.walkTo(position);
-            });
-            //daxWalker.walkTo(Players.getLocal().getPosition().randomize(8));
-            Time.sleep(1000);
-            Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(2000, 6000));
+            int times = Beggar.randInt(1, 3);
+            Log.info("Random walking " + times + " time(s)");
+            for (int i = 0; i < times; i ++) {
+                daxWalker(Players.getLocal().getPosition().randomize(10));
+                Time.sleep(1000);
+                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(2000, 6000));
+            }
         }
     }
 
     void daxWalker(Position position , Area stopArea) {
         daxWalker.walkTo(position, () -> {
+            if (stopArea == null && (Dialog.isOpen() && Dialog.canContinue())) {
+                Time.sleep(1000, 5000);
+                return true;
+            }
+            if (stopArea == null) {
+                return false;
+            }
+
             if (stopArea.contains(Players.getLocal()) || (Dialog.isOpen() && Dialog.canContinue())) {
                 Time.sleep(1000, 5000);
                 return true;
@@ -131,12 +139,6 @@ public abstract class TutorialSection extends Task {
     }
 
     void daxWalker(Position position) {
-        daxWalker.walkTo(position, () -> {
-            if (Dialog.isOpen() && Dialog.canContinue()) {
-                Time.sleep(1000, 5000);
-                return true;
-            }
-            return false; // false to continue walking after check. true to exit out of walker.
-        });
+        daxWalker(position, null);
     }
 }
