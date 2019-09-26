@@ -12,7 +12,9 @@ import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Trade;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
+import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Area;
+import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.event.listeners.*;
 import org.rspeer.runetek.event.types.*;
 import org.rspeer.runetek.providers.RSWorld;
@@ -231,7 +233,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         //logoutAndSwitchAcc();
         resetRender();
         removeAll();
-        fighter = new Fighter(this, randInt(720_000, 1_200_000)); // 12 - 20
+        fighter = new Fighter(this, randInt(720_000, 1_080_000)); // 12 - 18
         fighter.onStart();
     }
 
@@ -681,12 +683,14 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 if (isTanning){
                     tanner.sold = false;
                     tanner.checkedBank = false;
-                    tanner.closeGE();
+                    Movement.setWalkFlag(Players.getLocal());
+                    //tanner.closeGE();
                 }
                 if (isChoc) {
                     chocolate.sold = false;
                     chocolate.checkedBank = false;
-                    chocolate.closeGE();
+                    Movement.setWalkFlag(Players.getLocal());
+                    //chocolate.closeGE();
                 }
             }
         }

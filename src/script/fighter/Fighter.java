@@ -1,5 +1,6 @@
 package script.fighter;
 
+import com.dax.walker.DaxWalker;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.StopWatch;
 import org.rspeer.runetek.api.commons.Time;
@@ -44,10 +45,12 @@ public class Fighter {
 
     private long stopTimeMs;
     public long startTimeMs;
+    public DaxWalker daxWalker;
     public Beggar beggar;
 
     public Fighter(Beggar script, long stopTimeMs) {
         beggar = script;
+        daxWalker = script.daxWalker;
         this.stopTimeMs = stopTimeMs;
     }
 

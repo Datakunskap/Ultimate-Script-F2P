@@ -51,13 +51,12 @@ public abstract class TutorialSection extends Task {
     protected final boolean talkToInstructor() {
         Npc i = getInstructor();
         if (i != null && i.isPositionInteractable() && i.interact("Talk-to")) {
-            Log.info("Talking to instructor");
             Time.sleepUntil(this::pendingContinue, 2000, 6000);
         } else if (i != null) {
             Log.info("Walking to instructor");
-            daxWalker.walkTo(i.getPosition().randomize(3));
+            daxWalker(i.getPosition().randomize(4));
         } else {
-            daxWalker.walkTo(Players.getLocal().getPosition().randomize(6));
+            daxWalker(Players.getLocal().getPosition().randomize(6));
             Log.severe("Cant Find Instructor: Section " + getTutorialSection() + " Progress " + getProgress());
             return false;
         }
@@ -122,6 +121,14 @@ public abstract class TutorialSection extends Task {
 
     void daxWalker(Position position , Area stopArea) {
         daxWalker.walkTo(position, () -> {
+            if (stopArea == null && (Dialog.isOpen() && Dialog.canContinue())) {
+                Time.sleep(1000, 5000);
+                return true;
+            }
+            if (stopArea == null) {
+                return false;
+            }
+
             if (stopArea.contains(Players.getLocal()) || (Dialog.isOpen() && Dialog.canContinue())) {
                 Time.sleep(1000, 5000);
                 return true;
@@ -131,12 +138,6 @@ public abstract class TutorialSection extends Task {
     }
 
     void daxWalker(Position position) {
-        daxWalker.walkTo(position, () -> {
-            if (Dialog.isOpen() && Dialog.canContinue()) {
-                Time.sleep(1000, 5000);
-                return true;
-            }
-            return false; // false to continue walking after check. true to exit out of walker.
-        });
+        daxWalker(position, null);
     }
 }
