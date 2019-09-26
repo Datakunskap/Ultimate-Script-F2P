@@ -60,6 +60,10 @@ public final class TutorialIsland {
 
     }
 
+    public boolean isStopping(){
+        return beggar.isStopping();
+    }
+
     public TutorialIsland copy() {
         return new TutorialIsland(beggar);
     }

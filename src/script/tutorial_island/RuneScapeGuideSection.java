@@ -1,6 +1,7 @@
 package script.tutorial_island;
 
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
+import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Varps;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Dialog;
@@ -10,6 +11,7 @@ import org.rspeer.runetek.api.component.tab.Tab;
 import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.input.menu.ActionOpcodes;
+import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
 import script.Beggar;
 
@@ -51,7 +53,9 @@ public final class RuneScapeGuideSection extends TutorialSection{
 
     @Override
     public int execute () {
-
+        if (!Game.isLoggedIn() || Players.getLocal() == null) {
+            return 2000;
+        }
         getComponents();
 
         if (pendingContinue()) {

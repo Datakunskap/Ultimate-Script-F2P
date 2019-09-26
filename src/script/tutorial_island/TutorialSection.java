@@ -17,7 +17,6 @@ import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.runetek.providers.RSTileDecor;
-import org.rspeer.script.Script;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
@@ -103,7 +102,7 @@ public abstract class TutorialSection extends Task {
 
     void randWalker(Position posRequired) {
         Log.info("Walking to next section");
-        while (!Script.interrupted() && !Players.getLocal().getPosition().equals(posRequired)) {
+        while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping()) {
             if (!Players.getLocal().isMoving()) {
                 daxWalker(posRequired);
             }
@@ -113,8 +112,7 @@ public abstract class TutorialSection extends Task {
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i ++) {
                 daxWalker(Players.getLocal().getPosition().randomize(10));
-                Time.sleep(1000);
-                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(2000, 6000));
+                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(2000, 5000));
             }
         }
     }
