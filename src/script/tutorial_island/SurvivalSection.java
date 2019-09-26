@@ -10,13 +10,17 @@ import org.rspeer.runetek.api.component.tab.Tab;
 import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.movement.Movement;
+import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
+import org.rspeer.runetek.providers.RSTileDecor;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 public final class SurvivalSection extends TutorialSection {
 
@@ -131,6 +135,23 @@ public final class SurvivalSection extends TutorialSection {
 
     private boolean standingOnFire() {
         return SceneObjects.getNearest(obj -> obj.getPosition().distance(Players.getLocal()) <= 0 && obj.getName().equals("Fire")) != null;
+    }
+
+    Optional<Position> getEmptyPosition() {
+        List<Position> allPositions = Area.surrounding(Players.getLocal().getPosition(), 10).getTiles();
+        //List<Position> allPositions = Players.getLocal()..getArea(10).getPositions();
+
+        // Remove any position with an object (except ground decorations, as they can be walked on)
+        for (SceneObject object : SceneObjects.getLoaded()) {
+            if (object.getProvider() instanceof RSTileDecor) {
+                continue;
+            }
+            allPositions.removeIf(position -> object.getPosition().equals(position));
+        }
+
+        allPositions.removeIf(position -> !position.isPositionInteractable());
+
+        return allPositions.stream().min(Comparator.comparingInt(p -> (int) Players.getLocal().getPosition().distance(p)));
     }
 
     private void cook() {

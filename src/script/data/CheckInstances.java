@@ -1,11 +1,11 @@
 package script.data;
 
+import api.bot_management.BotManagement;
+import api.bot_management.data.LaunchedClient;
+import api.bot_management.data.QuickLaunch;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.ui.Log;
 import script.Beggar;
-import script.automation.Management;
-import script.automation.data.LaunchedClient;
-import script.automation.data.QuickLaunch;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,13 +21,13 @@ public class CheckInstances {
 
     public boolean validate() {
         try {
-            runningClients = Management.getRunningClients(Beggar.API_KEY);
+            runningClients = BotManagement.getRunningClients();
             Log.fine(runningClients.size() + " Clients Running");
 
             for (int t = 0; t < 2; t++) {
                 if (runningClients.size() < Beggar.ALLOWED_INSTANCES) {
                     Time.sleep(10000);
-                    runningClients = Management.getRunningClients(Beggar.API_KEY);
+                    runningClients = BotManagement.getRunningClients();
                     Log.info(runningClients.size() + " Clients Running");
                 }
             }
@@ -52,7 +52,7 @@ public class CheckInstances {
 
         try {
 
-            Management.startClient(0, quickLaunch.get().toString(), 0, null, 1);
+            BotManagement.startClient(0, quickLaunch.get().toString(), 0, null, 1);
 
         } catch (Exception e) {
             main.writeToErrorFile("CheckInstances.execute():  " + e.getMessage());

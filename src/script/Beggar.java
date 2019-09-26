@@ -1,5 +1,9 @@
 package script;
 
+import api.bot_management.BotManagement;
+import api.bot_management.RsPeerDownloader;
+import api.bot_management.data.LaunchedClient;
+import api.bot_management.data.QuickLaunch;
 import com.dax.walker.DaxWalker;
 import com.dax.walker.Server;
 import org.rspeer.RSPeer;
@@ -24,10 +28,6 @@ import org.rspeer.script.ScriptMeta;
 import org.rspeer.script.events.LoginScreen;
 import org.rspeer.script.task.TaskScript;
 import org.rspeer.ui.Log;
-import script.automation.Download;
-import script.automation.Management;
-import script.automation.data.LaunchedClient;
-import script.automation.data.QuickLaunch;
 import script.data.*;
 import script.fighter.Fighter;
 import script.tanner.ExPriceChecker;
@@ -299,7 +299,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
             try {
 
-                Management.startClient(0, quickLaunch.get().toString(), 10, null, 1);
+                BotManagement.startClient(0, quickLaunch.get().toString(), 10, null, 1);
                 killClient();
 
             } catch (Exception e) {
@@ -348,9 +348,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     public void killClient() throws IOException {
         RSPeer.shutdown();
-        for (LaunchedClient client : Management.getRunningClients(API_KEY)) {
+        for (LaunchedClient client : BotManagement.getRunningClients()) {
             if (client.getRunescapeEmail().equals(RSPeer.getGameAccount().getUsername())) {
-                client.kill(API_KEY);
+                client.kill();
             }
         }
         System.exit(0);
@@ -364,9 +364,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         try {
             new BegLauncher(IDs[0], path).launch();
 
-            for (LaunchedClient client : Management.getRunningClients(API_KEY)) {
+            for (LaunchedClient client : BotManagement.getRunningClients()) {
                 if (client.getRunescapeEmail().equals(RSPeer.getGameAccount().getUsername())) {
-                    client.kill(API_KEY);
+                    client.kill();
                 }
             }
         } catch (Exception e) {
@@ -1196,9 +1196,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     private void updateRSPeer() {
         try {
-            if (Download.shouldDownload()) {
+            if (RsPeerDownloader.shouldDownload()) {
                 writeToErrorFile("DOWNLOAD NEW JAR");
-                Download.downloadNewJar();
+                //RsPeerDownloader.downloadNewJar();
             }
         } catch (IOException e) {
             e.printStackTrace();

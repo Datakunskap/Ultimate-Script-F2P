@@ -1,4 +1,4 @@
-package script.automation.data;
+package api.bot_management.data;
 
 public class UserInfo {
     private int uid;
