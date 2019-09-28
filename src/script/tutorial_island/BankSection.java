@@ -12,14 +12,13 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
-import script.Beggar;
 
 import java.util.Arrays;
 import java.util.List;
 
 public final class BankSection extends TutorialSection {
 
-    private static final Area BANK_AREA = Area.rectangular(3119, 3125, 3124, 3119);
+    private static final Area BANK_AREA =  Area.rectangular(3119, 3123, 3123, 3120);
 
     private static final List<Position> PATH_TO_BANK = Arrays.asList(
             new Position(3111, 3123, 0),
@@ -47,7 +46,7 @@ public final class BankSection extends TutorialSection {
         switch (getProgress()) {
             case 510:
                 if (!BANK_AREA.contains(Players.getLocal())) {
-                    daxWalker(BANK_AREA.getTiles().get(Beggar.randInt(0, BANK_AREA.getTiles().size() -1)), BANK_AREA);
+                    Movement.walkToRandomized(BANK_AREA.getCenter());
                 } else if (Dialog.isOpen() && Dialog.isViewingChatOptions()) {
                     Dialog.process("Yes.");
                 } else if (SceneObjects.getNearest("Bank booth").interact("Use")) {

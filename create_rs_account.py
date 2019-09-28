@@ -45,7 +45,7 @@ def register_account(email, password):
         'password1': password,
         'onlyOnePassword': 1,
         'day': randint(1, 28),
-        'month': randint(1, 12),
+        'month': randint(1, 12) < 10,
         'year': randint(1995, 2005),
         'agree_email': 1,
         'agree_email_third_party': 1,

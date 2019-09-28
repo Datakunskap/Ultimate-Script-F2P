@@ -1,4 +1,4 @@
-package script.automation.data;
+package api.bot_management.data;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;

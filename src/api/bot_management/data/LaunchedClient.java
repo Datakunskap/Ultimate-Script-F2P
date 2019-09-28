@@ -1,9 +1,8 @@
-package script.automation.data;
+package api.bot_management.data;
 
+import api.bot_management.BotManagementFileHelper;
 import okhttp3.*;
-import script.automation.Authentication;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class LaunchedClient {
@@ -56,10 +55,8 @@ public class LaunchedClient {
         return tag;
     }
 
-    public boolean kill(String apiKey) throws IOException {
-        //final String apiKey = Authentication.getApiKey();
-        if (apiKey.isEmpty())
-            throw new FileNotFoundException("Could not find api key file");
+    public boolean kill() throws IOException {
+        final String apiKey = BotManagementFileHelper.getApiKeyOrThrow();
 
         final Request request = new Request.Builder()
                 .url("https://services.rspeer.org/api/botLauncher/sendNew?message=:kill&tag=" + tag)

@@ -1,5 +1,9 @@
 package script;
 
+import api.bot_management.BotManagement;
+import api.bot_management.RsPeerDownloader;
+import api.bot_management.data.LaunchedClient;
+import api.bot_management.data.QuickLaunch;
 import com.dax.walker.DaxWalker;
 import com.dax.walker.Server;
 import org.rspeer.RSPeer;
@@ -24,10 +28,6 @@ import org.rspeer.script.ScriptMeta;
 import org.rspeer.script.events.LoginScreen;
 import org.rspeer.script.task.TaskScript;
 import org.rspeer.ui.Log;
-import script.automation.Download;
-import script.automation.Management;
-import script.automation.data.LaunchedClient;
-import script.automation.data.QuickLaunch;
 import script.data.*;
 import script.fighter.Fighter;
 import script.tanner.ExPriceChecker;
@@ -209,6 +209,17 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         );
     }
 
+    public void startFighter(boolean sleep) {
+        //logoutAndSwitchAcc();
+        if (sleep) {
+            Time.sleep(300_000, 600_000);
+        }
+        resetRender();
+        removeAll();
+        fighter = new Fighter(this, randInt(600_000, 1_080_000)); // 10 - 18
+        fighter.onStart();
+    }
+
     public void restartBeggar() {
         removeAll();
 
@@ -229,14 +240,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         Log.fine("Starting Beggar");
         submitTasks();
-    }
-
-    public void startFighter() {
-        //logoutAndSwitchAcc();
-        resetRender();
-        removeAll();
-        fighter = new Fighter(this, randInt(720_000, 1_080_000)); // 12 - 18
-        fighter.onStart();
     }
 
     @Override
@@ -301,7 +304,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
             try {
 
-                Management.startClient(0, quickLaunch.get().toString(), 10, null, 1);
+                BotManagement.startClient(0, quickLaunch.get().toString(), 10, null, 1);
                 killClient();
 
             } catch (Exception e) {
@@ -350,9 +353,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     public void killClient() throws IOException {
         RSPeer.shutdown();
-        for (LaunchedClient client : Management.getRunningClients(API_KEY)) {
+        for (LaunchedClient client : BotManagement.getRunningClients()) {
             if (client.getRunescapeEmail().equals(RSPeer.getGameAccount().getUsername())) {
-                client.kill(API_KEY);
+                client.kill();
             }
         }
         System.exit(0);
@@ -366,9 +369,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         try {
             new BegLauncher(IDs[0], path).launch();
 
-            for (LaunchedClient client : Management.getRunningClients(API_KEY)) {
+            for (LaunchedClient client : BotManagement.getRunningClients()) {
                 if (client.getRunescapeEmail().equals(RSPeer.getGameAccount().getUsername())) {
-                    client.kill(API_KEY);
+                    client.kill();
                 }
             }
         } catch (Exception e) {
@@ -1197,9 +1200,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     private void updateRSPeer() {
         try {
-            if (Download.shouldDownload()) {
+            if (RsPeerDownloader.shouldDownload()) {
                 writeToErrorFile("DOWNLOAD NEW JAR");
-                Download.downloadNewJar();
+                //RsPeerDownloader.downloadNewJar();
             }
         } catch (IOException e) {
             e.printStackTrace();

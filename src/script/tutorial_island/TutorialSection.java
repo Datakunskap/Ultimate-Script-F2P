@@ -4,27 +4,19 @@ import com.dax.walker.DaxWalker;
 import com.dax.walker.Server;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
-import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Varps;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.Interfaces;
-import org.rspeer.runetek.api.input.Keyboard;
+import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
-import org.rspeer.runetek.api.scene.SceneObjects;
-import org.rspeer.runetek.providers.RSTileDecor;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
-
-import java.awt.event.KeyEvent;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 
 public abstract class TutorialSection extends Task {
 
@@ -79,47 +71,29 @@ public abstract class TutorialSection extends Task {
     }
 
     protected boolean selectContinue() {
-        Keyboard.pressEventKey(KeyEvent.VK_SPACE);
-        return true;
-    }
-
-    Optional<Position> getEmptyPosition() {
-        List<Position> allPositions = Area.surrounding(Players.getLocal().getPosition(), 10).getTiles();
-        //List<Position> allPositions = Players.getLocal()..getArea(10).getPositions();
-
-        // Remove any position with an object (except ground decorations, as they can be walked on)
-        for (SceneObject object : SceneObjects.getLoaded()) {
-            if (object.getProvider() instanceof RSTileDecor) {
-                continue;
-            }
-            allPositions.removeIf(position -> object.getPosition().equals(position));
-        }
-
-        allPositions.removeIf(position -> !position.isPositionInteractable());
-
-        return allPositions.stream().min(Comparator.comparingInt(p -> (int) Players.getLocal().getPosition().distance(p)));
+        return Dialog.processContinue();
     }
 
     void randWalker(Position posRequired) {
         Log.info("Walking to next section");
-        while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping()) {
+        while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping() && Game.isLoggedIn()) {
             if (!Players.getLocal().isMoving()) {
-                daxWalker(posRequired);
+                Movement.walkTo(posRequired);
             }
         }
-        if (posRequired.distance(Players.getLocal()) < 4) {
-            int times = Beggar.randInt(1, 3);
+        if (posRequired.distance(Players.getLocal()) <= 3) {
+            int times = Beggar.randInt(1, 2);
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i ++) {
-                daxWalker(Players.getLocal().getPosition().randomize(10));
-                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(2000, 5000));
+                Movement.walkTo(Players.getLocal().getPosition().randomize(8));
+                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(4000, 7000));
             }
         }
     }
 
     void daxWalker(Position position , Area stopArea) {
         daxWalker.walkTo(position, () -> {
-            if (stopArea == null && (Dialog.isOpen() && Dialog.canContinue())) {
+            if (stopArea == null && (pendingContinue() || TutorialIsland.getInstance(null).isIdling || !Game.isLoggedIn())) {
                 Time.sleep(1000, 5000);
                 return true;
             }
@@ -127,7 +101,7 @@ public abstract class TutorialSection extends Task {
                 return false;
             }
 
-            if (stopArea.contains(Players.getLocal()) || (Dialog.isOpen() && Dialog.canContinue())) {
+            if (stopArea.contains(Players.getLocal()) || pendingContinue() || TutorialIsland.getInstance(null).isIdling || !Game.isLoggedIn()) {
                 Time.sleep(1000, 5000);
                 return true;
             }

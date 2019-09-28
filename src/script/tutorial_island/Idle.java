@@ -47,6 +47,8 @@ public class Idle extends Task {
     public int execute() {
         if(idleTill == 0) {
             idleTill = System.currentTimeMillis() + Random.low(20000, 90000);
+            main.isIdling = true;
+            Time.sleep(300);
             Log.fine("Idling for " + getIdleFor() + " seconds");
             return Fighter.getLoopReturn();
         }
@@ -65,6 +67,7 @@ public class Idle extends Task {
         if (main.beggar.getBlockingEvent(LoginScreen.class) == null) {
             main.beggar.addBlockingEvent(new LoginScreen(main.beggar));
         }
+        main.isIdling = false;
         return Fighter.getLoopReturn();
     }
 }

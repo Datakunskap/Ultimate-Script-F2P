@@ -1,59 +1,56 @@
-package script.automation;
+package api.bot_management;
 
+import api.bot_management.data.LaunchedClient;
+import api.bot_management.data.Launcher;
+import api.bot_management.data.QuickLaunch;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import okhttp3.*;
-import script.automation.data.LaunchedClient;
-import script.automation.data.Launcher;
-import script.automation.data.QuickLaunch;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 
-public class Management {
+public class BotManagement {
 
     private static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
+    private static final String DEFAULT_JVM_ARGS = "-Xmx768m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Xss2m";
 
-    public static boolean startDefaultClient(int pcIndex) throws Exception {
+    public static boolean startDefaultClient(int pcIndex) throws IOException {
         return startClient(pcIndex,
                 null,
-                "-Xmx768m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Xss2m",
+                DEFAULT_JVM_ARGS,
                 10,
                 null,
                 1
         );
     }
 
-    public static boolean startClient(int pcIndex, int sleep, String proxy, int count) throws Exception {
+    public static boolean startClient(int pcIndex, int sleep, String proxy, int count) throws IOException {
         return startClient(pcIndex, "", sleep, proxy, count);
     }
 
-    public static boolean startClient(int pcIndex, int sleep, int count) throws Exception {
+    public static boolean startClient(int pcIndex, int sleep, int count) throws IOException {
         return startClient(pcIndex, "", sleep, "", count);
     }
 
-    public static boolean startClient(int pcIndex, String qs, int sleep, String proxy, int count) throws Exception {
+    public static boolean startClient(int pcIndex, String qs, int sleep, String proxy, int count) throws IOException {
         return startClient(
                 pcIndex,
                 qs,
-                "-Xmx768m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Xss2m",
+                DEFAULT_JVM_ARGS,
                 sleep,
                 proxy,
                 count
         );
     }
 
-    public static boolean startClient(int pcIndex, String qs, String jvmArgs, int sleep, String proxy, int count) throws Exception {
-        final String apiKey = Authentication.getApiKey();
-        if (apiKey.isEmpty())
-            throw new FileNotFoundException("Could not find api key file");
+    public static boolean startClient(int pcIndex, String qs, String jvmArgs, int sleep, String proxy, int count) throws IOException {
+        final String apiKey = BotManagementFileHelper.getApiKeyOrThrow();
 
-        List<Launcher> launchers = getLaunchers(10);
-
+        List<Launcher> launchers = getLaunchers();
         final Headers headers = new Headers.Builder()
                 .add("ApiClient", apiKey)
                 .add("Content-Type", "application/json")
@@ -88,9 +85,7 @@ public class Management {
     }
 
     public static boolean addProxy(String name, String ip, String port, String username, String password) throws Exception {
-        final String apiKey = Authentication.getApiKey();
-        if (apiKey.isEmpty())
-            throw new FileNotFoundException("Could not find api key file");
+        final String apiKey = BotManagementFileHelper.getApiKeyOrThrow();
 
         final Headers headers = new Headers.Builder()
                 .add("ApiClient", apiKey)
@@ -122,9 +117,7 @@ public class Management {
     }
 
     public static List<QuickLaunch> getQuickLaunchers() throws IOException {
-        final String apiKey = Authentication.getApiKey();
-        if (apiKey.isEmpty())
-            throw new FileNotFoundException("Could not find api key file");
+        final String apiKey = BotManagementFileHelper.getApiKeyOrThrow();
 
         final Request request = new Request.Builder()
                 .url("https://services.rspeer.org/api/botLauncher/getQuickLaunch")
@@ -148,14 +141,12 @@ public class Management {
         return gson.fromJson(body.string(), clientType);
     }
 
-    public static List<LaunchedClient> getRunningClients(String API_KEY) throws IOException {
-        //final String apiKey = Authentication.getApiKey();
-        if (API_KEY.isEmpty())
-            throw new FileNotFoundException("Could not find api key file");
+    public static List<LaunchedClient> getRunningClients() throws IOException {
+        final String apiKey = BotManagementFileHelper.getApiKeyOrThrow();
 
         final Request request = new Request.Builder()
                 .url("https://services.rspeer.org/api/botLauncher/connectedClients")
-                .header("ApiClient", API_KEY)
+                .header("ApiClient", apiKey)
                 .get()
                 .build();
 
@@ -174,10 +165,8 @@ public class Management {
         return gson.fromJson(body.string(), type);
     }
 
-    public static List<Launcher> getLaunchers(int retries) throws IOException, InterruptedException {
-        final String apiKey = Authentication.getApiKey();
-        if (apiKey.isEmpty())
-            throw new FileNotFoundException("Could not find api key file");
+    public static List<Launcher> getLaunchers() throws IOException {
+        final String apiKey = BotManagementFileHelper.getApiKeyOrThrow();
 
         final Request request = new Request.Builder()
                 .url("https://services.rspeer.org/api/botLauncher/connected")
@@ -202,15 +191,6 @@ public class Management {
             Launcher launcher = gson.fromJson(entry.getValue().getAsJsonObject(), Launcher.class);
             launcher.setSocketAddress(entry.getKey());
             launchers.add(launcher);
-        }
-
-        if (launchers.size() < 1) {
-            if (retries > 0) {
-                Thread.sleep(10000);
-                getLaunchers(retries - 1);
-            } else {
-                throw new IOException("Failed Getting Launcher");
-            }
         }
         return launchers;
     }

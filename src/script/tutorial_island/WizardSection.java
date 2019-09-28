@@ -67,7 +67,7 @@ public final class WizardSection extends TutorialSection {
 
         if (getInstructor() == null && main.onTutorialIsland()) {
             //Time.sleepUntil(() -> Players.getLocal().isAnimating(), 2000, 5000);
-            Movement.walkToRandomized(WIZARD_BUILDING.getCenter());
+            daxWalker(WIZARD_BUILDING.getCenter(), WIZARD_BUILDING);
             return Fighter.getLoopReturn();
         }
 
@@ -100,8 +100,8 @@ public final class WizardSection extends TutorialSection {
         }
 
         if (!main.onTutorialIsland()) {
-            randWalker(Players.getLocal().getPosition());
-            main.beggar.startFighter();
+            randWalker(Players.getLocal().getPosition().randomize(25));
+            main.beggar.startFighter(true);
         }
 
         return TutorialIsland.getRandSleep();

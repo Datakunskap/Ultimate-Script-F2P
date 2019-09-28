@@ -322,8 +322,16 @@ public class Fighter {
             } else {
                 Log.severe("Low Combat LVL Continuing");
                 startTimeMs = System.currentTimeMillis() - (stopTimeMs / 2);
+                invalidateNodes();
                 CombatStore.resetTargetingValues();
             }
+        }
+    }
+
+    private void invalidateNodes() {
+        Node[] nodes = supplier.getTasks();
+        for (Node node : nodes) {
+            node.onInvalid();
         }
     }
 
