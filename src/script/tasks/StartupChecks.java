@@ -44,7 +44,7 @@ public class StartupChecks extends Task {
 
     private void fighterCheck() {
         if (Players.getLocal().getCombatLevel() <= 3)
-            main.startFighter();
+            main.startFighter(false);
     }
 
     public void instanceCheck() {

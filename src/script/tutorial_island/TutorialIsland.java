@@ -10,6 +10,7 @@ public final class TutorialIsland {
     public Beggar beggar;
     final int idleTutSection = Beggar.randInt(0, 20);
     boolean hasIdled = (Beggar.randInt(0, 5) == 0);
+    boolean isIdling;
 
     private TutorialIsland(Beggar script) {
         beggar = script;
@@ -33,7 +34,7 @@ public final class TutorialIsland {
     }
 
     public static int getRandSleep(){
-        return Beggar.randInt(1000, 2500);
+        return Beggar.randInt(800, 2500);
     }
 
     public static int randomSectionRun;

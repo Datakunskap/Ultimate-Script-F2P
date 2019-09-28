@@ -207,6 +207,17 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         );
     }
 
+    public void startFighter(boolean sleep) {
+        //logoutAndSwitchAcc();
+        if (sleep) {
+            Time.sleep(300_000, 600_000);
+        }
+        resetRender();
+        removeAll();
+        fighter = new Fighter(this, randInt(600_000, 1_080_000)); // 10 - 18
+        fighter.onStart();
+    }
+
     public void restartBeggar() {
         removeAll();
 
@@ -227,14 +238,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         Log.fine("Starting Beggar");
         submitTasks();
-    }
-
-    public void startFighter() {
-        //logoutAndSwitchAcc();
-        resetRender();
-        removeAll();
-        fighter = new Fighter(this, randInt(720_000, 1_080_000)); // 12 - 18
-        fighter.onStart();
     }
 
     @Override

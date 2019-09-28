@@ -9,6 +9,7 @@ import org.rspeer.runetek.api.Varps;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.Interfaces;
+import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
@@ -75,16 +76,16 @@ public abstract class TutorialSection extends Task {
 
     void randWalker(Position posRequired) {
         Log.info("Walking to next section");
-        while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping()) {
+        while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping() && Game.isLoggedIn()) {
             if (!Players.getLocal().isMoving()) {
-                daxWalker(posRequired);
+                Movement.walkTo(posRequired);
             }
         }
-        if (posRequired.distance(Players.getLocal()) < 4) {
-            int times = Beggar.randInt(1, 3);
+        if (posRequired.distance(Players.getLocal()) <= 3) {
+            int times = Beggar.randInt(1, 2);
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i ++) {
-                daxWalker(Players.getLocal().getPosition().randomize(10));
+                Movement.walkTo(Players.getLocal().getPosition().randomize(8));
                 Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(4000, 7000));
             }
         }
@@ -92,7 +93,7 @@ public abstract class TutorialSection extends Task {
 
     void daxWalker(Position position , Area stopArea) {
         daxWalker.walkTo(position, () -> {
-            if (stopArea == null && (Dialog.isOpen() && Dialog.canContinue())) {
+            if (stopArea == null && (pendingContinue() || TutorialIsland.getInstance(null).isIdling || !Game.isLoggedIn())) {
                 Time.sleep(1000, 5000);
                 return true;
             }
@@ -100,7 +101,7 @@ public abstract class TutorialSection extends Task {
                 return false;
             }
 
-            if (stopArea.contains(Players.getLocal()) || (Dialog.isOpen() && Dialog.canContinue())) {
+            if (stopArea.contains(Players.getLocal()) || pendingContinue() || TutorialIsland.getInstance(null).isIdling || !Game.isLoggedIn()) {
                 Time.sleep(1000, 5000);
                 return true;
             }

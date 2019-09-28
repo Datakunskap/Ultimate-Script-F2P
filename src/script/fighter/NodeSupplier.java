@@ -1,6 +1,6 @@
 package script.fighter;
 
-import org.rspeer.script.task.Task;
+import script.fighter.framework.Node;
 import script.fighter.nodes.combat.BackToFightZone;
 import script.fighter.nodes.combat.FightNode;
 import script.fighter.nodes.food.EatNode;
@@ -31,19 +31,19 @@ public class NodeSupplier {
         BUY_GE = new BuyGE(main);
     }
 
-    public final Task EAT;
-    public final Task GET_FOOD;
-    public final Task IDLE;
-    public final Task DEPOSIT_LOOT;
-    public final Task LOOT;
-    public final Task PROGRESSION_CHECKER;
-    public final Task BURY_BONES;
-    public final Task BACK_TO_FIGHT;
-    public final Task FIGHT;
-    public final Task BUY_GE;
+    public final Node EAT;
+    public final Node GET_FOOD;
+    public final Node IDLE;
+    public final Node DEPOSIT_LOOT;
+    public final Node LOOT;
+    public final Node PROGRESSION_CHECKER;
+    public final Node BURY_BONES;
+    public final Node BACK_TO_FIGHT;
+    public final Node FIGHT;
+    public final Node BUY_GE;
 
-    /*public Task[] getTasks() {
-        Task[] tasks = new Task[]{
+    public Node[] getTasks() {
+        Node[] tasks = new Node[]{
                 EAT,
                 GET_FOOD,
                 DEPOSIT_LOOT,
@@ -52,9 +52,10 @@ public class NodeSupplier {
                 BURY_BONES,
                 IDLE,
                 FIGHT,
-                BACK_TO_FIGHT
+                BACK_TO_FIGHT,
+                BUY_GE
         };
 
         return tasks;
-    }*/
+    }
 }
