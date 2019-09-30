@@ -33,11 +33,7 @@ class WaitForCaptcha():
             time.sleep(1)
 
 
-def register_account(email, password):
-    register_account(email, password, None, None, None, None)
-
-
-def register_account(email, password, proxyIp, proxyUser, proxyPass, proxyPort):
+def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=None, proxyPort=None):
     print('''Registering account with:
     Email: %s
     Password: %s ''' % (email, password))
@@ -85,11 +81,7 @@ def register_account(email, password, proxyIp, proxyUser, proxyPass, proxyPort):
         # raise Exception('Jagex says no')
 
 
-def solve_captcha(retries):
-    solve_captcha(retries, None)
-
-
-def solve_captcha(retries, proxies):
+def solve_captcha(retries, proxies=None):
     print('Solving Captcha')
     waiting = True
     touched = False
@@ -155,24 +147,24 @@ parser = argparse.ArgumentParser(description='Create Runescape account(s)\n'
                                              'Pass new account details or path to a file with list of them',
                                  formatter_class=argparse.RawTextHelpFormatter)
 
-single_acc_arg_group = parser.add_argument_group('Create an account')
-single_acc_arg_group.add_argument('-e2', '--email2', nargs=1,
+acc_arg_group = parser.add_argument_group('Create an account')
+acc_arg_group.add_argument('-e2', '--email', nargs=1,
                                   help='Email address to use for the new account')
-single_acc_arg_group.add_argument('-p2', '--password2', nargs=1,
+acc_arg_group.add_argument('-p2', '--password', nargs=1,
                                   help='Password')
 
-single_acc_arg_group = parser.add_argument_group('Create an account with proxy')
-single_acc_arg_group.add_argument('-e', '--email', nargs=1,
+proxy_acc_arg_group = parser.add_argument_group('Create an account with proxy')
+proxy_acc_arg_group.add_argument('-e', '--email_p', nargs=1,
                                   help='Email address to use for the new account')
-single_acc_arg_group.add_argument('-p', '--password', nargs=1,
+proxy_acc_arg_group.add_argument('-p', '--password_p', nargs=1,
                                   help='Password')
-single_acc_arg_group.add_argument('-i', '--proxyIp', nargs=1,
+proxy_acc_arg_group.add_argument('-i', '--proxyIp', nargs=1,
                                   help='Proxy ip')
-single_acc_arg_group.add_argument('-u', '--proxyUser', nargs=1,
+proxy_acc_arg_group.add_argument('-u', '--proxyUser', nargs=1,
                                   help='Proxy username')
-single_acc_arg_group.add_argument('-x', '--proxyPass', nargs=1,
+proxy_acc_arg_group.add_argument('-x', '--proxyPass', nargs=1,
                                   help='Proxy password')
-single_acc_arg_group.add_argument('-o', '--proxyPort', nargs=1,
+proxy_acc_arg_group.add_argument('-o', '--proxyPort', nargs=1,
                                   help='Proxy port')
 # acc_list_arg_group = parser.add_argument_group('Create accounts from a list')
 
@@ -192,12 +184,12 @@ args = parser.parse_args()
 #        email, password = account.rstrip().split(':')
 #        register_account(email, password)
 
-if args.email and args.password and args.proxyIp and args.proxyUser and args.proxyPass and args.proxyPort:
-    register_account(args.email[0], args.password[0], args.proxyIp[0],
-                     args.proxyUser[0], args.proxyPass[0], args.proxyPort[0])
+if args.email and args.password:
+    register_account(args.email[0], args.password[0])
 
-elif args.email and args.password:
-    register_account(args.email2[0], args.password2[0])
+elif args.email_p and args.password_p and args.proxyIp and args.proxyUser and args.proxyPass and args.proxyPort:
+    register_account(args.email_p[0], args.password_p[0], args.proxyIp[0],
+                     args.proxyUser[0], args.proxyPass[0], args.proxyPort[0])
 
 else:
     print('Not enough arguments! Run with -h/--help for more info')
