@@ -84,8 +84,11 @@ public class ProgressionChecker extends Node {
             Combat.AttackStyle[] possibleStyles = type.getAttackStyles();
             for (int i = 0; i < type.getAttackStyles().length; i++) {
                 if (possibleStyles[i] == null) {
-                    Log.severe("STYLE: " + Combat.getAttackStyle().getName() + "  |  TYPE"  + Combat.getWeaponType().name());
-                    ProgressiveSet.getCurrent().setStyle(Combat.AttackStyle.ACCURATE);
+                    Log.severe("Equipment Error -> Using Default Style & Skill");
+                    Progressive p = ProgressiveSet.getCurrent();
+                    p.setStyle(Combat.AttackStyle.ACCURATE);
+                    p.setSkill(Skill.ATTACK);
+                    break;
                 }
                 if(possibleStyles[i].equals(progressive.getStyle())) {
                     Combat.select(i);
