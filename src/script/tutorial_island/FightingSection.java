@@ -43,7 +43,7 @@ public final class FightingSection extends TutorialSection {
 
         SceneObject gate = SceneObjects.getNearest("Gate");
         if (getInstructor() == null && gate != null && getProgress() < 390) {
-            daxWalker(gate.getPosition());
+            Movement.walkTo(gate.getPosition());
             if (gate.isPositionInteractable() && Players.getLocal().getPosition().distance(gate) < 3) {
                 Log.info("Opening gate");
                 gate.interact("Open");

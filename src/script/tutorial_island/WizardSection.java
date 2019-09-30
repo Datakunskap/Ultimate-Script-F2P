@@ -69,7 +69,7 @@ public final class WizardSection extends TutorialSection {
 
         if (getInstructor() == null && main.onTutorialIsland()) {
             //Time.sleepUntil(() -> Players.getLocal().isAnimating(), 2000, 5000);
-            daxWalker(WIZARD_BUILDING.getCenter(), WIZARD_BUILDING);
+            Movement.walkToRandomized(WIZARD_BUILDING.getCenter());
             return Fighter.getLoopReturn();
         }
 
