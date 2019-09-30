@@ -34,7 +34,7 @@ public final class TutorialIsland {
     }
 
     public static int getRandSleep(){
-        return Beggar.randInt(800, 2500);
+        return Beggar.randInt(1500, 3000);
     }
 
     public static int randomSectionRun;

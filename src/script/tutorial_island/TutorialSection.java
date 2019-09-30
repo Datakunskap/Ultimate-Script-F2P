@@ -4,6 +4,7 @@ import com.dax.walker.DaxWalker;
 import com.dax.walker.Server;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
+import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Varps;
 import org.rspeer.runetek.api.commons.Time;
@@ -14,9 +15,15 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
+import org.rspeer.runetek.api.scene.SceneObjects;
+import org.rspeer.runetek.providers.RSTileDecor;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 public abstract class TutorialSection extends Task {
 
@@ -77,9 +84,8 @@ public abstract class TutorialSection extends Task {
     void randWalker(Position posRequired) {
         Log.info("Walking to next section");
         while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping() && Game.isLoggedIn()) {
-            if (!Players.getLocal().isMoving()) {
-                Movement.walkTo(posRequired);
-            }
+            Time.sleep(600, 1000);
+            Movement.walkTo(posRequired);
         }
         if (posRequired.distance(Players.getLocal()) <= 3) {
             int times = Beggar.randInt(1, 2);
@@ -88,6 +94,27 @@ public abstract class TutorialSection extends Task {
                 Movement.walkTo(Players.getLocal().getPosition().randomize(8));
                 Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(4000, 7000));
             }
+        }
+    }
+
+    Optional<Position> getEmptyPosition(boolean min, int distance) {
+        List<Position> allPositions = Area.surrounding(Players.getLocal().getPosition(), distance).getTiles();
+        //List<Position> allPositions = Players.getLocal()..getArea(10).getPositions();
+
+        // Remove any position with an object (except ground decorations, as they can be walked on)
+        for (SceneObject object : SceneObjects.getLoaded()) {
+            if (object.getProvider() instanceof RSTileDecor) {
+                continue;
+            }
+            allPositions.removeIf(position -> object.getPosition().equals(position));
+        }
+
+        allPositions.removeIf(position -> !position.isPositionInteractable() || !position.isPositionWalkable());
+
+        if (min) {
+            return allPositions.stream().min(Comparator.comparingInt(p -> (int) Players.getLocal().getPosition().distance(p)));
+        } else {
+            return allPositions.stream().max(Comparator.comparingInt(p -> (int) Players.getLocal().getPosition().distance(p)));
         }
     }
 

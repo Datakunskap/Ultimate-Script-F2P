@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 import argparse
 import requests
 import sys
@@ -34,11 +34,22 @@ class WaitForCaptcha():
 
 
 def register_account(email, password):
+    register_account(email, password, None, None, None, None)
+
+
+def register_account(email, password, proxyIp, proxyUser, proxyPass, proxyPort):
     print('''Registering account with:
     Email: %s
     Password: %s ''' % (email, password))
 
-    response = requests.post(RUNESCAPE_REGISTER_URL, data={
+    if proxyIp is None:
+        captcha_solution = solve_captcha(5)
+    else:
+        proxies = {'http': 'socks5://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort),
+                   'https': 'socks5://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort)}
+        captcha_solution = solve_captcha(5, proxies)
+
+    data = {
         'theme': 'oldschool',
         'email1': email,
         'onlyOneEmail': 1,
@@ -49,16 +60,21 @@ def register_account(email, password):
         'year': randint(1995, 2005),
         'agree_email': 1,
         'agree_email_third_party': 1,
-        'g-recaptcha-response': solve_captcha(5),
+        'g-recaptcha-response': captcha_solution,
         'create-submit': 'Play Now'
-    })
+    }
+
+    if proxyIp is None:
+        response = requests.post(RUNESCAPE_REGISTER_URL, data=data)
+    else:
+        response = requests.post(RUNESCAPE_REGISTER_URL, proxies=proxies, data=data)
 
     if response.status_code == requests.codes.ok:
         if 'Account Created' in response.text:
             print('Robots win again, account successfully registered\n\n')
 
             with open('C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt', 'a+') as f:
-                f.write('%s\n' % email)
+                f.write('%s:%s\n' % (email, password))
                 f.close()
 
         else:
@@ -70,17 +86,26 @@ def register_account(email, password):
 
 
 def solve_captcha(retries):
+    solve_captcha(retries, None)
+
+
+def solve_captcha(retries, proxies):
     print('Solving Captcha')
     waiting = True
     touched = False
     captcha_id = None
 
-    response = requests.get(CAPTCHA_REQ_URL, params={
+    params = {
         'key': CAPTCHA_API_KEY,
         'method': 'userrecaptcha',
         'googlekey': RUNESCAPE_RECAPTCHA_KEY,
         'pageurl': RUNESCAPE_REGISTER_URL
-    })
+    }
+
+    if proxies is None:
+        response = requests.get(CAPTCHA_REQ_URL, params=params)
+    else:
+        response = requests.get(CAPTCHA_REQ_URL, params=params, proxies=proxies)
 
     if retries < 1:
         if response.status_code != requests.codes.ok:
@@ -105,11 +130,15 @@ def solve_captcha(retries):
 
         touched = True
 
-        solution_response = requests.get(CAPTCHA_RES_URL, params={
+        params = {
             'key': CAPTCHA_API_KEY,
             'action': 'get',
             'id': captcha_id
-        })
+        }
+        if proxies is None:
+            solution_response = requests.get(CAPTCHA_RES_URL, params=params)
+        else:
+            solution_response = requests.get(CAPTCHA_RES_URL, params=params, proxies=proxies)
 
         if solution_response.text not in ('CAPCHA_NOT_READY', 'CAPTCHA_NOT_READY'):
             print('\nCaptcha solved after %ds! (solution: %s)' % (wait_for_captcha.waited_for, solution_response.text))
@@ -126,30 +155,46 @@ parser = argparse.ArgumentParser(description='Create Runescape account(s)\n'
                                              'Pass new account details or path to a file with list of them',
                                  formatter_class=argparse.RawTextHelpFormatter)
 
-single_acc_arg_group = parser.add_argument_group('Create a single account')
+single_acc_arg_group = parser.add_argument_group('Create an account')
+single_acc_arg_group.add_argument('-e2', '--email2', nargs=1,
+                                  help='Email address to use for the new account')
+single_acc_arg_group.add_argument('-p2', '--password2', nargs=1,
+                                  help='Password')
 
+single_acc_arg_group = parser.add_argument_group('Create an account with proxy')
 single_acc_arg_group.add_argument('-e', '--email', nargs=1,
                                   help='Email address to use for the new account')
 single_acc_arg_group.add_argument('-p', '--password', nargs=1,
                                   help='Password')
+single_acc_arg_group.add_argument('-i', '--proxyIp', nargs=1,
+                                  help='Proxy ip')
+single_acc_arg_group.add_argument('-u', '--proxyUser', nargs=1,
+                                  help='Proxy username')
+single_acc_arg_group.add_argument('-x', '--proxyPass', nargs=1,
+                                  help='Proxy password')
+single_acc_arg_group.add_argument('-o', '--proxyPort', nargs=1,
+                                  help='Proxy port')
+# acc_list_arg_group = parser.add_argument_group('Create accounts from a list')
 
-acc_list_arg_group = parser.add_argument_group('Create accounts from a list')
-
-acc_list_arg_group.add_argument('-l', '--list', nargs=1,
-                                help='''Path to file with list of new account details
-        Syntax within files should match:
-        email:password''')
+# acc_list_arg_group.add_argument('-l', '--list', nargs=1,
+#                                help='''Path to file with list of new account details
+#        Syntax within files should match:
+#        email:password''')
 
 args = parser.parse_args()
 
-if args.list:
-    accounts_file = open(args.list[0])
-    accounts = accounts_file.readlines()
-    accounts_file.close()
+# if args.list:
+#    accounts_file = open(args.list[0])
+#    accounts = accounts_file.readlines()
+#    accounts_file.close()
+#
+#    for account in accounts:
+#        email, password = account.rstrip().split(':')
+#        register_account(email, password)
 
-    for account in accounts:
-        email, password = account.rstrip().split(':')
-        register_account(email, password)
+if args.email and args.password and args.proxyIp and args.proxyUser and args.proxyPass and args.proxyPort:
+    register_account(args.email[0], args.password[0], args.proxyIp[0],
+                     args.proxyUser[0], args.proxyPass[0], args.proxyPort[0])
 
 elif args.email and args.password:
     register_account(args.email[0], args.password[0])

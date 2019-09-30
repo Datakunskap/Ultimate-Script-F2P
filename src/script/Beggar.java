@@ -39,6 +39,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.rspeer.runetek.event.types.LoginResponseEvent.Response.INVALID_CREDENTIALS;
 import static org.rspeer.runetek.event.types.LoginResponseEvent.Response.RUNESCAPE_UPDATE_2;
@@ -138,6 +139,16 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public Fighter fighter;
     public DaxWalker daxWalker;
 
+    private static final String PROXY_IP = "108.187.189.123";
+    private static final String PROXY_USER = "qLo741";
+    private static final String PROXY_PASS = "z6wApt";
+    private static final String PROXY_PORT = "8000";
+    private static final String PYTHON_3_EXE = System.getProperty("user.home") + "\\AppData\\Local\\Programs\\Python\\Python37\\python.exe";
+    private static final String ACC_GEN_PY = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\create_rs_account.py";
+    public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
+    private static final String ERROR_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeerErrors.txt";
+    private static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
+
     public static final String MULE_NAME = "IBear115";
     public static final MuleArea MULE_AREA = MuleArea.COOKS_GUILD;
     public static final int MULE_WORLD = 393;
@@ -212,7 +223,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public void startFighter(boolean sleep) {
         //logoutAndSwitchAcc();
         if (sleep) {
-            Time.sleep(300_000, 600_000);
+            int ms = randInt(300_000, 600_000);
+            Log.info("Sleeping for " + TimeUnit.MILLISECONDS.toMinutes(ms) + " min(s)");
+            Time.sleep(ms);
         }
         resetRender();
         removeAll();
@@ -256,7 +269,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         } else if (loginResponseEvent.getResponse().equals(LoginResponseEvent.Response.RUNESCAPE_UPDATE) ||
                 loginResponseEvent.getResponse().equals(RUNESCAPE_UPDATE_2)) {
 
-            new CheckInstances(this).execute(RSPeer.getGameAccount().getUsername());
+            String [] info = new String[]{ RSPeer.getGameAccount().getUsername(), RSPeer.getGameAccount().getPassword() };
+            new CheckInstances(this).execute(info);
 
             try {
                 killClient();
@@ -301,10 +315,11 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
             generateAccounts(NUM_BACKLOG_ACCOUNTS);
             QuickLaunch quickLaunch = setupQuickLauncher(readAccount(true));
+            Log.info(quickLaunch.get().toString());
 
             try {
 
-                BotManagement.startClient(0, quickLaunch.get().toString(), 10, null, 1);
+                BotManagement.startClient(0, quickLaunch.get().toString(), 0, null, 1);
                 killClient();
 
             } catch (Exception e) {
@@ -320,31 +335,25 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
     }
 
-    public QuickLaunch setupQuickLauncher(String username) {
+    public QuickLaunch setupQuickLauncher(String[] accountInfo) {
         QuickLaunch qL = new QuickLaunch();
         ArrayList<QuickLaunch.Client> clientList = new ArrayList<>();
 
-        QuickLaunch.Config qlConfig = qL.new Config(
-                true,
-                true,
-                0,
-                false,
-                false);
-
-        QuickLaunch.Script qLScript = qL.new Script(
-                "",
-                "Ultimate Beggar",
-                "",
-                false);
+        QuickLaunch.Config config = qL.new Config(
+                true, true, 0, false, false);
+        QuickLaunch.Script script = qL.new Script(
+                "", "Ultimate Beggar", "", false);
+        QuickLaunch.Proxy proxy;
+        if (PROXY_IP != null && !PROXY_IP.isEmpty()) {
+            proxy = qL.new Proxy(
+                    "0", "9/29/2019", "DrScatman", "proxy1", PROXY_IP, Integer.parseInt(PROXY_PORT), PROXY_USER, PROXY_PASS);
+        } else {
+            proxy = qL.new Proxy("","","","","", 80,"","");
+        }
 
         int newWorld = (currWorld > 0 ? currWorld : popWorldsArr[randInt(0, 2)]);
         QuickLaunch.Client qLClient = qL.new Client(
-                username,
-                "plmmlp",
-                newWorld,
-                qL.new Proxy("", "", "", "", "", 80, "", ""),
-                qLScript,
-                qlConfig);
+                accountInfo[0], accountInfo[1], newWorld, proxy, script, config);
 
         clientList.add(qLClient);
         qL.setClients(clientList);
@@ -363,7 +372,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     private void manualLauncher() {
         generateAccounts(NUM_BACKLOG_ACCOUNTS);
-        int[] IDs = writeJson(readAccount(false));
+        int[] IDs = writeJson(readAccount(false)[0]);
         String path = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\Beggar";
 
         try {
@@ -384,11 +393,22 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     }
 
     private void executeGenerator(int retries) {
-        String randEmailArg = "-e " + getRandString() + "@gmail.com";
+        final String EMAIL_ARG = "-e " + getRandString(12, 18) + "@gmail.com";
+        final String PASSWORD_ARG = "-p " + getRandString(6, 20);
+        final String PROXY_IP_ARG = "-i " + PROXY_IP;
+        final String PROXY_USER_ARG = "-u " + PROXY_USER;
+        final String PROXY_PASS_ARG = "-x " + PROXY_PASS;
+        final String PROXY_PORT_ARG = "-o " + PROXY_PORT;
 
         try {
-            Runtime.getRuntime().exec(
-                    "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + randEmailArg + " " + PASSWORD_ARG + " && exit" + "\"");
+            if (PROXY_IP == null || PROXY_IP.isEmpty()) {
+                Runtime.getRuntime().exec(
+                        "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + EMAIL_ARG + " " + PASSWORD_ARG + " && exit" + "\"");
+            } else {
+                Runtime.getRuntime().exec(
+                        "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + EMAIL_ARG + " " + PASSWORD_ARG +
+                                " " + PROXY_IP_ARG + " " + PROXY_USER_ARG + " " + PROXY_PASS_ARG + " " + PROXY_PORT_ARG + " && exit" + "\"");
+            }
         } catch (Exception e) {
             writeToErrorFile("executeGenerator()  |  " + e.getMessage());
             Log.severe("executeGenerator()  |  " + e.getMessage());
@@ -399,11 +419,11 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
     }
 
-    protected String getRandString() {
+    protected String getRandString(int min, int max) {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder salt = new StringBuilder();
         java.util.Random rnd = new java.util.Random();
-        int strLen = randInt(12, 18);
+        int strLen = randInt(min, max);
 
         while (salt.length() < strLen) { // length of the random string.
             int index = (int) (rnd.nextFloat() * SALTCHARS.length());
@@ -417,8 +437,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         int numToGen = setNumBacklogged - getNumAccsBacklogged();
 
         if (numToGen > 0) {
+            numToGen = numToGen <= 5 ? numToGen : 5;
             Log.fine("Generating " + numToGen + " Accounts");
-            for (int g = 0; g < (numToGen <= 5 ? numToGen : 5); g++) {
+            for (int g = 0; g < numToGen; g++) {
                 executeGenerator(10);
                 Time.sleep(2000);
             }
@@ -426,12 +447,13 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     }
 
     public void logoutAndSwitchAcc() {
-        String currAcc = RSPeer.getGameAccount().getUsername();
-        writeAccount(currAcc);
+        String[] info = new String[] { RSPeer.getGameAccount().getUsername(), RSPeer.getGameAccount().getPassword() };
+        writeAccount(info);
 
         if (Game.logout()) {
-            RSPeer.setGameAccount(new GameAccount(readAccount(true), "plmmlp"));
-            if (Time.sleepUntil(() -> !RSPeer.getGameAccount().getUsername().equals(currAcc), 20000))
+            String[] newInfo = readAccount(true);
+            RSPeer.setGameAccount(new GameAccount(info[0], info[1]));
+            if (Time.sleepUntil(() -> !RSPeer.getGameAccount().getUsername().equals(info[0]), 20000))
                 Log.fine("Account Switched");
 
             while(!Game.isLoggedIn() && !Login.getResponseLines()[0].toLowerCase().contains("disabled")) {
@@ -550,7 +572,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     private List<String> accountsList;
 
-    public String readAccount(boolean readFirst) {
+    public String[] readAccount(boolean readFirst) {
         String accounts = "";
         File file = new File(ACCOUNTS_FILE_PATH);
 
@@ -586,11 +608,15 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         accounts = accounts.trim();
         accountsList = Arrays.asList(accounts.split(System.lineSeparator()));
         String account = readFirst ? accountsList.get(0) : accountsList.get(accountsList.size() - 1);
-        account = account.trim();
+        String[] info = account.trim().split(":");
+        if (info.length == 1) {
+            writeToErrorFile("Using Default Password");
+            info = new String[]{info[0], "plmmlp"};
+        }
 
         writeAccounts(file);
 
-        return account;
+        return info;
     }
 
     private void writeAccounts(File file) {
@@ -618,11 +644,11 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
     }
 
-    public void writeAccount(String email) {
+    public void writeAccount(String[] info) {
         try (FileWriter fw = new FileWriter(ACCOUNTS_FILE_PATH, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
-            out.println(email);
+            out.println(info[0] + ":" + info[1]);
         } catch (IOException e) {
             writeToErrorFile("Failed writing account");
             e.printStackTrace();

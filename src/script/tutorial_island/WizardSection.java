@@ -12,6 +12,7 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
+import script.Beggar;
 import script.fighter.Fighter;
 
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public final class WizardSection extends TutorialSection {
             new Position(3138, 3082, 0),
             new Position(3141, 3087, 0),
             new Position(3138, 3091, 0)
-);
+    );
 
     private static final List<Position> PATH_TO_WIZARD_BUILDING = Arrays.asList(
             new Position(3122, 3101, 0),
@@ -38,12 +39,12 @@ public final class WizardSection extends TutorialSection {
     );
 
     private static final Area CHICKEN_AREA = Area.polygonal(
-                   new Position(3140, 3088),
-                    new Position(3140, 3089),
-                    new Position(3137, 3092),
-                    new Position(3141, 3092),
-                    new Position(3144, 3089),
-                    new Position(3144, 3088)
+            new Position(3140, 3088),
+            new Position(3140, 3089),
+            new Position(3137, 3092),
+            new Position(3141, 3092),
+            new Position(3144, 3089),
+            new Position(3144, 3088)
     );
 
     private TutorialIsland main;
@@ -59,7 +60,7 @@ public final class WizardSection extends TutorialSection {
     }
 
     @Override
-    public int execute () {
+    public int execute() {
         if (pendingContinue()) {
             selectContinue();
             return TutorialIsland.getRandSleep();
@@ -100,7 +101,10 @@ public final class WizardSection extends TutorialSection {
         }
 
         if (!main.onTutorialIsland()) {
-            randWalker(Players.getLocal().getPosition().randomize(25));
+            getEmptyPosition(false, Beggar.randInt(3, 25)).ifPresent(position -> {
+                if (Movement.getDestinationDistance() > 0)
+                    randWalker(position);
+            });
             main.beggar.startFighter(true);
         }
 
