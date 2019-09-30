@@ -150,6 +150,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final String API_KEY = "JV5ML4DE4M9W8Z5KBE00322RDVNDGGMTMU1EH9226YCVGFUBE6J6OY1Q2NJ0RA8YAPKO70";
     public static final int NUM_BACKLOG_ACCOUNTS = 45;
     public static final boolean BUY_GEAR = true;
+    private static final boolean TUTORIAL_COMPLETED_SLEEP = true;
+    public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 30);
 
     @Override
     public void onStart() {
@@ -215,7 +217,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     public void startFighter(boolean sleep) {
         //logoutAndSwitchAcc();
-        if (sleep) {
+        if (sleep && TUTORIAL_COMPLETED_SLEEP) {
             int ms = randInt(300_000, 600_000);
             Log.info("Sleeping for " + TimeUnit.MILLISECONDS.toMinutes(ms) + " min(s)");
             Time.sleep(ms);

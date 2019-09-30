@@ -109,9 +109,10 @@ public abstract class TutorialSection extends Task {
             allPositions.removeIf(position -> object.getPosition().equals(position));
         }
 
-        allPositions.removeIf(position -> !position.isPositionInteractable() || !position.isPositionWalkable());
+        allPositions.removeIf(position -> !position.isPositionWalkable() || !Movement.isWalkable(position, false));
 
         if (min) {
+            allPositions.removeIf(position -> !position.isPositionInteractable() || !position.isPositionWalkable() || !Movement.isWalkable(position, false));
             return allPositions.stream().min(Comparator.comparingInt(p -> (int) Players.getLocal().getPosition().distance(p)));
         } else {
             return allPositions.stream().max(Comparator.comparingInt(p -> (int) Players.getLocal().getPosition().distance(p)));
