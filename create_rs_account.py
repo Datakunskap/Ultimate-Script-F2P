@@ -197,7 +197,7 @@ if args.email and args.password and args.proxyIp and args.proxyUser and args.pro
                      args.proxyUser[0], args.proxyPass[0], args.proxyPort[0])
 
 elif args.email and args.password:
-    register_account(args.email[0], args.password[0])
+    register_account(args.email2[0], args.password2[0])
 
 else:
     print('Not enough arguments! Run with -h/--help for more info')

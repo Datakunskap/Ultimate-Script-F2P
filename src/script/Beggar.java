@@ -397,8 +397,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         try {
             if (PROXY_IP == null || PROXY_IP.isEmpty()) {
+                final String EMAIL_ARG_2 = "-e2 " + getRandString(12, 18) + "@gmail.com";
+                final String PASSWORD_ARG_2 = "-p2 " + getRandString(6, 20);
                 Runtime.getRuntime().exec(
-                        "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + EMAIL_ARG + " " + PASSWORD_ARG + " && exit" + "\"");
+                        "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + EMAIL_ARG_2 + " " + PASSWORD_ARG_2 + " && exit" + "\"");
             } else {
                 Runtime.getRuntime().exec(
                         "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + EMAIL_ARG + " " + PASSWORD_ARG +
