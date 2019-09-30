@@ -82,7 +82,7 @@ public abstract class TutorialSection extends Task {
     }
 
     void randWalker(Position posRequired) {
-        Log.info("Walking to next section");
+        Log.info("Walking to position");
         while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping() && Game.isLoggedIn()) {
             Time.sleep(600, 1000);
             Movement.walkTo(posRequired);
@@ -99,7 +99,6 @@ public abstract class TutorialSection extends Task {
 
     Optional<Position> getEmptyPosition(boolean min, int distance) {
         List<Position> allPositions = Area.surrounding(Players.getLocal().getPosition(), distance).getTiles();
-        //List<Position> allPositions = Players.getLocal()..getArea(10).getPositions();
 
         // Remove any position with an object (except ground decorations, as they can be walked on)
         for (SceneObject object : SceneObjects.getLoaded()) {

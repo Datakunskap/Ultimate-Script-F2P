@@ -16,7 +16,6 @@ import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.ui.Log;
-import script.Beggar;
 
 public final class FightingSection extends TutorialSection {
 
@@ -43,7 +42,7 @@ public final class FightingSection extends TutorialSection {
         InterfaceComponent VIEW_EQUIPMENT_STATS_WIDGET = Interfaces.getComponent(387, 17);
 
         SceneObject gate = SceneObjects.getNearest("Gate");
-        if (getInstructor() == null && gate != null) {
+        if (getInstructor() == null && gate != null && getProgress() < 390) {
             daxWalker(gate.getPosition());
             if (gate.isPositionInteractable() && Players.getLocal().getPosition().distance(gate) < 3) {
                 Log.info("Opening gate");
@@ -113,8 +112,8 @@ public final class FightingSection extends TutorialSection {
                     Movement.walkToRandomized(LADDER_AREA.getCenter());
                 } else if (SceneObjects.getNearest("Ladder").interact("Climb-up")) {
                     Time.sleepUntil(() -> !LADDER_AREA.contains(Players.getLocal()), 2000, 5000);
-                    Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                    Time.sleepUntil(() -> !Players.getLocal().isMoving(), Beggar.randInt(3500, 6500));
+
+                    getEmptyPosition(false, 6).ifPresent(this::randWalker);
                 }
                 break;
         }

@@ -101,10 +101,7 @@ public final class WizardSection extends TutorialSection {
         }
 
         if (!main.onTutorialIsland()) {
-            getEmptyPosition(false, Beggar.randInt(3, 25)).ifPresent(position -> {
-                if (Movement.getDestinationDistance() > 0)
-                    randWalker(position);
-            });
+            getEmptyPosition(false, Beggar.TUTORIAL_COMPLETED_WALK_DIST).ifPresent(this::randWalker);
             main.beggar.startFighter(true);
         }
 
