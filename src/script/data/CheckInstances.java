@@ -44,11 +44,11 @@ public class CheckInstances {
         return runningClients;
     }
 
-    public int execute(String account) {
+    public int execute(String[] accountInfo) {
         Log.fine("Launching another instance");
 
         main.generateAccounts(Beggar.NUM_BACKLOG_ACCOUNTS);
-        QuickLaunch quickLaunch = main.setupQuickLauncher(account);
+        QuickLaunch quickLaunch = main.setupQuickLauncher(accountInfo);
 
         try {
 
