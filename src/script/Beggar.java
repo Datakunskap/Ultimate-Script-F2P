@@ -4,8 +4,6 @@ import api.bot_management.BotManagement;
 import api.bot_management.RsPeerDownloader;
 import api.bot_management.data.LaunchedClient;
 import api.bot_management.data.QuickLaunch;
-import com.dax.walker.DaxWalker;
-import com.dax.walker.Server;
 import org.rspeer.RSPeer;
 import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.Game;
@@ -137,7 +135,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public int numBegs = 0;
     public int idleBegNum = randInt(30, 40);
     public Fighter fighter;
-    public DaxWalker daxWalker;
 
     private static final String PROXY_IP = "108.187.189.123";
     private static final String PROXY_USER = "qLo741";
@@ -180,7 +177,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         startTime = (worldHop || worldHopf2p) ? System.currentTimeMillis() : 0;
         setRandMuleKeep(2500, 10000);
-        daxWalker = new DaxWalker(new Server("sub_DPjXXzL5DeSiPf", "PUBLIC-KEY"));
+        //daxWalker = new DaxWalker(new Server("sub_DPjXXzL5DeSiPf", "PUBLIC-KEY"));
 
         CheckTutIsland checkT = new CheckTutIsland(this);
 
