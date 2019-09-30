@@ -37,7 +37,7 @@ public class BackToFightZone extends Node {
         }
         if(Movement.getDestinationDistance() >= distRandom) {
             Logger.debug("Walking to: " + startTileRandom.toString());
-            Movement.walkToRandomized(startTileRandom);
+            Movement.walkTo(startTileRandom);
             Time.sleep(200, 450);
             /*if (!Players.getLocal().isMoving()) {
                 Logger.debug("Walking to: " + startTileRandom.toString());
