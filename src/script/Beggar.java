@@ -158,7 +158,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final int NUM_BACKLOG_ACCOUNTS = 10;
     public static final boolean BUY_GEAR = true;
     private static final boolean TUTORIAL_COMPLETED_SLEEP = true;
-    public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 30);
+    public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
 
     @Override
     public void onStart() {
@@ -231,7 +231,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
         resetRender();
         removeAll();
-        fighter = new Fighter(this, randInt(600_000, 1_080_000)); // 10 - 18
+        fighter = new Fighter(this, randInt(600_000, 900_000)); // 10 - 15
         fighter.onStart();
     }
 

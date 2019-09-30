@@ -55,7 +55,7 @@ public class Fighter {
     }
 
     public static int getLoopReturn() {
-        return Random.high(200, 450);
+        return Random.high(200, 900);
     }
 
     public StopWatch getRuntime() {

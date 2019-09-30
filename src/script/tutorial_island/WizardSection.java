@@ -1,6 +1,7 @@
 package script.tutorial_island;
 
 import org.rspeer.runetek.adapter.scene.Npc;
+import org.rspeer.runetek.api.commons.BankLocation;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.tab.Magic;
@@ -101,7 +102,17 @@ public final class WizardSection extends TutorialSection {
         }
 
         if (!main.onTutorialIsland()) {
-            getEmptyPosition(false, Beggar.TUTORIAL_COMPLETED_WALK_DIST).ifPresent(this::randWalker);
+            switch (Beggar.randInt(0, 0)) {
+                case 0:
+                    getEmptyPosition(false, Beggar.TUTORIAL_COMPLETED_WALK_DIST).ifPresent(this::randWalker);
+                    break;
+                case 1:
+                    randWalker(BankLocation.LUMBRIDGE_CASTLE.getPosition());
+                    break;
+                case 2:
+                    randWalker(BankLocation.DRAYNOR.getPosition());
+                    break;
+            }
             main.beggar.startFighter(true);
         }
 
