@@ -51,9 +51,9 @@ public abstract class TutorialSection extends Task {
             Time.sleepUntil(this::pendingContinue, 2000, 6000);
         } else if (i != null) {
             Log.info("Walking to instructor");
-            daxWalker(i.getPosition().randomize(4));
+            Movement.walkTo(i.getPosition().randomize(4));
         } else {
-            daxWalker(Players.getLocal().getPosition().randomize(6));
+            Movement.walkTo(Players.getLocal().getPosition().randomize(6));
             Log.severe("Cant Find Instructor: Section " + getTutorialSection() + " Progress " + getProgress());
             return false;
         }
@@ -118,7 +118,7 @@ public abstract class TutorialSection extends Task {
         }
     }
 
-    void daxWalker(Position position , Area stopArea) {
+    /*void daxWalker(Position position , Area stopArea) {
         daxWalker.walkTo(position, () -> {
             if (stopArea == null && (pendingContinue() || TutorialIsland.getInstance(null).isIdling || !Game.isLoggedIn())) {
                 Time.sleep(1000, 5000);
@@ -134,9 +134,9 @@ public abstract class TutorialSection extends Task {
             }
             return false; // false to continue walking after check. true to exit out of walker.
         });
-    }
+    }*/
 
-    void daxWalker(Position position) {
+    /*void daxWalker(Position position) {
         daxWalker(position, null);
-    }
+    }*/
 }
