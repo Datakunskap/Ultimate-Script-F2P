@@ -6,12 +6,16 @@ import time
 import os
 from random import randint
 
+# set http_proxy=10.10.1.10:3128
+# set https_proxy=10.10.1.11:1080
+# set ftp_proxy=10.10.1.10:3128
 RUNESCAPE_REGISTER_URL = 'https://secure.runescape.com/m=account-creation/g=oldscape/create_account'
 RUNESCAPE_RECAPTCHA_KEY = '6Lcsv3oUAAAAAGFhlKrkRb029OHio098bbeyi_Hv'
 CAPTCHA_URL = 'http://2captcha.com/'
 CAPTCHA_REQ_URL = CAPTCHA_URL + 'in.php'
 CAPTCHA_RES_URL = CAPTCHA_URL + 'res.php'
 CAPTCHA_API_KEY = '4935affd16c15fb4100e8813cdccfab6'
+
 
 class WaitForCaptcha():
     def __init__(self):
@@ -82,7 +86,7 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
     if proxyIp is None:
         response = requests.post(RUNESCAPE_REGISTER_URL, data=data)
     else:
-        response = requests.post(RUNESCAPE_REGISTER_URL, proxies=proxies, data=data)
+        response = requests.post(RUNESCAPE_REGISTER_URL, data=data, proxies=proxies)
 
     if response.status_code == requests.codes.ok:
         if 'Account Created' in response.text:
@@ -158,57 +162,62 @@ def solve_captcha(retries, proxies=None):
             return captcha_solution
 
 
-if not len(sys.argv) > 1:
-    print('You forgot to pass in any arguments! Run with -h/--help for more info')
-    sys.exit()
+def main():
+    if not len(sys.argv) > 1:
+        print('You forgot to pass in any arguments! Run with -h/--help for more info')
+        sys.exit()
 
-parser = argparse.ArgumentParser(description='Create Runescape account(s)\n'
-                                             'Pass new account details or path to a file with list of them',
-                                 formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description='Create Runescape account(s)\n'
+                                                 'Pass new account details or path to a file with list of them',
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
-acc_arg_group = parser.add_argument_group('Create an account')
-acc_arg_group.add_argument('-e2', '--email', nargs=1,
-                                  help='Email address to use for the new account')
-acc_arg_group.add_argument('-p2', '--password', nargs=1,
-                                  help='Password')
+    acc_arg_group = parser.add_argument_group('Create an account')
+    acc_arg_group.add_argument('-e2', '--email', nargs=1,
+                               help='Email address to use for the new account')
+    acc_arg_group.add_argument('-p2', '--password', nargs=1,
+                               help='Password')
 
-proxy_acc_arg_group = parser.add_argument_group('Create an account with proxy')
-proxy_acc_arg_group.add_argument('-e', '--email_p', nargs=1,
-                                  help='Email address to use for the new account')
-proxy_acc_arg_group.add_argument('-p', '--password_p', nargs=1,
-                                  help='Password')
-proxy_acc_arg_group.add_argument('-i', '--proxyIp', nargs=1,
-                                  help='Proxy ip')
-proxy_acc_arg_group.add_argument('-u', '--proxyUser', nargs=1,
-                                  help='Proxy username')
-proxy_acc_arg_group.add_argument('-x', '--proxyPass', nargs=1,
-                                  help='Proxy password')
-proxy_acc_arg_group.add_argument('-o', '--proxyPort', nargs=1,
-                                  help='Proxy port')
-# acc_list_arg_group = parser.add_argument_group('Create accounts from a list')
+    proxy_acc_arg_group = parser.add_argument_group('Create an account with proxy')
+    proxy_acc_arg_group.add_argument('-e', '--email_p', nargs=1,
+                                     help='Email address to use for the new account')
+    proxy_acc_arg_group.add_argument('-p', '--password_p', nargs=1,
+                                 help='Password')
+    proxy_acc_arg_group.add_argument('-i', '--proxyIp', nargs=1,
+                                     help='Proxy ip')
+    proxy_acc_arg_group.add_argument('-u', '--proxyUser', nargs=1,
+                                     help='Proxy username')
+    proxy_acc_arg_group.add_argument('-x', '--proxyPass', nargs=1,
+                                     help='Proxy password')
+    proxy_acc_arg_group.add_argument('-o', '--proxyPort', nargs=1,
+                                     help='Proxy port')
+    # acc_list_arg_group = parser.add_argument_group('Create accounts from a list')
 
-# acc_list_arg_group.add_argument('-l', '--list', nargs=1,
-#                                help='''Path to file with list of new account details
-#        Syntax within files should match:
-#        email:password''')
+    # acc_list_arg_group.add_argument('-l', '--list', nargs=1,
+    #                                help='''Path to file with list of new account details
+    #        Syntax within files should match:
+    #        email:password''')
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
-# if args.list:
-#    accounts_file = open(args.list[0])
-#    accounts = accounts_file.readlines()
-#    accounts_file.close()
-#
-#    for account in accounts:
-#        email, password = account.rstrip().split(':')
-#        register_account(email, password)
+    # if args.list:
+    #    accounts_file = open(args.list[0])
+    #    accounts = accounts_file.readlines()
+    #    accounts_file.close()
+    #
+    #    for account in accounts:
+    #        email, password = account.rstrip().split(':')
+    #        register_account(email, password)
 
-if args.email and args.password:
-    register_account(args.email[0], args.password[0])
+    if args.email and args.password:
+        register_account(args.email[0], args.password[0])
 
-elif args.email_p and args.password_p and args.proxyIp and args.proxyUser and args.proxyPass and args.proxyPort:
-    register_account(args.email_p[0], args.password_p[0], args.proxyIp[0],
-                     args.proxyUser[0], args.proxyPass[0], args.proxyPort[0])
+    elif args.email_p and args.password_p and args.proxyIp and args.proxyUser and args.proxyPass and args.proxyPort:
+        register_account(args.email_p[0], args.password_p[0], args.proxyIp[0],
+                         args.proxyUser[0], args.proxyPass[0], args.proxyPort[0])
 
-else:
-    print('Not enough arguments! Run with -h/--help for more info')
+    else:
+        print('Not enough arguments! Run with -h/--help for more info')
+
+
+if __name__ == '__main__':
+    main()
