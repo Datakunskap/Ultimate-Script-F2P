@@ -8,6 +8,7 @@ import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Varps;
 import org.rspeer.runetek.api.commons.Time;
+import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.movement.Movement;
@@ -84,7 +85,7 @@ public abstract class TutorialSection extends Task {
     void randWalker(Position posRequired) {
         Log.info("Walking to position");
         while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping() && Game.isLoggedIn()) {
-            Time.sleep(600, 1000);
+            Time.sleepUntil(() -> Players.getLocal().getPosition().equals(posRequired), Random.high(600, 1200));
             Movement.walkTo(posRequired);
         }
         if (posRequired.distance(Players.getLocal()) <= 3) {
