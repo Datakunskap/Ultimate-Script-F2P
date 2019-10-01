@@ -294,12 +294,12 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         if (!disableChain && !GAMBLER) {
             Log.fine("Chaining");
-            try {
+            /*try {
                 Thread.sleep(randInt(5000, 300000));
             } catch (InterruptedException e) {
                 writeToErrorFile("Interrupted sleep while chaining");
                 e.printStackTrace();
-            }
+            }*/
 
             if (Game.isLoggedIn())
                 Game.logout();
