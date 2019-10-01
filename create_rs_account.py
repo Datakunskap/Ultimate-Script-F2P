@@ -36,7 +36,8 @@ class WaitForCaptcha():
 def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=None, proxyPort=None):
     print('''Registering account with:
     Email: %s
-    Password: %s ''' % (email, password))
+    Password: %s 
+    Proxy: %s''' % (email, password, (proxyIp is None if 'None' else proxyIp)))
 
     if proxyIp is None:
         captcha_solution = solve_captcha(5)
