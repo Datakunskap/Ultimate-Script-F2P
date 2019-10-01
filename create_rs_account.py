@@ -33,18 +33,36 @@ class WaitForCaptcha():
             time.sleep(1)
 
 
+def proxy_test(proxyIp):
+    url = 'http://ifconfig.me/ip'
+
+    response = requests.get(url)
+    local_ip = format(response.text.strip())
+    response = requests.get(url, proxies=proxies)
+    proxy_ip = format(response.text.strip())
+
+    if local_ip != proxy_ip and proxyIp == proxy_ip:
+        return True
+    else:
+        return False
+
+
 def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=None, proxyPort=None):
+    global proxies
     print('''Registering account with:
     Email: %s
     Password: %s 
-    Proxy: %s''' % (email, password, (proxyIp is None if 'None' else proxyIp)))
+    Proxy: %s''' % (email, password, ('None' if proxyIp is None else proxyIp)))
 
     if proxyIp is None:
         captcha_solution = solve_captcha(5)
     else:
         proxies = {'http': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort),
                    'https': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort)}
-        captcha_solution = solve_captcha(5, proxies)
+        if proxy_test(proxyIp):
+            captcha_solution = solve_captcha(5)
+        else:
+            raise Exception('Proxy Test Failed')
 
     data = {
         'theme': 'oldschool',
@@ -82,7 +100,7 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
         # raise Exception('Jagex says no')
 
 
-def solve_captcha(retries, proxies=None):
+def solve_captcha(retries):
     print('Solving Captcha')
     waiting = True
     touched = False
