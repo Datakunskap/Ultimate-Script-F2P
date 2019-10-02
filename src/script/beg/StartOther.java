@@ -14,7 +14,7 @@ import java.time.Duration;
 
 public class StartOther extends Task {
 
-    private final int SUM_TOP_3_WORLDS_POP_LIMIT = 2900;
+    private final int SUM_TOP_3_WORLDS_POP_LIMIT = 2800;
     private final int RUNTIME_HOURS_LIMIT = 7;
     private final int LAST_TRADE_MINUTES = 30;
     private final int LAST_TRADE_MINUTES_MUTED = 35;
