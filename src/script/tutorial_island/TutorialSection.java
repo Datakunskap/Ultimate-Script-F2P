@@ -11,7 +11,6 @@ import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.Interfaces;
-import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
@@ -23,7 +22,6 @@ import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
 
-import java.awt.event.KeyEvent;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -72,9 +70,8 @@ public abstract class TutorialSection extends Task {
         if (wierdContinue != null && wierdContinue.isVisible()) {
             String msg = wierdContinue.getText().toLowerCase();
             if (msg.contains("someone") || msg.contains("reach") || msg.contains("already")){
-                //Game.getClient().fireScriptEvent(299, 1, 1);
-                Keyboard.pressEventKey(KeyEvent.VK_SPACE);
-                return true;
+                Game.getClient().fireScriptEvent(299, 1, 1);
+                return false;
             }
         }
 
