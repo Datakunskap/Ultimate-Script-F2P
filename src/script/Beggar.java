@@ -133,7 +133,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public int sumTopPops = 0;
     public static final boolean MULE_ITEMS = false;
     public int numBegs = 0;
-    public int idleBegNum = randInt(30, 45);
+    public int idleBegNum = randInt(45, 70);
     public Fighter fighter;
 
     private static final String PROXY_IP = null;//"108.187.189.123";
@@ -313,7 +313,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
             generateAccounts(NUM_BACKLOG_ACCOUNTS);
             QuickLaunch quickLaunch = setupQuickLauncher(readAccount(true));
-            Log.info(quickLaunch.get().toString());
 
             try {
 

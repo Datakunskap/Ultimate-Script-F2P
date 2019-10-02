@@ -25,7 +25,7 @@ public class ProgressionChecker extends Node {
 
     private Fighter main;
 
-    public ProgressionChecker(Fighter main){
+    public ProgressionChecker(Fighter main) {
         this.main = main;
         BackgroundTaskExecutor.submit(() -> ProgressiveSet.setCurrent(ProgressiveSet.getBest()), 1000);
     }
@@ -98,7 +98,7 @@ public class ProgressionChecker extends Node {
                     p.setSkill(Skill.ATTACK);
                     break;
                 }
-                if(possibleStyles[i].equals(progressive.getStyle())) {
+                if (possibleStyles[i].equals(progressive.getStyle())) {
                     Combat.select(i);
                     break;
                 }

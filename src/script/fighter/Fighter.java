@@ -300,7 +300,7 @@ public class Fighter {
         CombatListener.onChatMessage(e);
     }
 
-    private Node active;
+    private Node active = null;
 
     public Node getActive() {
         return active;

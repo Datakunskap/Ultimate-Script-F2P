@@ -24,7 +24,7 @@ public class NodeSupplier {
         IDLE = new IdleNode(main);
         DEPOSIT_LOOT = new DepositLootNode(main);
         LOOT = new LootNode(main);
-        PROGRESSION_CHECKER = new ProgressionChecker();
+        PROGRESSION_CHECKER = new ProgressionChecker(main);
         BURY_BONES = new BuryBones(main);
         BACK_TO_FIGHT = new BackToFightZone(main);
         FIGHT = new FightNode(main);

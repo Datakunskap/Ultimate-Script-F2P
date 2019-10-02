@@ -90,7 +90,7 @@ public abstract class TutorialSection extends Task {
             }
         }
         if (posRequired.distance(Players.getLocal()) <= 3) {
-            int times = 1;//Beggar.randInt(1, 2);
+            int times = Beggar.randInt(1, 2);
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i ++) {
                 Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
