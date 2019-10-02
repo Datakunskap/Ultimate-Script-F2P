@@ -2,8 +2,8 @@ package script.chocolate.tasks;
 
 import script.Beggar;
 import script.chocolate.Main;
-import script.tasks.Mule;
-import script.tasks.StartOther;
+import script.beg.Mule;
+import script.beg.StartOther;
 
 import java.time.Duration;
 

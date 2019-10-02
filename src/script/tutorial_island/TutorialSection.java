@@ -1,7 +1,7 @@
 package script.tutorial_island;
 
-import com.dax.walker.DaxWalker;
-import com.dax.walker.Server;
+import dax.walker.DaxWalker;
+import dax.walker.Server;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.adapter.scene.SceneObject;
@@ -11,6 +11,7 @@ import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.Interfaces;
+import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
@@ -22,6 +23,7 @@ import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
 
+import java.awt.event.KeyEvent;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -70,7 +72,8 @@ public abstract class TutorialSection extends Task {
         if (wierdContinue != null && wierdContinue.isVisible()) {
             String msg = wierdContinue.getText().toLowerCase();
             if (msg.contains("someone") || msg.contains("reach") || msg.contains("already")){
-                Game.getClient().fireScriptEvent(299, 1, 1);
+                //Game.getClient().fireScriptEvent(299, 1, 1);
+                Keyboard.pressEventKey(KeyEvent.VK_SPACE);
                 return true;
             }
         }
@@ -85,15 +88,16 @@ public abstract class TutorialSection extends Task {
     void randWalker(Position posRequired) {
         Log.info("Walking to position");
         while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping() && Game.isLoggedIn()) {
-            Time.sleepUntil(() -> Players.getLocal().getPosition().equals(posRequired), Random.high(600, 1200));
-            Movement.walkTo(posRequired);
+            if (!Time.sleepUntil(() -> Players.getLocal().getPosition().equals(posRequired), Random.low(800, 1800))) {
+                Movement.walkToRandomized(posRequired);
+            }
         }
         if (posRequired.distance(Players.getLocal()) <= 3) {
-            int times = Beggar.randInt(1, 2);
+            int times = 1;//Beggar.randInt(1, 2);
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i ++) {
-                Movement.walkTo(Players.getLocal().getPosition().randomize(8));
-                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(4000, 7000));
+                Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
+                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(3000, 6000));
             }
         }
     }

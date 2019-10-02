@@ -5,8 +5,8 @@ import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.tanner.Main;
-import script.tasks.Mule;
-import script.tasks.StartOther;
+import script.beg.Mule;
+import script.beg.StartOther;
 
 import java.time.Duration;
 
