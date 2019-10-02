@@ -141,9 +141,9 @@ public class Fighter {
             HashSet<String> loot = new HashSet<>();
             //loot.add("raw chicken");
             //loot.add("cowhide");
-            /*if (Beggar.randInt(0, 1) == 0) {
+            if (Beggar.randInt(0, 1) == 0) {
                 loot.add("bones");
-            }*/
+            }
             progressive.setLoot(loot);
             progressive.setRadius(Random.low(10, 15));
             progressive.setBuryBones(true);
