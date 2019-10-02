@@ -111,9 +111,9 @@ public final class FightingSection extends TutorialSection {
                 if (!LADDER_AREA.contains(Players.getLocal())) {
                     Movement.walkToRandomized(LADDER_AREA.getCenter());
                 } else if (SceneObjects.getNearest("Ladder").interact("Climb-up")) {
-                    Time.sleepUntil(() -> !LADDER_AREA.contains(Players.getLocal()), 2000, 5000);
-
-                    getEmptyPosition(false, 6).ifPresent(this::randWalker);
+                    if(Time.sleepUntil(() -> !LADDER_AREA.contains(Players.getLocal()), 2000, 6000)) {
+                        getEmptyPosition(false, 6).ifPresent(this::randWalker);
+                    }
                 }
                 break;
         }

@@ -125,7 +125,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public boolean isChoc = false;
     public int sumTopPops = 0;
     public int numBegs = 0;
-    public int idleBegNum = randInt(45, 70);
+    public int idleBegNum = randInt(50, 70);
     public Fighter fighter;
 
     private static final String PROXY_IP = null;//"108.187.189.123";
@@ -148,7 +148,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final int NUM_BACKLOG_ACCOUNTS = 50;
     public static final boolean BUY_GEAR = true;
     private static final boolean TUTORIAL_COMPLETED_SLEEP = false;
-    public static final boolean TUTORIAL_IDLE = false;
+    public static final boolean TUTORIAL_IDLE = true;
+    public static final boolean IDLE_LOGOUT = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
 
     @Override

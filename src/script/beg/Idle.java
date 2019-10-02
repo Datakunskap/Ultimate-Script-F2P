@@ -53,7 +53,7 @@ public class Idle extends Task {
             return Fighter.getLoopReturn();
         }
         long timeout = getIdleFor();
-        if(timeout > 60 && Game.isLoggedIn()) {
+        if(timeout > 60 && Game.isLoggedIn() && Beggar.IDLE_LOGOUT) {
             Log.fine("Logging out....");
             main.removeBlockingEvent(LoginScreen.class);
             Game.logout();
