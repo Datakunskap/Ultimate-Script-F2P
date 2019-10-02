@@ -1,6 +1,5 @@
 package script.tutorial_island;
 
-import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.data.CheckTutIsland;
@@ -10,7 +9,7 @@ public final class TutorialIsland {
     private static TutorialIsland main;
     public Beggar beggar;
     final int idleTutSection = Beggar.randInt(0, 20);
-    boolean hasIdled = (Beggar.randInt(0, 5) == 0);
+    boolean hasIdled = (Beggar.randInt(0, 10) != 0);
     boolean isIdling;
 
     private TutorialIsland(Beggar script) {
@@ -35,7 +34,7 @@ public final class TutorialIsland {
     }
 
     public static int getRandSleep(){
-        return Random.high(500, 2000);
+        return Beggar.randInt(1000, 2500);
     }
 
     public static int randomSectionRun;

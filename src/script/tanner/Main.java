@@ -16,7 +16,7 @@ import script.data.MuleArea;
 import script.tanner.data.Location;
 import script.tanner.tasks.*;
 import script.tanner.ui.Gui;
-import script.tasks.StartOther;
+import script.beg.StartOther;
 
 import java.awt.*;
 import java.io.IOException;

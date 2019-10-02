@@ -63,10 +63,10 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
     else:
         proxies = {'http': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort),
                    'https': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort)}
-        if proxy_test(proxies):
-            captcha_solution = solve_captcha(5, proxies)
-        else:
-            raise Exception('Proxy Test Failed')
+        captcha_solution = solve_captcha(5, proxies)
+        #if proxy_test(proxies):
+        #else:
+        #    raise Exception('Proxy Test Failed')
 
     data = {
         'theme': 'oldschool',

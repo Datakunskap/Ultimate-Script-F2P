@@ -14,7 +14,7 @@ import script.Beggar;
 import script.chocolate.tasks.*;
 import script.data.MuleArea;
 import script.tanner.ExPriceChecker;
-import script.tasks.StartOther;
+import script.beg.StartOther;
 
 import java.awt.*;
 import java.io.IOException;
