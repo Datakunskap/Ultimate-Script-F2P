@@ -14,10 +14,7 @@ import script.fighter.nodes.restock.BuyGE;
 
 public class NodeSupplier {
 
-    private Fighter main;
-
     public NodeSupplier(Fighter main) {
-        this.main = main;
 
         EAT = new EatNode(main);
         GET_FOOD = new GetFoodNode(main);

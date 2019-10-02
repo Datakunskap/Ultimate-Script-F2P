@@ -37,7 +37,6 @@ public class ProgressionChecker extends Node {
     private List<Item> toSwitch;
 
     private List<Item> checkEquipmentToSwitch() {
-        Log.info("Equipping items");
         List<Item> indexes = new ArrayList<>();
         HashMap<EquipmentSlot, String> map = progressive.getEquipmentMap();
 
@@ -108,7 +107,7 @@ public class ProgressionChecker extends Node {
             return Fighter.getLoopReturn();
         }
         for (Item item : toSwitch) {
-            System.out.println("Equipping: " + item.getName());
+            Log.info("Equipping: " + item.getName());
             item.click();
             Time.sleep(100, 350);
         }
