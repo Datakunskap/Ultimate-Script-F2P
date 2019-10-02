@@ -125,7 +125,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public boolean isChoc = false;
     public int sumTopPops = 0;
     public int numBegs = 0;
-    public int idleBegNum = randInt(30, 40);
+    public int idleBegNum = randInt(30, 45);
     public Fighter fighter;
 
     private static final String PROXY_IP = "108.187.189.123";
@@ -221,7 +221,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
         resetRender();
         removeAll();
-        fighter = new Fighter(this, randInt(600_000, 900_000)); // 10 - 15
+        fighter = new Fighter(this, randInt(600_000, 1_200_000)); // 10 - 20
         fighter.onStart();
     }
 
