@@ -1,12 +1,15 @@
 package script.fighter.nodes.progressive;
 
 import org.rspeer.runetek.adapter.component.Item;
+import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.tab.*;
+import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.fighter.Fighter;
 import script.fighter.config.ProgressiveSet;
+import script.fighter.debug.Logger;
 import script.fighter.framework.BackgroundTaskExecutor;
 import script.fighter.framework.Node;
 import script.fighter.models.Progressive;
@@ -34,7 +37,7 @@ public class ProgressionChecker extends Node {
     private List<Item> toSwitch;
 
     private List<Item> checkEquipmentToSwitch() {
-        //Log.info("Equipping items");
+        Log.info("Equipping items");
         List<Item> indexes = new ArrayList<>();
         HashMap<EquipmentSlot, String> map = progressive.getEquipmentMap();
 
@@ -64,6 +67,9 @@ public class ProgressionChecker extends Node {
 
     @Override
     public boolean validate() {
+        if (!Game.isLoggedIn() || Players.getLocal() == null) {
+            return false;
+        }
         progressive = ProgressiveSet.getCurrent();
         if (progressive == null) {
             return false;
@@ -78,6 +84,8 @@ public class ProgressionChecker extends Node {
 
     @Override
     public int execute() {
+        invalidateTask(main.getActive());
+
         Combat.AttackStyle style = Combat.getAttackStyle();
         if (!progressive.getStyle().equals(style)) {
             Combat.WeaponType type = Combat.getWeaponType();
@@ -115,6 +123,14 @@ public class ProgressionChecker extends Node {
     @Override
     public void onScriptStop() {
         super.onScriptStop();
+    }
+
+    public void invalidateTask(Node active) {
+        if (active != null && !this.equals(active)) {
+            Logger.debug("Node has changed.");
+            active.onInvalid();
+        }
+        main.setActive(this);
     }
 
     private void noAmmoSwitch() {

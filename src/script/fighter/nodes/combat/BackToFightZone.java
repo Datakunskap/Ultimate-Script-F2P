@@ -1,5 +1,6 @@
 package script.fighter.nodes.combat;
 
+import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.movement.Movement;
@@ -29,6 +30,8 @@ public class BackToFightZone extends Node {
     @Override
     public int execute() {
         invalidateTask(main.getActive());
+        if (!Game.isLoggedIn() || Players.getLocal() == null)
+            return 2000;
 
         //Log.info("Walking back to fight zone.");
         if(startTileRandom == null) {

@@ -9,7 +9,7 @@ public final class TutorialIsland {
     private static TutorialIsland main;
     public Beggar beggar;
     final int idleTutSection = Beggar.randInt(0, 20);
-    boolean hasIdled = (Beggar.randInt(0, 10) != 0);
+    boolean hasIdled = !Beggar.TUTORIAL_IDLE;
     boolean isIdling;
 
     private TutorialIsland(Beggar script) {

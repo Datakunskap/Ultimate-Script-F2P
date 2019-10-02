@@ -136,10 +136,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public int idleBegNum = randInt(30, 45);
     public Fighter fighter;
 
-    private static final String PROXY_IP = "108.187.189.123";
-    private static final String PROXY_USER = "qLo741";
-    private static final String PROXY_PASS = "z6wApt";
-    private static final String PROXY_PORT = "8000";
+    private static final String PROXY_IP = null;//"108.187.189.123";
+    private static final String PROXY_USER = null;//"qLo741";
+    private static final String PROXY_PASS = null;//"z6wApt";
+    private static final String PROXY_PORT = null;//"8000";
     private static final String PYTHON_3_EXE = System.getProperty("user.home") + "\\AppData\\Local\\Programs\\Python\\Python37\\python.exe";
     private static final String ACC_GEN_PY = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\create_rs_account.py";
     public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
@@ -154,7 +154,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final String API_KEY = "1FFY03V3M22KU5CFQ60DF9A40B3WKAU9CP0ZPCFE5KBLAMTUX61EC981FL7ZA8TLH2HFFM";
     public static final int NUM_BACKLOG_ACCOUNTS = 10;
     public static final boolean BUY_GEAR = true;
-    private static final boolean TUTORIAL_COMPLETED_SLEEP = false;
+    private static final boolean TUTORIAL_COMPLETED_SLEEP = true;
+    public static final boolean TUTORIAL_IDLE = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
 
     @Override
@@ -390,8 +391,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     }
 
     private void executeGenerator(int retries) {
-        final String EMAIL_ARG = "-e " + getRandString(12, 18) + "@gmail.com";
-        final String PASSWORD_ARG = "-p " + getRandString(6, 20);
+        final String EMAIL_ARG = "-e " + getRandString(false, 12, 18) + "@gmail.com";
+        final String PASSWORD_ARG = "-p " + getRandString(true, 6, 20);
         final String PROXY_IP_ARG = "-i " + PROXY_IP;
         final String PROXY_USER_ARG = "-u " + PROXY_USER;
         final String PROXY_PASS_ARG = "-x " + PROXY_PASS;
@@ -399,8 +400,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         try {
             if (PROXY_IP == null || PROXY_IP.isEmpty()) {
-                final String EMAIL_ARG_2 = "-e2 " + getRandString(12, 18) + "@gmail.com";
-                final String PASSWORD_ARG_2 = "-p2 " + getRandString(6, 20);
+                final String EMAIL_ARG_2 = "-e2 " + getRandString(false, 12, 18) + "@gmail.com";
+                final String PASSWORD_ARG_2 = "-p2 " + getRandString(true, 6, 20);
                 Runtime.getRuntime().exec(
                         "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + EMAIL_ARG_2 + " " + PASSWORD_ARG_2 + " && exit" + "\"");
             } else {
@@ -418,8 +419,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
     }
 
-    protected String getRandString(int min, int max) {
-        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    protected String getRandString(boolean caseSensitive, int min, int max) {
+        String SALTCHARS = caseSensitive ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890" :
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
         StringBuilder salt = new StringBuilder();
         java.util.Random rnd = new java.util.Random();
         int strLen = randInt(min, max);
