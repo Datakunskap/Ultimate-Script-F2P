@@ -18,39 +18,51 @@ public class BotManagement {
     private static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
     private static final String DEFAULT_JVM_ARGS = "-Xmx768m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -Xss2m";
 
-    public static boolean startDefaultClient(int pcIndex) throws IOException {
+    public static boolean startDefaultClient(int pcIndex, int retries) throws IOException {
         return startClient(pcIndex,
                 null,
                 DEFAULT_JVM_ARGS,
                 10,
                 null,
-                1
+                1,
+                retries
         );
     }
 
-    public static boolean startClient(int pcIndex, int sleep, String proxy, int count) throws IOException {
-        return startClient(pcIndex, "", sleep, proxy, count);
+    public static boolean startClient(int pcIndex, int sleep, String proxy, int count, int retries) throws IOException {
+        return startClient(pcIndex, "", sleep, proxy, count, retries);
     }
 
-    public static boolean startClient(int pcIndex, int sleep, int count) throws IOException {
-        return startClient(pcIndex, "", sleep, "", count);
+    public static boolean startClient(int pcIndex, int sleep, int count, int retries) throws IOException {
+        return startClient(pcIndex, "", sleep, "", count, retries);
     }
 
-    public static boolean startClient(int pcIndex, String qs, int sleep, String proxy, int count) throws IOException {
+    public static boolean startClient(int pcIndex, String qs, int sleep, String proxy, int count, int retries) throws IOException {
         return startClient(
                 pcIndex,
                 qs,
                 DEFAULT_JVM_ARGS,
                 sleep,
                 proxy,
-                count
+                count,
+                retries
         );
     }
 
-    public static boolean startClient(int pcIndex, String qs, String jvmArgs, int sleep, String proxy, int count) throws IOException {
+    public static boolean startClient(int pcIndex, String qs, String jvmArgs, int sleep, String proxy, int count, int retries) throws IOException {
         final String apiKey = BotManagementFileHelper.getApiKeyOrThrow();
 
         List<Launcher> launchers = getLaunchers();
+        while (launchers.size() < 1 && retries > 0) {
+            try {
+                Thread.sleep(10000);
+                launchers = getLaunchers();
+                retries --;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         final Headers headers = new Headers.Builder()
                 .add("ApiClient", apiKey)
                 .add("Content-Type", "application/json")

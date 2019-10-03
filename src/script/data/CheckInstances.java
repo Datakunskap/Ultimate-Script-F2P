@@ -58,7 +58,7 @@ public class CheckInstances {
 
         try {
 
-            BotManagement.startClient(0, quickLaunch.get().toString(), 0, null, 1);
+            BotManagement.startClient(0, quickLaunch.get().toString(), 0, null, 1, 10);
 
         } catch (Exception e) {
             main.writeToErrorFile("CheckInstances.execute():  " + e.getMessage());

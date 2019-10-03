@@ -1,5 +1,6 @@
 package script.tutorial_island;
 
+import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.data.CheckTutIsland;
@@ -34,7 +35,7 @@ public final class TutorialIsland {
     }
 
     public static int getRandSleep(){
-        return Beggar.randInt(1000, 2500);
+        return Random.high(400, 1500);
     }
 
     public static int randomSectionRun;

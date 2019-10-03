@@ -43,7 +43,7 @@ public class TradePlayer extends Task {
     private static final String[] restrictedTradeItems = new String[]{"Oak logs", "Willow logs", "Yew logs", "Raw shrimps",
             "Shrimps", "Raw anchovies", "Anchovies", "Raw lobster", "Lobster", "Clay", "Copper ore", "Tin ore", "Iron ore",
             "Silver ore", "Coal", "Cowhide", "Vial", "Vial of water", "Fishing bait", "Feather", "Eye of newt", "Adamantite ore",
-            "Jug of water", "Air rune", "Water rune", "Earth rune", "Fire rune", "Chaos rune", "Mind rune", "Body rune"};
+            "Jug of water", "Air rune", "Water rune", "Earth rune", "Fire rune", "Chaos rune", "Mind rune", "Body rune", "Mithril ore"};
 
     @Override
     public boolean validate() {

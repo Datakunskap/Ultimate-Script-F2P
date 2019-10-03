@@ -33,7 +33,6 @@ import script.tanner.ExPriceChecker;
 import script.tanner.Main;
 import script.ui.Gui;
 import verify_acc_gen.AccountGenerator;
-import verify_acc_gen.BrowserUtilities;
 
 import java.awt.*;
 import java.io.*;
@@ -316,7 +315,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
             try {
 
-                BotManagement.startClient(0, quickLaunch.get().toString(), 0, null, 1);
+                BotManagement.startClient(0, quickLaunch.get().toString(), 0, null, 1, 10);
                 killClient();
 
             } catch (Exception e) {
@@ -369,7 +368,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     private void seleniumGenerator(int numToGen) throws Exception {
         int firstExt = randInt(0, 9994);
         int lastExt = firstExt + numToGen;
-        String emailBase = BrowserUtilities.getRandomString();
+        String emailBase = getRandString(false, 8, 15);
         String password = getRandString(true, 6, 20);
         AccountGenerator selenium = new AccountGenerator();
         if (PROXY_IP != null && !PROXY_IP.isEmpty()) {
