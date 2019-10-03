@@ -26,12 +26,14 @@ import org.rspeer.script.ScriptMeta;
 import org.rspeer.script.events.LoginScreen;
 import org.rspeer.script.task.TaskScript;
 import org.rspeer.ui.Log;
+import script.beg.*;
 import script.data.*;
 import script.fighter.Fighter;
 import script.tanner.ExPriceChecker;
 import script.tanner.Main;
-import script.beg.*;
 import script.ui.Gui;
+import verify_acc_gen.AccountGenerator;
+import verify_acc_gen.BrowserUtilities;
 
 import java.awt.*;
 import java.io.*;
@@ -136,7 +138,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     private static final String ACC_GEN_PY = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\create_rs_account.py";
     public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
     private static final String ERROR_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeerErrors.txt";
-    private static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
+    public static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
 
     public static final String MULE_NAME = "IBear115";
     public static final MuleArea MULE_AREA = MuleArea.COOKS_GUILD;
@@ -151,6 +153,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final boolean TUTORIAL_IDLE = false;
     public static final boolean IDLE_LOGOUT = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
+    public static final boolean SELENIUM_VERIFY_GEN = true;
 
     @Override
     public void onStart() {
@@ -159,7 +162,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         LoginScreen ctx = new LoginScreen(this);
         ctx.setDelayOnLoginLimit(true);
         ctx.setStopScriptOn(LoginResponseEvent.Response.ACCOUNT_DISABLED, true);
-        //ctx.setStopScriptOn(LoginResponseEvent.Response.ACCOUNT_LOCKED, true);
 
         runtime = StopWatch.start();
         startC = Inventory.getCount(true, 995);
@@ -261,7 +263,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         } else if (loginResponseEvent.getResponse().equals(LoginResponseEvent.Response.RUNESCAPE_UPDATE) ||
                 loginResponseEvent.getResponse().equals(RUNESCAPE_UPDATE_2)) {
 
-            String [] info = new String[]{ RSPeer.getGameAccount().getUsername(), RSPeer.getGameAccount().getPassword() };
+            String[] info = new String[]{RSPeer.getGameAccount().getUsername(), RSPeer.getGameAccount().getPassword()};
             new CheckInstances(this).execute(info);
 
             try {
@@ -297,7 +299,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             try {
                 Thread.sleep(randInt(5000, 300000));
             } catch (InterruptedException e) {
-                writeToErrorFile("Interrupted sleep while chaining");
                 e.printStackTrace();
             }
 
@@ -305,7 +306,12 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 Game.logout();
 
 
-            generateAccounts(NUM_BACKLOG_ACCOUNTS);
+            try {
+                accountGeneratorDriver(SELENIUM_VERIFY_GEN, NUM_BACKLOG_ACCOUNTS);
+            } catch (Exception e) {
+                writeToErrorFile(e.getMessage() + System.lineSeparator() + e.toString());
+            }
+
             QuickLaunch quickLaunch = setupQuickLauncher(readAccount(true));
 
             try {
@@ -318,11 +324,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 Log.severe(e);
                 e.printStackTrace();
                 if (stopRetries > 0) {
-                    stopRetries --;
+                    stopRetries--;
                     onStop();
                 }
             }
-            //manualLauncher();
         }
     }
 
@@ -339,7 +344,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             proxy = qL.new Proxy(
                     "0", "9/29/2019", "DrScatman", "proxy1", PROXY_IP, Integer.parseInt(PROXY_PORT), PROXY_USER, PROXY_PASS);
         } else {
-            proxy = qL.new Proxy("","","","","", 80,"","");
+            proxy = qL.new Proxy("", "", "", "", "", 80, "", "");
         }
 
         int newWorld = (currWorld > 0 ? currWorld : popWorldsArr[randInt(0, 2)]);
@@ -361,29 +366,21 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         System.exit(0);
     }
 
-    private void manualLauncher() {
-        generateAccounts(NUM_BACKLOG_ACCOUNTS);
-        int[] IDs = writeJson(readAccount(false)[0]);
-        String path = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\Beggar";
-
-        try {
-            new BegLauncher(IDs[0], path).launch();
-
-            for (LaunchedClient client : BotManagement.getRunningClients()) {
-                if (client.getRunescapeEmail().equals(RSPeer.getGameAccount().getUsername())) {
-                    client.kill();
-                }
-            }
-        } catch (Exception e) {
-            writeToErrorFile("Failed Launching Client");
-            e.printStackTrace();
-            System.exit(1);
+    private void seleniumGenerator(int numToGen) throws Exception {
+        int firstExt = randInt(0, 9994);
+        int lastExt = firstExt + numToGen;
+        String emailBase = BrowserUtilities.getRandomString();
+        String password = getRandString(true, 6, 20);
+        AccountGenerator selenium = new AccountGenerator();
+        if (PROXY_IP != null && !PROXY_IP.isEmpty()) {
+            selenium.performTask(emailBase, password, firstExt, lastExt,
+                    PROXY_IP, PROXY_PORT, PROXY_USER, PROXY_PASS);
+        } else {
+            selenium.performTask(emailBase, password, firstExt, lastExt);
         }
-
-        System.exit(0);
     }
 
-    private void executeGenerator(int retries) {
+    private void pythonGenerator(int retries) {
         final String EMAIL_ARG = "-e " + getRandString(false, 12, 18) + "@gmail.com";
         final String PASSWORD_ARG = "-p " + getRandString(true, 6, 20);
         final String PROXY_IP_ARG = "-i " + PROXY_IP;
@@ -407,13 +404,13 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             Log.severe("executeGenerator()  |  " + e.getMessage());
             e.printStackTrace();
             if (retries > 0) {
-                executeGenerator(retries - 1);
+                pythonGenerator(retries - 1);
             }
         }
     }
 
-    protected String getRandString(boolean caseSensitive, int min, int max) {
-        String SALTCHARS = caseSensitive ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890" :
+    private String getRandString(boolean caseSensitive, int min, int max) {
+        String SALTCHARS = !caseSensitive ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890" :
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
         StringBuilder salt = new StringBuilder();
         java.util.Random rnd = new java.util.Random();
@@ -427,21 +424,27 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         return salt.toString();
     }
 
-    public void generateAccounts(int setNumBacklogged) {
+    public void accountGeneratorDriver(boolean seleniumVerify, int setNumBacklogged) throws Exception {
         int numToGen = setNumBacklogged - getNumAccsBacklogged();
+        if (numToGen <= 0)
+            return;
 
-        if (numToGen > 0) {
-            numToGen = numToGen <= 5 ? numToGen : 5;
+        numToGen = numToGen <= 5 ? numToGen : 5;
+
+        if (!seleniumVerify) {
             Log.fine("Generating " + numToGen + " Accounts");
             for (int g = 0; g < numToGen; g++) {
-                executeGenerator(10);
-                Time.sleep(2000);
+                pythonGenerator(10);
+                Time.sleep(300);
             }
+        } else {
+            Log.fine("Generating & Verifying " + numToGen + " Accounts");
+            seleniumGenerator(numToGen);
         }
     }
 
     public void logoutAndSwitchAcc() {
-        String[] info = new String[] { RSPeer.getGameAccount().getUsername(), RSPeer.getGameAccount().getPassword() };
+        String[] info = new String[]{RSPeer.getGameAccount().getUsername(), RSPeer.getGameAccount().getPassword()};
         writeAccount(info);
 
         if (Game.logout()) {
@@ -450,118 +453,13 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             if (Time.sleepUntil(() -> !RSPeer.getGameAccount().getUsername().equals(info[0]), 20000))
                 Log.fine("Account Switched");
 
-            while(!Game.isLoggedIn() && !Login.getResponseLines()[0].toLowerCase().contains("disabled")) {
+            while (!Game.isLoggedIn() && !Login.getResponseLines()[0].toLowerCase().contains("disabled")) {
                 Login.enterCredentials(RSPeer.getGameAccount().getUsername(), RSPeer.getGameAccount().getPassword());
                 Time.sleep(200);
                 Keyboard.pressEnter();
                 Time.sleepUntil(() -> Game.isLoggedIn() || Login.getResponseLines()[0].toLowerCase().contains("disabled"), 2000, 10000);
             }
         }
-    }
-
-    public int[] writeJson(String account) {
-        File file1 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\Beggar1.json");
-        //File file2 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\Simscape1.json");
-        String data1 = "";
-        //String data2 = "";
-
-        try {
-            try (BufferedReader br = new BufferedReader(new FileReader(file1))) {
-                StringBuilder sb = new StringBuilder();
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }
-                data1 = sb.toString();
-            }
-        } catch (IOException e) {
-            Log.info("File not found");
-        }
-        //data = data.trim();
-        String[] arr1 = data1.split(System.lineSeparator());
-        for (int i = 0; i < arr1.length; i++) {
-            if (arr1[i].contains("\"RsUsername\":")) {
-                arr1[i] = "\t\t\"RsUsername\": " + "\"" + account + "\"" + ",";
-            }
-            int setWorld = (currWorld > 0 ? currWorld : popWorldsArr[randInt(0, 2)]);
-            if (arr1[i].contains("\"World\":")) {
-                arr1[i] = "\t\t\"World\": " + setWorld + ",";
-            }
-        }
-
-        /*try {
-            try (BufferedReader br = new BufferedReader(new FileReader(file2))) {
-                StringBuilder sb = new StringBuilder();
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }
-                data2 = sb.toString();
-            }
-        } catch (IOException e) {
-            Log.info("File not found");
-        }
-        //data = data.trim();
-        String[] arr2 = data2.split(System.lineSeparator());
-        for (int i = 0; i < arr2.length; i++) {
-            if (arr2[i].contains("\"RsUsername\":")) {
-                arr2[i] = "\t\t\"RsUsername\": " + "\"" + account + "\"" + ",";
-            }
-            if (arr1[i].contains("\"World\":")) {
-                arr1[i] = "\t\t\"World\": " + popWorldsArr[randInt(0, 2)] + ",";
-            }
-        }*/
-
-        int[] IDs = new int[2];
-        PrintWriter pw = null;
-        try {
-            int beggarID = 1;
-            while (file1.exists()) {
-                beggarID++;
-                file1 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\Beggar" + beggarID + ".json");
-            }
-            file1.createNewFile();
-            IDs[0] = beggarID;
-
-            pw = new PrintWriter(file1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for (String s : arr1) {
-            assert pw != null;
-            pw.println(s);
-        }
-        assert pw != null;
-        pw.close();
-
-        /*PrintWriter pw2 = null;
-        try {
-            int simscapeID = 1;
-            while (file2.exists()) {
-                simscapeID++;
-                file2 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\Simscape" + simscapeID + ".json");
-            }
-            file2.createNewFile();
-            IDs[1] = simscapeID;
-
-            pw2 = new PrintWriter(file2);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for (String s : arr2) {
-            assert pw2 != null;
-            pw2.println(s);
-        }
-        assert pw2 != null;
-        pw2.close();*/
-
-        return IDs;
     }
 
     private List<String> accountsList;
@@ -671,7 +569,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     @Override
     public void notify(ChatMessageEvent msg) {
-        if(msg.getType() == ChatMessageType.PUBLIC || msg.getType() == ChatMessageType.PRIVATE_RECEIVED)
+        if (msg.getType() == ChatMessageType.PUBLIC || msg.getType() == ChatMessageType.PRIVATE_RECEIVED)
             return;
 
         if (!isFighterRunning && !isChoc && !isTanning) {
@@ -704,7 +602,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         } else if (isChoc || isTanning) {
             if (msg.getMessage().toLowerCase().contains("that offer costs")) {
-                if (isTanning){
+                if (isTanning) {
                     tanner.sold = false;
                     tanner.checkedBank = false;
                     Movement.setWalkFlag(Players.getLocal());
@@ -717,9 +615,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                     //chocolate.closeGE();
                 }
             }
-        }
-
-        else {
+        } else {
             fighter.notify(msg);
         }
     }
@@ -812,7 +708,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     }
 
     public String[] randSpecialLines(String[] arr) {
-        for (int i = 0; i < arr.length; i ++) {
+        for (int i = 0; i < arr.length; i++) {
             if (randInt(1, 5) == 1) { // 20%
                 switch (randInt(0, 4)) {
                     case 0:
