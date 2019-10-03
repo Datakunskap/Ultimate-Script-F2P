@@ -47,7 +47,13 @@ public class CheckInstances {
     public int execute(String[] accountInfo) {
         Log.fine("Launching another instance");
 
-        main.generateAccounts(Beggar.NUM_BACKLOG_ACCOUNTS);
+        try {
+            main.accountGeneratorDriver(Beggar.SELENIUM_VERIFY_GEN, Beggar.NUM_BACKLOG_ACCOUNTS);
+        } catch (Exception e) {
+            main.writeToErrorFile(e.getMessage());
+            e.printStackTrace();
+        }
+
         QuickLaunch quickLaunch = main.setupQuickLauncher(accountInfo);
 
         try {

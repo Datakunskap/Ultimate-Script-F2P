@@ -3,7 +3,6 @@ package script.fighter.nodes.combat;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.adapter.scene.PathingEntity;
 import org.rspeer.runetek.adapter.scene.Player;
-import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.event.types.ChatMessageEvent;
 import org.rspeer.runetek.event.types.ChatMessageType;
@@ -89,9 +88,10 @@ public class CombatListener {
         }
         else if(e.getMessage().toLowerCase().contains("reach that!")) {
             Config.getProgressive().setPosition(Config.getProgressive().getPosition().randomize(3));
+            CombatStore.resetTargetingValues();
         }
         else if(e.getMessage().toLowerCase().contains("the door seems to be stuck")) {
-            Movement.walkTo(Players.getLocal().getPosition().randomize(8));
+            CombatStore.resetTargetingValues();
         }
     }
 
