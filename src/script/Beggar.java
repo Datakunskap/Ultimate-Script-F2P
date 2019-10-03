@@ -155,7 +155,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final int NUM_BACKLOG_ACCOUNTS = 10;
     public static final boolean BUY_GEAR = true;
     private static final boolean TUTORIAL_COMPLETED_SLEEP = false;
-    public static final boolean TUTORIAL_IDLE = true;
+    public static final boolean TUTORIAL_IDLE = false;
     public static final boolean IDLE_LOGOUT = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
 
