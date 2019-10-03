@@ -94,7 +94,7 @@ public abstract class TutorialSection extends Task {
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i ++) {
                 Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(3000, 6000));
+                Time.sleepUntil(() -> !Players.getLocal().isMoving() && !Movement.isDestinationSet(), 2000, Beggar.randInt(3000, 7000));
             }
         }
     }
