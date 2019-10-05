@@ -181,7 +181,7 @@ public class Fighter {
             progressive.setEnemies(enemies);
 
             progressive.setRandomIdle(true);
-            progressive.setRandomIdleBuffer(Beggar.randInt(15, 25));
+            progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
 
 
             CombatStore.resetTargetingValues();

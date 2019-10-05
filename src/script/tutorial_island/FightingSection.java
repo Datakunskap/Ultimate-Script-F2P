@@ -16,6 +16,7 @@ import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.ui.Log;
+import script.Beggar;
 
 public final class FightingSection extends TutorialSection {
 
@@ -128,7 +129,9 @@ public final class FightingSection extends TutorialSection {
         if (!OUTSIDE_RAT_CAGE_GATE_AREA.contains(Players.getLocal())) {
             Movement.walkToRandomized(OUTSIDE_RAT_CAGE_GATE_AREA.getCenter());
         } else if (SceneObjects.getNearest("Gate").interact("Open")) {
-            Time.sleepUntil(this::inRatCage, 2000,5000);
+            if (Time.sleepUntil(this::inRatCage, 2000,5000)) {
+                randWalker(INSIDE_RAT_CAGE_GATE_AREA.getTiles().get(Beggar.randInt(0, INSIDE_RAT_CAGE_GATE_AREA.getTiles().size() -1)));
+            }
         }
     }
 
@@ -136,8 +139,9 @@ public final class FightingSection extends TutorialSection {
         if (!INSIDE_RAT_CAGE_GATE_AREA.contains(Players.getLocal())) {
             Movement.walkToRandomized(INSIDE_RAT_CAGE_GATE_AREA.getCenter());
         } else if (SceneObjects.getNearest("Gate").interact("Open")) {
-            randWalker(SceneObjects.getNearest("Gate").getPosition());
-            Time.sleepUntil(() -> !inRatCage(), 2000, 5000);
+            if (Time.sleepUntil(() -> !inRatCage(), 2000, 5000)) {
+                randWalker(OUTSIDE_RAT_CAGE_GATE_AREA.getTiles().get(Beggar.randInt(0, OUTSIDE_RAT_CAGE_GATE_AREA.getTiles().size() -1)));
+            }
         }
     }
 
