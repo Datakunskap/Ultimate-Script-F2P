@@ -54,7 +54,8 @@ public abstract class TutorialSection extends Task {
             Log.info("Walking to instructor");
             Movement.walkTo(i.getPosition().randomize(4));
         } else {
-            Movement.walkTo(Players.getLocal().getPosition().randomize(6));
+            //Movement.walkTo(Players.getLocal().getPosition().randomize(6));
+            findInstructorFallback();
             Log.severe("Cant Find Instructor: Section " + getTutorialSection() + " Progress " + getProgress());
             return false;
         }
@@ -69,7 +70,7 @@ public abstract class TutorialSection extends Task {
         InterfaceComponent wierdContinue = Interfaces.getComponent(162, 44);
         if (wierdContinue != null && wierdContinue.isVisible()) {
             String msg = wierdContinue.getText().toLowerCase();
-            if (msg.contains("someone") || msg.contains("reach") || msg.contains("already")){
+            if (msg.contains("someone") || msg.contains("reach") || msg.contains("already")) {
                 Game.getClient().fireScriptEvent(299, 1, 1);
                 return false;
             }
@@ -85,14 +86,17 @@ public abstract class TutorialSection extends Task {
     void randWalker(Position posRequired) {
         Log.info("Walking to position");
         while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping() && Game.isLoggedIn()) {
-            if (!Time.sleepUntil(() -> Players.getLocal().getPosition().equals(posRequired), Random.low(800, 1800))) {
+            if (!Time.sleepUntil(() -> Players.getLocal().getPosition().equals(posRequired), Random.low(600, 1800))) {
                 Movement.walkToRandomized(posRequired);
+                if (!Players.getLocal().isMoving() && SceneObjects.getFirstAt(posRequired.toScene()).containsAction(a -> true)) {
+                    SceneObjects.getFirstAt(posRequired.toScene()).interact(a -> true);
+                }
             }
         }
         if (posRequired.distance(Players.getLocal()) <= 3) {
             int times = Beggar.randInt(1, 2);
             Log.info("Random walking " + times + " time(s)");
-            for (int i = 0; i < times; i ++) {
+            for (int i = 0; i < times; i++) {
                 Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
                 Time.sleepUntil(() -> !Players.getLocal().isMoving() && !Movement.isDestinationSet(), 2000, Beggar.randInt(3000, 7000));
             }
@@ -120,6 +124,40 @@ public abstract class TutorialSection extends Task {
         }
     }
 
+    private void findInstructorFallback() {
+        switch (Game.getClient().getHintArrowType()) {
+            case 0:
+                Log.severe("No hint arrow");
+                getEmptyPosition(false, Beggar.randInt(4, 8)).ifPresent(this::randWalker);
+                break;
+            case 1:
+                Log.fine("Hint Arrow: Npc");
+                Npc npc = Npcs.getAt(Game.getClient().getHintArrowNpcIndex());
+                if (npc != null && npc.isPositionInteractable()) {
+                    npc.interact("Talk-to");
+                } else if (npc != null) {
+                    randWalker(npc.getPosition());
+                } else {
+                    getEmptyPosition(false, Beggar.randInt(4, 8)).ifPresent(this::randWalker);
+                }
+                break;
+            case 2:
+                Position hintPos = new Position(Game.getClient().getHintArrowX(), Game.getClient().getHintArrowY(), Players.getLocal().getFloorLevel());
+                for (SceneObject so : SceneObjects.getAt(hintPos)) {
+                    if (so.containsAction(a -> true)) {
+                        Log.fine("Hint Arrow: SceneObject");
+                        so.interact(a -> true);
+                        randWalker(so.getPosition());
+                        break;
+                    }
+                }
+                break;
+            default:
+                getEmptyPosition(false, Beggar.randInt(4, 8)).ifPresent(this::randWalker);
+                break;
+        }
+    }
+
     /*void daxWalker(Position position , Area stopArea) {
         daxWalker.walkTo(position, () -> {
             if (stopArea == null && (pendingContinue() || TutorialIsland.getInstance(null).isIdling || !Game.isLoggedIn())) {
@@ -136,9 +174,9 @@ public abstract class TutorialSection extends Task {
             }
             return false; // false to continue walking after check. true to exit out of walker.
         });
-    }*/
+    }
 
-    /*void daxWalker(Position position) {
+    void daxWalker(Position position) {
         daxWalker(position, null);
     }*/
 }

@@ -32,7 +32,6 @@ import script.fighter.Fighter;
 import script.tanner.ExPriceChecker;
 import script.tanner.Main;
 import script.ui.Gui;
-import verify_acc_gen.AccountGenerator;
 
 import java.awt.*;
 import java.io.*;
@@ -138,6 +137,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
     private static final String ERROR_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeerErrors.txt";
     public static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
+    private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\Runescape-Account-Generator-2.0.jar";
 
     public static final String MULE_NAME = "IBear115";
     public static final MuleArea MULE_AREA = MuleArea.COOKS_GUILD;
@@ -152,7 +152,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final boolean TUTORIAL_IDLE = false;
     public static final boolean IDLE_LOGOUT = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
-    public static final boolean SELENIUM_VERIFY_GEN = true;
+    public static final boolean SELENIUM_VERIFY_GEN = false;
 
     @Override
     public void onStart() {
@@ -173,7 +173,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         startTime = (worldHop || worldHopf2p) ? System.currentTimeMillis() : 0;
         setRandMuleKeep(2500, 10000);
-        //daxWalker = new DaxWalker(new Server("sub_DPjXXzL5DeSiPf", "PUBLIC-KEY"));
 
         CheckTutIsland checkT = new CheckTutIsland(this);
 
@@ -224,7 +223,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
         resetRender();
         removeAll();
-        fighter = new Fighter(this, randInt(600_000, 1_200_000)); // 10 - 20
+        fighter = new Fighter(this, randInt(600_000, 900_000)); // 10 - 15
         fighter.onStart();
     }
 
@@ -305,11 +304,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 Game.logout();
 
 
-            try {
-                accountGeneratorDriver(SELENIUM_VERIFY_GEN, NUM_BACKLOG_ACCOUNTS);
-            } catch (Exception e) {
-                writeToErrorFile(e.getMessage() + System.lineSeparator() + e.toString());
-            }
+            accountGeneratorDriver(NUM_BACKLOG_ACCOUNTS);
 
             QuickLaunch quickLaunch = setupQuickLauncher(readAccount(true));
 
@@ -365,17 +360,30 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         System.exit(0);
     }
 
-    private void seleniumGenerator(int numToGen) throws Exception {
+    private void seleniumGenerator(int numToGen) {
         int firstExt = randInt(0, 9994);
         int lastExt = firstExt + numToGen;
-        String emailBase = getRandString(false, 8, 15);
+        String emailBase = getRandString(false, 12, 18);
         String password = getRandString(true, 6, 20);
-        AccountGenerator selenium = new AccountGenerator();
-        if (PROXY_IP != null && !PROXY_IP.isEmpty()) {
-            selenium.performTask(emailBase, password, firstExt, lastExt,
-                    PROXY_IP, PROXY_PORT, PROXY_USER, PROXY_PASS);
-        } else {
-            selenium.performTask(emailBase, password, firstExt, lastExt);
+
+        try {
+            if (PROXY_IP != null && !PROXY_IP.isEmpty()) {
+                /*selenium.performTask(emailBase, password, firstExt, lastExt,
+                        ACCOUNTS_FILE_PATH, PROXY_IP, PROXY_PORT, PROXY_USER, PROXY_PASS);*/
+                Runtime.getRuntime().exec(
+                        "cmd /c start cmd.exe /K \"" + "java -jar" + " " + SELENIUM_GEN_PATH + " " + emailBase
+                                + " " + password + " " + firstExt + " " + lastExt + " " + ACCOUNTS_FILE_PATH + " " +
+                                PROXY_IP + " " + PROXY_PORT + PROXY_USER + " " + PROXY_PASS + " && exit" + "\"");
+            } else {
+                //selenium.performTask(emailBase, password, firstExt, lastExt, ACCOUNTS_FILE_PATH);
+                Runtime.getRuntime().exec(
+                        "cmd /c start cmd.exe /K \"" + "java -jar" + " " + SELENIUM_GEN_PATH + " " + emailBase
+                                + " " + password + " " + firstExt + " " + lastExt + " " + ACCOUNTS_FILE_PATH +
+                                " && exit" + "\"");
+            }
+        } catch (Exception e) {
+            writeToErrorFile(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -423,14 +431,14 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         return salt.toString();
     }
 
-    public void accountGeneratorDriver(boolean seleniumVerify, int setNumBacklogged) throws Exception {
+    public void accountGeneratorDriver(int setNumBacklogged) {
         int numToGen = setNumBacklogged - getNumAccsBacklogged();
         if (numToGen <= 0)
             return;
 
         numToGen = numToGen <= 5 ? numToGen : 5;
 
-        if (!seleniumVerify) {
+        if (!SELENIUM_VERIFY_GEN) {
             Log.fine("Generating " + numToGen + " Accounts");
             for (int g = 0; g < numToGen; g++) {
                 pythonGenerator(10);

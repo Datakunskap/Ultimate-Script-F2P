@@ -48,7 +48,7 @@ public class CheckInstances {
         Log.fine("Launching another instance");
 
         try {
-            main.accountGeneratorDriver(Beggar.SELENIUM_VERIFY_GEN, Beggar.NUM_BACKLOG_ACCOUNTS);
+            main.accountGeneratorDriver(Beggar.NUM_BACKLOG_ACCOUNTS);
         } catch (Exception e) {
             main.writeToErrorFile(e.getMessage());
             e.printStackTrace();
