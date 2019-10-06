@@ -242,7 +242,7 @@ public class Gui extends Task {
 
     private void autoOpen() {
 
-            File f = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\BegLines.txt");
+            File f = new File(Beggar.BEG_LINES_PATH);
 
             BufferedReader br;
             try {

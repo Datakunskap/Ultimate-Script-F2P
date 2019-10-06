@@ -137,6 +137,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
     private static final String ERROR_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeerErrors.txt";
     public static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
+    public static final String BEG_LINES_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\BegLines.txt";
     private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\Runescape-Account-Generator-2.0.jar";
 
     public static final String MULE_NAME = "IBear115";
@@ -152,7 +153,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final boolean TUTORIAL_IDLE = false;
     public static final boolean IDLE_LOGOUT = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
-    public static final boolean SELENIUM_VERIFY_GEN = false;
+    public static final boolean SELENIUM_VERIFY_GEN = true;
+    public static final boolean OGRESS = true;
 
     @Override
     public void onStart() {
@@ -341,7 +343,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             proxy = qL.new Proxy("", "", "", "", "", 80, "", "");
         }
 
-        int newWorld = (currWorld > 0 ? currWorld : popWorldsArr[randInt(0, 2)]);
+        int newWorld = StartOther.getLowPopWorld(300, currWorld);//(currWorld > 0 ? currWorld : popWorldsArr[randInt(0, 2)]);
         QuickLaunch.Client qLClient = qL.new Client(
                 accountInfo[0], accountInfo[1], newWorld, proxy, script, config);
 

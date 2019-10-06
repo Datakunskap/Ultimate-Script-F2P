@@ -1,7 +1,5 @@
 package script.tutorial_island;
 
-import dax.walker.DaxWalker;
-import dax.walker.Server;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.adapter.scene.SceneObject;
@@ -29,11 +27,10 @@ import java.util.Optional;
 public abstract class TutorialSection extends Task {
 
     private final String INSTRUCTOR_NAME;
-    private final DaxWalker daxWalker;
 
     public TutorialSection(final String INSTRUCTOR_NAME) {
         this.INSTRUCTOR_NAME = INSTRUCTOR_NAME;
-        daxWalker = new DaxWalker(new Server("sub_DPjXXzL5DeSiPf", "PUBLIC-KEY"));
+        //daxWalker = new DaxWalker(new Server("sub_DPjXXzL5DeSiPf", "PUBLIC-KEY"));
     }
 
     //public abstract void onLoop() throws InterruptedException;
@@ -88,7 +85,9 @@ public abstract class TutorialSection extends Task {
         while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping() && Game.isLoggedIn()) {
             if (!Time.sleepUntil(() -> Players.getLocal().getPosition().equals(posRequired), Random.low(600, 1800))) {
                 Movement.walkToRandomized(posRequired);
-                if (!Players.getLocal().isMoving() && SceneObjects.getFirstAt(posRequired.toScene()).containsAction(a -> true)) {
+
+                if (!Players.getLocal().isMoving() && posRequired.distance(Players.getLocal()) < 3 &&
+                        SceneObjects.getFirstAt(posRequired.toScene()).containsAction(a -> true)) {
                     SceneObjects.getFirstAt(posRequired.toScene()).interact(a -> true);
                 }
             }
