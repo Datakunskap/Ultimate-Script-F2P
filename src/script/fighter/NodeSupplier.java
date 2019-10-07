@@ -11,11 +11,11 @@ import script.fighter.nodes.loot.DepositLootNode;
 import script.fighter.nodes.loot.LootNode;
 import script.fighter.nodes.progressive.ProgressionChecker;
 import script.fighter.nodes.restock.BuyGE;
+import script.fighter.nodes.restock.SellGE;
 
 public class NodeSupplier {
 
     public NodeSupplier(Fighter main) {
-
         EAT = new EatNode(main);
         GET_FOOD = new GetFoodNode(main);
         IDLE = new IdleNode(main);
@@ -26,6 +26,7 @@ public class NodeSupplier {
         BACK_TO_FIGHT = new BackToFightZone(main);
         FIGHT = new FightNode(main);
         BUY_GE = new BuyGE(main);
+        SELL_GE = new SellGE(main);
     }
 
     public final Node EAT;
@@ -38,6 +39,7 @@ public class NodeSupplier {
     public final Node BACK_TO_FIGHT;
     public final Node FIGHT;
     public final Node BUY_GE;
+    public final Node SELL_GE;
 
     public Node[] getTasks() {
         Node[] tasks = new Node[]{
@@ -50,7 +52,8 @@ public class NodeSupplier {
                 IDLE,
                 FIGHT,
                 BACK_TO_FIGHT,
-                BUY_GE
+                BUY_GE,
+                SELL_GE
         };
 
         return tasks;

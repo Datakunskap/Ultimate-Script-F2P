@@ -40,6 +40,9 @@ public class BackToFightZone extends Node {
         }
         if(Movement.getDestinationDistance() >= distRandom) {
             Logger.debug("Walking to: " + startTileRandom.toString());
+            if (shouldEnableRun()) {
+                enableRun();
+            }
             Movement.walkTo(startTileRandom);
             Time.sleep(200, 450);
             /*if (!Players.getLocal().isMoving()) {
@@ -49,6 +52,22 @@ public class BackToFightZone extends Node {
             }*/
         }
         return Fighter.getLoopReturn();
+    }
+
+    public static boolean shouldEnableRun() {
+        if (Movement.isRunEnabled()) {
+            return false;
+        }
+        if (Random.nextInt(1, 100) == 1) {
+            // sometimes I like to random enable run
+            return true;
+        }
+        return Movement.getRunEnergy() > Random.nextInt(12, 30);
+    }
+
+    public static void enableRun() {
+        Movement.toggleRun(true);
+        Time.sleepUntil(Movement::isRunEnabled, 500);
     }
 
     @Override

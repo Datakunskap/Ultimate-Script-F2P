@@ -4,10 +4,7 @@ import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.StopWatch;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
-import org.rspeer.runetek.api.component.tab.Combat;
-import org.rspeer.runetek.api.component.tab.EquipmentSlot;
-import org.rspeer.runetek.api.component.tab.Inventory;
-import org.rspeer.runetek.api.component.tab.Skill;
+import org.rspeer.runetek.api.component.tab.*;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.Projection;
@@ -31,6 +28,7 @@ import script.fighter.paint.CombatPaintRenderer;
 import script.fighter.paint.ScriptPaint;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -72,123 +70,13 @@ public class Fighter {
     public void onStart() {
         try {
             beggar.isFighterRunning = true;
-            progressive = new Progressive();
-            progressive.setName("Fighter");
-            HashMap<EquipmentSlot, String> map = new HashMap<>();
-            switch (Beggar.randInt(0, 2)) {
-                case 0:
-                    map.put(EquipmentSlot.MAINHAND, "Bronze sword");
-                    map.put(EquipmentSlot.OFFHAND, "Wooden shield");
-                    break;
-                case 1:
-                    if (Inventory.contains("Bronze arrow")) {
-                        map.put(EquipmentSlot.MAINHAND, "Shortbow");
-                        map.put(EquipmentSlot.QUIVER, "Bronze arrow");
-                    }
-                    break;
-                case 2:
-                    map.put(EquipmentSlot.MAINHAND, "Bronze dagger");
-                    map.put(EquipmentSlot.OFFHAND, "Wooden shield");
-                    break;
-                default:
-                    map.put(EquipmentSlot.MAINHAND, "Mithril scimitar");
-                    map.put(EquipmentSlot.OFFHAND, "Iron kiteshield");
-                    break;
+            if (Beggar.OGRESS) {
+                setupMagicProgressive();
+                //setupLesserDemonProgressive();
+            } else {
+                setupDefaultProgressive("chicken");
             }
 
-            map.put(EquipmentSlot.LEGS, "Iron platelegs");
-            map.put(EquipmentSlot.CHEST, "Iron platebody");
-            map.put(EquipmentSlot.HEAD, "Iron full helm");
-            map.put(EquipmentSlot.NECK, "Amulet of strength");
-            map.put(EquipmentSlot.CAPE, "Team-17 cape");
-
-            progressive.setEquipmentMap(map);
-
-            switch (Beggar.randInt(0, 2)) {
-                case 0:
-                    if (map.containsKey(EquipmentSlot.QUIVER)) {
-                        progressive.setStyle(Combat.AttackStyle.ACCURATE);
-                        //progressive.setSkill(Skill.RANGED);
-                    } else {
-                        progressive.setStyle(Combat.AttackStyle.ACCURATE);
-                        //progressive.setSkill(Skill.ATTACK);
-                    }
-                    break;
-                case 1:
-                    if (map.containsKey(EquipmentSlot.QUIVER)) {
-                        progressive.setStyle(Combat.AttackStyle.RAPID);
-                        //progressive.setSkill(Skill.RANGED);
-                    } else {
-                        progressive.setStyle(Combat.AttackStyle.AGGRESSIVE);
-                        //progressive.setSkill(Skill.STRENGTH);
-                    }
-                    break;
-                case 2:
-                    if (map.containsKey(EquipmentSlot.QUIVER)) {
-                        progressive.setStyle(Combat.AttackStyle.LONGRANGE);
-                        //progressive.setSkill(Skill.DEFENCE);
-                    } else {
-                        progressive.setStyle(Combat.AttackStyle.DEFENSIVE);
-                       //progressive.setSkill(Skill.DEFENCE);
-                    }
-                    break;
-            }
-            progressive.setSkill(Skill.ATTACK);
-
-            progressive.setMinimumLevel(1);
-            HashSet<String> enemies = new HashSet<>();
-            progressive.setEnemies(enemies);
-            HashSet<String> loot = new HashSet<>();
-            //loot.add("raw chicken");
-            //loot.add("cowhide");
-            if (Beggar.randInt(0, 1) == 0) {
-                loot.add("bones");
-            }
-            progressive.setLoot(loot);
-            progressive.setRadius(Random.low(10, 15));
-            progressive.setBuryBones(true);
-            progressive.setPrioritizeLooting(false);
-
-            switch (Beggar.randInt(0, 3)) {
-                case 0:
-                    progressive.setPosition(new Position(3017, 3290)); //Sarim chickens
-                    enemies.add("chicken");
-                    break;
-                case 1:
-                    progressive.setPosition(new Position(3031, 3286)); //Sarim chickens (small)
-                    enemies.add("chicken");
-                    break;
-                case 2:
-                    progressive.setPosition(new Position(3231, 3295)); //Lumbridge chickens
-                    enemies.add("chicken");
-                    break;
-                case 3:
-                    progressive.setPosition(new Position(3188, 3277)); //Lumbridge chickens (small)
-                    enemies.add("chicken");
-                    break;
-                case 4:
-                    progressive.setPosition(new Position(3032, 3305)); //Sarim cows
-                    enemies.add("cow");
-                    enemies.add("cow calf");
-                    break;
-                case 5:
-                    progressive.setPosition(new Position(3254, 3283)); //Lumbridge cows
-                    enemies.add("cow");
-                    enemies.add("cow calf");
-                    break;
-            }
-
-            progressive.setEnemies(enemies);
-
-            progressive.setRandomIdle(true);
-            progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
-
-
-            CombatStore.resetTargetingValues();
-            if (!ProgressiveSet.isEmpty()) {
-                ProgressiveSet.removeAll();
-            }
-            ProgressiveSet.add(progressive);
             Config.setLogLevel(LogLevel.Debug);
             supplier = new NodeSupplier(this);
             manager = new NodeManager();
@@ -210,6 +98,243 @@ public class Fighter {
         }
     }
 
+    private void setupMagicProgressive() {
+        progressive = new Progressive();
+        progressive.setName("Train Magic: Chickens");
+        progressive.setStyle(Combat.AttackStyle.CASTING);
+        progressive.setSkill(Skill.MAGIC);
+        HashMap<EquipmentSlot, String> map = new HashMap<>();
+        switch (Beggar.randInt(0, 2)) {
+            case 0:
+                map.put(EquipmentSlot.MAINHAND, "Bronze sword");
+                map.put(EquipmentSlot.OFFHAND, "Wooden shield");
+                break;
+            case 1:
+                if (Inventory.contains("Bronze arrow")) {
+                    map.put(EquipmentSlot.MAINHAND, "Shortbow");
+                    map.put(EquipmentSlot.QUIVER, "Bronze arrow");
+                }
+                break;
+            case 2:
+                map.put(EquipmentSlot.MAINHAND, "Bronze dagger");
+                map.put(EquipmentSlot.OFFHAND, "Wooden shield");
+                break;
+        }
+        progressive.setEquipmentMap(map);
+        HashSet<String> runes = new HashSet<>();
+        runes.add("air rune");
+        runes.add("mind rune");
+        progressive.setRunes(runes);
+        progressive.setSpell(Spell.Modern.WIND_STRIKE);
+        HashSet<String> enemies = new HashSet<>();
+        enemies.add("chicken");
+        progressive.setEnemies(enemies);
+        HashSet<String> loot = new HashSet<>();
+        loot.add("raw chicken");
+        loot.add("bones");
+        String[] runeLoot = new String[] {"air rune", "mind rune","water rune","earth rune","fire rune",
+                "chaos rune", "cosmic rune","nature rune","law rune","death rune", "body rune"} ;
+        loot.addAll(Arrays.asList(runeLoot));
+        progressive.setLoot(loot);
+        progressive.setPrioritizeLooting(false);
+        progressive.setBuryBones(false);
+        switch (Beggar.randInt(0, 3)) {
+            case 0:
+                progressive.setPosition(new Position(3017, 3290)); //Sarim chickens
+                break;
+            case 1:
+                progressive.setPosition(new Position(3031, 3286)); //Sarim chickens (small)
+                break;
+            case 2:
+                progressive.setPosition(new Position(3231, 3295)); //Lumbridge chickens
+                break;
+            case 3:
+                progressive.setPosition(new Position(3188, 3277)); //Lumbridge chickens (small)
+                break;
+        }
+        progressive.setRadius(Random.low(10, 15));
+        progressive.setRandomIdle(true);
+        progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
+        progressive.setMinimumLevel(1);
+        progressive.setMaximumLevel(2);
+        ProgressiveSet.add(progressive);
+
+        progressive.setName("Train Magic: Goblins");
+        progressive.setStyle(Combat.AttackStyle.CASTING);
+        progressive.setSkill(Skill.MAGIC);
+        progressive.setSpell(Spell.Modern.WIND_STRIKE);
+        enemies = new HashSet<>();
+        enemies.add("goblin");
+        progressive.setEnemies(enemies);
+        loot = new HashSet<>();
+        loot.add("bones");
+        runeLoot = new String[] {"air rune", "mind rune","water rune","earth rune","fire rune",
+                "chaos rune", "cosmic rune","nature rune","law rune","death rune", "body rune"} ;
+        loot.addAll(Arrays.asList(runeLoot));
+        progressive.setLoot(loot);
+        progressive.setPrioritizeLooting(false);
+        progressive.setBuryBones(false);
+        switch (Beggar.randInt(0, 1)) {
+            case 0:
+                progressive.setPosition(new Position(3183, 3220)); //Behind lumbridge castle
+                break;
+            case 1:
+                progressive.setPosition(new Position(3248, 3237)); //Lumbridge east river lum
+                break;
+        }
+        progressive.setRadius(Beggar.randInt(15, 20));
+        progressive.setRandomIdle(true);
+        progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
+        progressive.setMinimumLevel(2);
+        progressive.setMaximumLevel(3);
+        ProgressiveSet.add(progressive);
+    }
+
+    private void setupLesserDemonProgressive() {
+        progressive = new Progressive();
+        progressive.setName("Train Magic: Lesser Demon");
+        progressive.setStyle(Combat.AttackStyle.CASTING);
+        progressive.setSkill(Skill.ATTACK);
+        HashSet<String> runes = new HashSet<>();
+        runes.add("air rune");
+        runes.add("mind rune");
+        progressive.setRunes(runes);
+        progressive.setSpell(Spell.Modern.WIND_STRIKE);
+        progressive.setMinimumLevel(1);
+        HashSet<String> enemies = new HashSet<>();
+        progressive.setPrioritizeLooting(false);
+        progressive.setPosition(new Position(3110, 3159, 2));
+        progressive.setRadius(3);
+        enemies.add("lesser demon");
+        progressive.setEnemies(enemies);
+        progressive.setEquipmentMap(new HashMap<>());
+        progressive.setRandomIdle(true);
+        progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
+
+        ProgressiveSet.add(progressive);
+    }
+
+    private void setupDefaultProgressive(String... enemiesToFight) {
+        progressive = new Progressive();
+        progressive.setName("Default");
+        HashMap<EquipmentSlot, String> map = new HashMap<>();
+        switch (Beggar.randInt(0, 2)) {
+            case 0:
+                map.put(EquipmentSlot.MAINHAND, "Bronze sword");
+                map.put(EquipmentSlot.OFFHAND, "Wooden shield");
+                break;
+            case 1:
+                if (Inventory.contains("Bronze arrow")) {
+                    map.put(EquipmentSlot.MAINHAND, "Shortbow");
+                    map.put(EquipmentSlot.QUIVER, "Bronze arrow");
+                }
+                break;
+            case 2:
+                map.put(EquipmentSlot.MAINHAND, "Bronze dagger");
+                map.put(EquipmentSlot.OFFHAND, "Wooden shield");
+                break;
+        }
+
+        progressive.setEquipmentMap(map);
+
+        switch (Beggar.randInt(0, 2)) {
+            case 0:
+                if (map.containsKey(EquipmentSlot.QUIVER)) {
+                    progressive.setStyle(Combat.AttackStyle.ACCURATE);
+                    //progressive.setSkill(Skill.RANGED);
+                } else {
+                    progressive.setStyle(Combat.AttackStyle.ACCURATE);
+                    //progressive.setSkill(Skill.ATTACK);
+                }
+                break;
+            case 1:
+                if (map.containsKey(EquipmentSlot.QUIVER)) {
+                    progressive.setStyle(Combat.AttackStyle.RAPID);
+                    //progressive.setSkill(Skill.RANGED);
+                } else {
+                    progressive.setStyle(Combat.AttackStyle.AGGRESSIVE);
+                    //progressive.setSkill(Skill.STRENGTH);
+                }
+                break;
+            case 2:
+                if (map.containsKey(EquipmentSlot.QUIVER)) {
+                    progressive.setStyle(Combat.AttackStyle.LONGRANGE);
+                    //progressive.setSkill(Skill.DEFENCE);
+                } else {
+                    progressive.setStyle(Combat.AttackStyle.DEFENSIVE);
+                    //progressive.setSkill(Skill.DEFENCE);
+                }
+                break;
+        }
+        progressive.setSkill(Skill.ATTACK);
+
+        progressive.setMinimumLevel(1);
+        HashSet<String> enemies = new HashSet<>();
+        progressive.setEnemies(enemies);
+        HashSet<String> loot = new HashSet<>();
+        loot.add("bronze scimitar");
+        String[] runes = new String[] {"air rune", "mind rune","water rune","earth rune","fire rune",
+                "chaos rune", "cosmic rune","nature rune","law rune","death rune", "body rune"} ;
+        loot.addAll(Arrays.asList(runes));
+        if (Beggar.randInt(0, 1) == 0) {
+            loot.add("bones");
+        }
+        progressive.setLoot(loot);
+        progressive.setRadius(Random.low(10, 15));
+        progressive.setBuryBones(true);
+        progressive.setPrioritizeLooting(false);
+
+        for (String enemy : enemiesToFight) {
+            enemies.add(enemy.toLowerCase());
+        }
+        progressive.setEnemies(enemies);
+
+        if (progressive.getEnemies().contains("chicken")) {
+            switch (Beggar.randInt(0, 3)) {
+                case 0:
+                    progressive.setPosition(new Position(3017, 3290)); //Sarim chickens
+                    break;
+                case 1:
+                    progressive.setPosition(new Position(3031, 3286)); //Sarim chickens (small)
+                    break;
+                case 2:
+                    progressive.setPosition(new Position(3231, 3295)); //Lumbridge chickens
+                    break;
+                case 3:
+                    progressive.setPosition(new Position(3188, 3277)); //Lumbridge chickens (small)
+                    break;
+            }
+        } else if (progressive.getEnemies().contains("cow")) {
+            switch (Beggar.randInt(0, 1)) {
+                case 0:
+                    progressive.setPosition(new Position(3032, 3305)); //Sarim cows
+                    break;
+                case 1:
+                    progressive.setPosition(new Position(3254, 3283)); //Lumbridge cows
+                    break;
+            }
+        } else if (progressive.getEnemies().contains("goblin")) {
+            switch (1) {
+                case 0:
+                    progressive.setPosition(new Position(3183, 3220)); //Behind lumbridge castle
+                    break;
+                case 1:
+                    progressive.setPosition(new Position(3248, 3237)); //Lumbridge east river lum
+                    break;
+            }
+        }
+
+        progressive.setRandomIdle(true);
+        progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
+
+
+        CombatStore.resetTargetingValues();
+        if (!ProgressiveSet.isEmpty()) {
+            ProgressiveSet.removeAll();
+        }
+        ProgressiveSet.add(progressive);
+    }
+
     private void setupNodes() {
 
         beggar.submit(
@@ -220,6 +345,7 @@ public class Fighter {
                 supplier.PROGRESSION_CHECKER,
                 supplier.BURY_BONES,
                 supplier.IDLE,
+                supplier.SELL_GE,
                 supplier.BUY_GE,
                 supplier.FIGHT,
                 supplier.BACK_TO_FIGHT
@@ -229,19 +355,6 @@ public class Fighter {
     private void setBackgroundTasks() {
         new TargetChecker();
     }
-
-/*    @Override
-    public int loop() {
-        if(!GameCanvas.isInputEnabled()) {
-            GameCanvas.setInputEnabled(true);
-        }
-        try {
-            return manager.execute(getLoopReturn());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return getLoopReturn();
-    }*/
 
     public void onStop(boolean scriptStopping, int bShutdownRetries) {
         beggar.isFighterRunning = false;
@@ -308,7 +421,8 @@ public class Fighter {
 
     public void setActive(Node task) {
         active = task;
-        checkStopTime();
+        if (!Beggar.OGRESS)
+            checkStopTime();
     }
 
     private void checkStopTime() {

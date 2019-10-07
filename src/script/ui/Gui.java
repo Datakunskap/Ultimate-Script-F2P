@@ -103,7 +103,7 @@ public class Gui extends Task {
         hopCheckf2p.setSelected(true);
         hopCheck.setSelected(false);
         hopPopText.setText("800");
-        hopTimeText.setText("10");
+        hopTimeText.setText("8");
 
         JPanel p1 = new JPanel(new MigLayout("filly, wrap 2"));
         JPanel p2 = new JPanel(new MigLayout("filly, wrap 2"));

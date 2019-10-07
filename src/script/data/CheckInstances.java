@@ -14,6 +14,7 @@ public class CheckInstances {
 
     private Beggar main;
     private List<LaunchedClient> runningClients;
+    private boolean generatedAccounts = false;
 
     public CheckInstances(Beggar beggar) {
         main = beggar;
@@ -47,11 +48,9 @@ public class CheckInstances {
     public int execute(String[] accountInfo) {
         Log.fine("Launching another instance");
 
-        try {
+        if (!generatedAccounts) {
             main.accountGeneratorDriver(Beggar.NUM_BACKLOG_ACCOUNTS);
-        } catch (Exception e) {
-            main.writeToErrorFile(e.getMessage());
-            e.printStackTrace();
+            generatedAccounts = true;
         }
 
         QuickLaunch quickLaunch = main.setupQuickLauncher(accountInfo);

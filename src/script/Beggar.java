@@ -102,18 +102,11 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public StopWatch lastTradeTime;
     public boolean refreshPrices = false;
     public long startTime = 0;
-    public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
     public boolean tradeGambler = false;
     public boolean roll = false;
     public int gambleAmnt = 0;
     public String gamblerName = "";
     public boolean giveGambler = false;
-    private static final String ACCOUNTS_FILE_PATH = "C:\\Users\\TheTheeMusketeers\\Desktop\\RSPeer\\f2pAccounts.txt";
-    public static final String BEG_LINES_PATH = "C:\\Users\\TheTheeMusketeers\\Desktop\\RSPeer\\BegLines.txt";
-    public static final String ERROR_FILE_PATH = "C:\\Users\\TheTheeMusketeers\\Desktop";
-    private static final String PYTHON_3_EXE = "C:\\Users\\TheTheeMusketeers\\AppData\\Local\\Programs\\Python\\Python37-32\\python.exe";
-    private static final String ACC_GEN_PY = "C:\\Users\\TheTheeMusketeers\\Desktop\\RSPeer\\create_rs_account.py";
-    private static final String PASSWORD_ARG = "-p plmmlp";
     public ArrayList<Integer> OTHER_BEG_WORLDS;
     private final boolean GAMBLER = false;
     public Main tanner;
@@ -131,10 +124,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public script.chocolate.Main chocolate;
     public boolean isChoc = false;
     public int sumTopPops = 0;
-    public static final boolean MULE_ITEMS = false;
     public int numBegs = 0;
     public int idleBegNum = randInt(50, 70);
     public Fighter fighter;
+    public int nextBotWorld;
 
     private static final String PROXY_IP = null;//"108.187.189.123";
     private static final String PROXY_USER = null;//"qLo741";
@@ -145,11 +138,13 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
     private static final String ERROR_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeerErrors.txt";
     public static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
+    public static final String BEG_LINES_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\BegLines.txt";
     private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\Runescape-Account-Generator-2.0.jar";
 
     public static final String MULE_NAME = "IBear115";
     public static final MuleArea MULE_AREA = MuleArea.COOKS_GUILD;
     public static final int MULE_WORLD = 393;
+    public static final boolean MULE_ITEMS = false;
     public static final int MUTED_MULE_AMNT = 25000;
     public static final int ALLOWED_INSTANCES = 8;
     public static final String API_KEY = "1FFY03V3M22KU5CFQ60DF9A40B3WKAU9CP0ZPCFE5KBLAMTUX61EC981FL7ZA8TLH2HFFM";
@@ -160,6 +155,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final boolean IDLE_LOGOUT = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
     public static final boolean SELENIUM_VERIFY_GEN = false;
+    public static final boolean OGRESS = false;
 
     @Override
     public void onStart() {
@@ -310,8 +306,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             if (Game.isLoggedIn())
                 Game.logout();
 
-
-            accountGeneratorDriver(NUM_BACKLOG_ACCOUNTS);
+            if (stopRetries == 5) {
+                accountGeneratorDriver(NUM_BACKLOG_ACCOUNTS);
+            }
 
             QuickLaunch quickLaunch = setupQuickLauncher(readAccount(true));
 
@@ -325,7 +322,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 Log.severe(e);
                 e.printStackTrace();
                 if (stopRetries > 0) {
-                    stopRetries--;
+                    stopRetries --;
                     onStop();
                 }
             }
@@ -348,7 +345,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             proxy = qL.new Proxy("", "", "", "", "", 80, "", "");
         }
 
-        int newWorld = (currWorld > 0 ? currWorld : popWorldsArr[randInt(0, 2)]);
+        int newWorld = (nextBotWorld > 0 ? nextBotWorld : (currWorld > 0 ? currWorld : popWorldsArr[randInt(0, 2)]));
         QuickLaunch.Client qLClient = qL.new Client(
                 accountInfo[0], accountInfo[1], newWorld, proxy, script, config);
 
