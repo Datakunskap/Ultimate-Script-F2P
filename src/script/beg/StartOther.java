@@ -137,17 +137,4 @@ public class StartOther extends Task {
 
         Time.sleepUntil(() -> Worlds.getCurrent() != currWorld, 12000);
     }
-
-    public static int getLowPopWorld(int pop, int currWorld) {
-        RSWorld newWorld = Worlds.get(x -> x != null && x.getPopulation() <= pop &&
-                !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
-
-        if (newWorld != null) {
-            return newWorld.getId();
-        } else if (pop < 1000) {
-            getLowPopWorld(pop + 100, currWorld);
-        }
-
-        return currWorld;
-    }
 }

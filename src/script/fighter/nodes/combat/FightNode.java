@@ -103,6 +103,7 @@ public class FightNode extends Node {
         return Fighter.getLoopReturn();
     }
 
+    @Override
     public void onInvalid() {
         running = false;
         super.onInvalid();
@@ -152,7 +153,9 @@ public class FightNode extends Node {
             return;
         }
         status = "Walking to target.";
-        Movement.walkTo(npc);
+        if (Config.getProgressive().getSpell() == null || !Movement.isInteractable(npc, false)) {
+            Movement.walkTo(npc);
+        }
     }
 
     private void castSpell(Npc npc) {

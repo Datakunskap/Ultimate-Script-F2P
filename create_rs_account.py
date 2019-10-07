@@ -5,16 +5,41 @@ import sys
 import time
 import os
 from random import randint
+import email, getpass, imaplib, re
+import html.parser
+import quopri
 
-# set http_proxy=10.10.1.10:3128
-# set https_proxy=10.10.1.11:1080
-# set ftp_proxy=10.10.1.10:3128
 RUNESCAPE_REGISTER_URL = 'https://secure.runescape.com/m=account-creation/g=oldscape/create_account'
 RUNESCAPE_RECAPTCHA_KEY = '6Lcsv3oUAAAAAGFhlKrkRb029OHio098bbeyi_Hv'
 CAPTCHA_URL = 'http://2captcha.com/'
 CAPTCHA_REQ_URL = CAPTCHA_URL + 'in.php'
 CAPTCHA_RES_URL = CAPTCHA_URL + 'res.php'
 CAPTCHA_API_KEY = '4935affd16c15fb4100e8813cdccfab6'
+
+
+def verify_email():
+    for msg in get_msgs():
+        get_links(msg)
+        # payload = getAttachment(msg, lambda x: x.endswith('.pem'))
+
+
+def get_links(msg):
+    return
+
+
+def get_msgs(servername="imap.gmail.com"):
+    usernm = "milleja115"
+    passwd = "Xb32y0x5"
+    subject = 'Thank you for registering your email'
+    conn = imaplib.IMAP4_SSL(servername)
+    conn.login(usernm, passwd)
+    conn.select('Inbox')
+    typ, data = conn.search(None, '(UNSEEN SUBJECT "%s")' % subject)
+    for num in data[0].split():
+        typ, data = conn.fetch(num, '(RFC822)')
+        msg = email.message_from_string(data[0][1])
+        typ, data = conn.store(num, '-FLAGS', '\\Seen')
+        yield msg
 
 
 class WaitForCaptcha():
@@ -64,8 +89,8 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
         proxies = {'http': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort),
                    'https': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort)}
         captcha_solution = solve_captcha(5, proxies)
-        #if proxy_test(proxies):
-        #else:
+        # if proxy_test(proxies):
+        # else:
         #    raise Exception('Proxy Test Failed')
 
     data = {
@@ -91,10 +116,11 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
     if response.status_code == requests.codes.ok:
         if 'Account Created' in response.text:
             print('Robots win again, account successfully registered\n\n')
-
             with open('C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt', 'a+') as f:
                 f.write('%s:%s\n' % (email, password))
                 f.close()
+
+            #verify_email()
 
         else:
             print(response.text)
@@ -181,7 +207,7 @@ def main():
     proxy_acc_arg_group.add_argument('-e', '--email_p', nargs=1,
                                      help='Email address to use for the new account')
     proxy_acc_arg_group.add_argument('-p', '--password_p', nargs=1,
-                                 help='Password')
+                                     help='Password')
     proxy_acc_arg_group.add_argument('-i', '--proxyIp', nargs=1,
                                      help='Proxy ip')
     proxy_acc_arg_group.add_argument('-u', '--proxyUser', nargs=1,

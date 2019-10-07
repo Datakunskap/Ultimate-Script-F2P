@@ -112,7 +112,7 @@ public final class FightingSection extends TutorialSection {
                     Movement.walkToRandomized(LADDER_AREA.getCenter());
                 } else if (SceneObjects.getNearest("Ladder").interact("Climb-up")) {
                     if(Time.sleepUntil(() -> !LADDER_AREA.contains(Players.getLocal()), 2000, 6000)) {
-                        getEmptyPosition(false, 6).ifPresent(this::randWalker);
+                        randWalker(Players.getLocal().getPosition());
                     }
                 }
                 break;
@@ -129,7 +129,7 @@ public final class FightingSection extends TutorialSection {
             Movement.walkToRandomized(OUTSIDE_RAT_CAGE_GATE_AREA.getCenter());
         } else if (SceneObjects.getNearest("Gate").interact("Open")) {
             if (Time.sleepUntil(this::inRatCage, 2000,5000)) {
-                randWalker(INSIDE_RAT_CAGE_GATE_AREA.getCenter());
+                randWalker(Players.getLocal().getPosition());
             }
         }
     }
@@ -139,7 +139,7 @@ public final class FightingSection extends TutorialSection {
             Movement.walkToRandomized(INSIDE_RAT_CAGE_GATE_AREA.getCenter());
         } else if (SceneObjects.getNearest("Gate").interact("Open")) {
             if (Time.sleepUntil(() -> !inRatCage(), 2000, 5000)) {
-                randWalker(OUTSIDE_RAT_CAGE_GATE_AREA.getCenter());
+                randWalker(Players.getLocal().getPosition());
             }
         }
     }

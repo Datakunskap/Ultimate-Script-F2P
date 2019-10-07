@@ -104,7 +104,7 @@ public final class WizardSection extends TutorialSection {
         if (!main.onTutorialIsland()) {
             switch (Beggar.randInt(0, 2)) {
                 case 0:
-                    getEmptyPosition(false, Beggar.TUTORIAL_COMPLETED_WALK_DIST).ifPresent(this::randWalker);
+                    getEmptyPosition(false, Beggar.TUTORIAL_COMPLETED_WALK_DIST, false).ifPresent(this::randWalker);
                     break;
                 case 1:
                     randWalker(BankLocation.LUMBRIDGE_CASTLE.getPosition());

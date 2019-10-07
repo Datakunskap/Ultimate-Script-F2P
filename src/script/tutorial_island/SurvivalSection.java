@@ -112,7 +112,7 @@ public final class SurvivalSection extends TutorialSection {
     private void lightFire() {
         if (standingOnFire()) {
             //Log.info("Standing on fire");
-            getEmptyPosition(true, 10).ifPresent(position -> {
+            getEmptyPosition(true, 10, true).ifPresent(position -> {
                 if (Movement.getDestinationDistance() > 0)
                     Movement.walkTo(position);
             });

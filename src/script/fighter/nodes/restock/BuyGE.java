@@ -1,16 +1,14 @@
 package script.fighter.nodes.restock;
 
-import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.Definitions;
+import org.rspeer.runetek.api.commons.BankLocation;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.GrandExchange;
-import org.rspeer.runetek.api.component.GrandExchangeSetup;
 import org.rspeer.runetek.api.component.tab.*;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
-import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
@@ -21,6 +19,9 @@ import script.fighter.Fighter;
 import script.fighter.config.Config;
 import script.fighter.debug.Logger;
 import script.fighter.framework.Node;
+import script.fighter.models.Progressive;
+import script.fighter.wrappers.BankWrapper;
+import script.fighter.wrappers.GEWrapper;
 import script.tanner.ExGrandExchange;
 import script.tanner.ExPriceChecker;
 
@@ -36,6 +37,7 @@ public class BuyGE extends Node {
     private int quantity;
     private String itemToBuy;
     private Spell spell;
+    private boolean checkedBank;
 
     public BuyGE(Fighter main) {
         this.main = main;
@@ -43,7 +45,7 @@ public class BuyGE extends Node {
 
     @Override
     public boolean validate() {
-        if (runesIterator != null || itemsStillBuying())
+        if (runesIterator != null || GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY))
             return true;
 
         HashSet<String> runes = Config.getProgressive().getRunes();
@@ -53,7 +55,7 @@ public class BuyGE extends Node {
             Log.fine("Restocking");
             runesIterator = runes.iterator();
             itemToBuy = runesIterator.next();
-            quantity = 35;
+            quantity = Random.low(15, 20);
             return true;
         }
 
@@ -65,32 +67,32 @@ public class BuyGE extends Node {
         invalidateTask(main.getActive());
 
         if (!Location.GE_AREA.getBegArea().contains(Players.getLocal())) {
-            if (!Movement.walkToRandomized(Location.GE_AREA.getBegArea().getCenter())) {
-                SceneObject stairs = SceneObjects.getNearest("Staircase");
-                if (stairs != null) {
-                    if (stairs.interact("Climb-down")) {
-                        Logger.debug("Climbing stairs");
-                    } else if (stairs.getPosition().randomize(3).isPositionWalkable()) {
-                        Movement.walkTo(stairs);
-                    } else {
-                        SceneObject door = SceneObjects.getNearest("Door");
-                        if (door != null && door.isPositionInteractable()) {
-                            door.interact("Open");
-                        }
-                    }
-                }
+            if (!Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition())) {
+                handleObstacles();
             }
             status = "Walking to GE";
             return Fighter.getLoopReturn();
         }
 
+        if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
+            if (!Inventory.contains(i -> i.getName().equals("Coins") && i.getStackSize() >= getPrice())) {
+                if (!checkedBank) {
+                    BankWrapper.openAndDepositAll(true, Config.getProgressive().getRunes().toArray(new String[0]));
+                    checkedBank = true;
+                } else {
+                    GEWrapper.setSellItems(true);
+                }
+                return Fighter.getLoopReturn();
+            }
+        }
+
         if (!GrandExchange.isOpen()) {
             status = "Restocking";
-            openGE();
+            GEWrapper.openGE();
             return Fighter.getLoopReturn();
         }
 
-        if (runesIterator != null && !itemsStillBuying()) {
+        if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
             if (ExGrandExchange.buy(itemToBuy, quantity, getPrice(), false)) {
                 if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemName().toLowerCase().equals(itemToBuy)) != null, 8000)) {
                     Logger.debug("Buying: " + itemToBuy);
@@ -107,19 +109,23 @@ public class BuyGE extends Node {
             GrandExchange.open(GrandExchange.View.OVERVIEW);
         }
 
-        if (itemsStillBuying()) {
+        if (GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
             GrandExchange.collectAll();
             Time.sleep(Random.mid(300, 600));
             Keyboard.pressEnter();
         }
 
-        if (!itemsStillBuying() && runesIterator == null) {
-            closeGE();
+        if (!GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY) && runesIterator == null) {
+            GEWrapper.closeGE();
             if (!Tabs.isOpen(Tab.MAGIC)) {
                 Tabs.open(Tab.MAGIC);
                 Time.sleepUntil(() -> Tabs.isOpen(Tab.MAGIC) && Magic.canCast(spell), 8000);
             }
             Log.fine("Done restocking");
+            Progressive p = Config.getProgressive();
+            if (p.getEnemies().contains("chicken") || p.getEnemies().contains("lesser demon")) {
+                GEWrapper.teleportHome();
+            }
         }
 
         return Fighter.getLoopReturn();
@@ -136,31 +142,11 @@ public class BuyGE extends Node {
             if (price < 1) {
                 price = Inventory.getCount(true, 995) / 2;
             }
-            return (price + 5) * quantity;
+            return price * quantity;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return 0;
-    }
-
-    private void openGE() {
-        Npc n = Npcs.getNearest(x -> x != null && x.getName().contains("Grand Exchange Clerk"));
-        if (n != null) {
-            Time.sleepUntil(() -> n.interact("Exchange"), 1000, 10000);
-            Time.sleep(700, 1300);
-        }
-    }
-
-    private void closeGE(){
-        if (GrandExchange.isOpen()) {
-            Movement.walkToRandomized(Players.getLocal().getPosition().randomize(4));
-            Time.sleepUntil(() -> !GrandExchange.isOpen(), 2000, 6000);
-        }
-    }
-
-    private boolean itemsStillBuying() {
-        return (GrandExchange.isOpen() || GrandExchangeSetup.isOpen()) &&
-                (GrandExchange.getOffers(RSGrandExchangeOffer.Type.BUY).length > 0 || GrandExchange.getFirstActive() != null);
     }
 
     private boolean hasRunes(HashSet<String> runes){
@@ -174,8 +160,26 @@ public class BuyGE extends Node {
         return true;
     }
 
+    private void handleObstacles() {
+        SceneObject stairs = SceneObjects.getNearest("Staircase");
+        if (stairs != null) {
+            if (stairs.interact("Climb-down")) {
+                Logger.debug("Climbing stairs");
+            } else if (stairs.getPosition().randomize(3).isPositionWalkable()) {
+                Movement.walkTo(stairs);
+            } else {
+                SceneObject door = SceneObjects.getNearest("Door");
+                if (door != null && door.isPositionInteractable()) {
+                    door.interact("Open");
+                }
+            }
+        }
+    }
+
+    @Override
     public void onInvalid() {
         runesIterator = null;
+        checkedBank = false;
         super.onInvalid();
     }
 
