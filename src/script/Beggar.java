@@ -255,7 +255,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     @Override
     public void notify(LoginResponseEvent loginResponseEvent) {
         if (loginResponseEvent.getResponse().equals(LoginResponseEvent.Response.ACCOUNT_DISABLED) ||
-                loginResponseEvent.getResponse().equals(INVALID_CREDENTIALS)
+                loginResponseEvent.getResponse().equals(INVALID_CREDENTIALS) ||
+                loginResponseEvent.getResponse().equals(LoginResponseEvent.Response.ACCOUNT_LOCKED) ||
+                loginResponseEvent.getResponse().equals(LoginResponseEvent.Response.ACCOUNT_STOLEN)
         ) {
 
             disableChain = false;

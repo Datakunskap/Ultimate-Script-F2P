@@ -174,9 +174,9 @@ public class Fighter {
         progressive.setLoot(loot);
         progressive.setPrioritizeLooting(false);
         progressive.setBuryBones(false);
-        switch (Beggar.randInt(0, 1)) {
+        switch (1) {
             case 0:
-                progressive.setPosition(new Position(3183, 3220)); //Behind lumbridge castle
+                //progressive.setPosition(new Position(3183, 3220)); //Behind lumbridge castle
                 break;
             case 1:
                 progressive.setPosition(new Position(3248, 3237)); //Lumbridge east river lum
