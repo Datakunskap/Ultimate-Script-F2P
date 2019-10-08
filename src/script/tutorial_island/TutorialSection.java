@@ -94,7 +94,7 @@ public abstract class TutorialSection extends Task {
             for (int i = 0; i < times; i++) {
                 //Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
                 getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
-                Time.sleepUntil(() -> !Players.getLocal().isMoving() && !Movement.isDestinationSet(), 600, Beggar.randInt(3000, 7000));
+                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 600, Beggar.randInt(2000, 5000));
             }
         }
     }
