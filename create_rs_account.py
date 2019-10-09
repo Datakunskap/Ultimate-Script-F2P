@@ -6,8 +6,6 @@ import time
 import os
 from random import randint
 import email, getpass, imaplib, re
-import html.parser
-import quopri
 
 RUNESCAPE_REGISTER_URL = 'https://secure.runescape.com/m=account-creation/g=oldscape/create_account'
 RUNESCAPE_RECAPTCHA_KEY = '6Lcsv3oUAAAAAGFhlKrkRb029OHio098bbeyi_Hv'
@@ -17,29 +15,57 @@ CAPTCHA_RES_URL = CAPTCHA_URL + 'res.php'
 CAPTCHA_API_KEY = '4935affd16c15fb4100e8813cdccfab6'
 
 
-def verify_email():
-    for msg in get_msgs():
-        get_links(msg)
-        # payload = getAttachment(msg, lambda x: x.endswith('.pem'))
+# By linkLocator = By.cssSelector("a[href*='http://echo7.bluehornet.com']");
+# String validLink = "";
+# List<WebElement> links = driver.findElements(linkLocator);
+# for (WebElement link : links) {
+# if (link.getText().contains("submit_code")) {
+# validLink = link.getText();
+# break;
+# }
+# }
+# driver.get(validLink);
+# utilities.waitUntilUrlContains("submit_code");
 
-
-def get_links(msg):
-    return
-
-
-def get_msgs(servername="imap.gmail.com"):
-    usernm = "milleja115"
-    passwd = "Xb32y0x5"
+def verify_email(proxies=None, sleep=60):
+    server_name = "imap.gmail.com"
+    username = "milleja115"
+    password = "Xb32y0x5!"
     subject = 'Thank you for registering your email'
-    conn = imaplib.IMAP4_SSL(servername)
-    conn.login(usernm, passwd)
+    conn = imaplib.IMAP4_SSL(server_name)
+    conn.login(username, password)
     conn.select('Inbox')
-    typ, data = conn.search(None, '(UNSEEN SUBJECT "%s")' % subject)
-    for num in data[0].split():
-        typ, data = conn.fetch(num, '(RFC822)')
-        msg = email.message_from_string(data[0][1])
-        typ, data = conn.store(num, '-FLAGS', '\\Seen')
-        yield msg
+
+    num_emails = 0
+    sleeps = 6
+    print("Waiting %ds for verification email..." % sleep)
+    sleep = sleep / sleeps
+    while num_emails == 0 and sleeps > 0:
+        typ, data = conn.search(None, '(UNSEEN SUBJECT "%s")' % subject)
+        unread_msg_nums = data[0].split()
+        print("Sleeping %ds" % sleep)
+        time.sleep(sleep)
+        num_emails = len(unread_msg_nums)
+        sleeps = sleeps - 1
+
+    print('Verifying %d Account Email(s)' % num_emails)  # print the count of all unread messages
+
+    for num in unread_msg_nums:  # data is a list. A space separated string
+        typ, data = conn.fetch(num, '(RFC822)')  # fetch the email body (RFC822) for the given ID
+        raw_email = data[0][1]  # here's the body, which is raw text of the whole email
+        raw_email = str(raw_email)
+        typ, data = conn.store(num, '-FLAGS', '\\Seen')  # marks email as read
+        link = (re.search("(?P<url>http://echo7.bluehornet.com[^\s]+VALIDATE)", raw_email).group("url")).split("\"")[0]
+        if link:
+            if proxies:
+                response = requests.get(link, proxies=proxies)
+            else:
+                response = requests.get(link)
+            if response:
+                conn.store(num, '+FLAGS', '\Seen')  # marks email as read (again)
+                print('EMAIL VERIFIED!')
+        else:
+            raise Exception('UNABLE TO PARSE LINK FROM EMAIL')
 
 
 class WaitForCaptcha():
@@ -120,14 +146,12 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
                 f.write('%s:%s\n' % (email, password))
                 f.close()
 
-            #verify_email()
+            verify_email(proxies)
 
         else:
-            print(response.text)
-            # raise Exception('Jagex says no')
+            print('JAGEX SAYS NO: Creation')
     else:
-        print(response.text)
-        # raise Exception('Jagex says no')
+        print('JAGEX SAYS NO: Posting To Link')
 
 
 def solve_captcha(retries, proxies=None):
