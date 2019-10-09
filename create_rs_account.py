@@ -262,9 +262,8 @@ def main():
         register_account(args.email[0], args.password[0])
 
     elif args.email_p and args.password_p and args.proxyIp and args.proxyUser and args.proxyPass and args.proxyPort:
-        verify_email()
-        #register_account(args.email_p[0], args.password_p[0], args.proxyIp[0],
-         #                args.proxyUser[0], args.proxyPass[0], args.proxyPort[0])
+        register_account(args.email_p[0], args.password_p[0], args.proxyIp[0],
+                         args.proxyUser[0], args.proxyPass[0], args.proxyPort[0])
 
     else:
         print('Not enough arguments! Run with -h/--help for more info')
