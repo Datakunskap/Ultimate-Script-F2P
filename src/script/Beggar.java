@@ -394,7 +394,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     }
 
     private void pythonGenerator(int retries) {
-        final String EMAIL_ARG = "-e " + getRandString(false, 12, 18) + "@gmail.com";
+        final String EMAIL_ARG = "-e " + getVerificationEmailAlias();
         final String PASSWORD_ARG = "-p " + getRandString(true, 6, 20);
         final String PROXY_IP_ARG = "-i " + PROXY_IP;
         final String PROXY_USER_ARG = "-u " + PROXY_USER;
@@ -403,7 +403,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         try {
             if (PROXY_IP == null || PROXY_IP.isEmpty()) {
-                final String EMAIL_ARG_2 = "-e2 " + getRandString(false, 12, 18) + "@gmail.com";
+                final String EMAIL_ARG_2 = "-e2 " + getVerificationEmailAlias();
                 final String PASSWORD_ARG_2 = "-p2 " + getRandString(true, 6, 20);
                 Runtime.getRuntime().exec(
                         "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + EMAIL_ARG_2 + " " + PASSWORD_ARG_2 + " && exit" + "\"");
@@ -420,6 +420,27 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 pythonGenerator(retries - 1);
             }
         }
+    }
+
+    private String getVerificationEmailAlias(){
+        final String DOMAIN = "@gmail.com";
+        String base = "milleja115";
+
+        String extension = "+" + getRandString(false, 3, 35);
+        String newBase = base + extension;
+
+        int numDots = randInt(1, newBase.length());
+        for (int i = 0; i < numDots; i ++) {
+            int randomSplitIndex = randInt(1, newBase.length() -2);
+
+            String dotAttempt = newBase.substring(0, randomSplitIndex) + "." +
+                    newBase.substring(randomSplitIndex);
+
+            if (!dotAttempt.contains("..")) {
+                newBase = dotAttempt;
+            }
+        }
+        return newBase + DOMAIN;
     }
 
     private String getRandString(boolean caseSensitive, int min, int max) {
