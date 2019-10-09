@@ -37,7 +37,7 @@ def verify_email(proxies=None, sleep=60):
     conn.select('Inbox')
 
     num_emails = 0
-    sleeps = 12
+    sleeps = 6
     print("Waiting %ds for verification email..." % sleep)
     sleep = sleep / sleeps
     while num_emails == 0 and sleeps > 0:

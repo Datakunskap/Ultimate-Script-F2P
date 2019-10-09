@@ -148,7 +148,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final int MUTED_MULE_AMNT = 25000;
     public static final int ALLOWED_INSTANCES = 8;
     public static final String API_KEY = "JV5ML4DE4M9W8Z5KBE00322RDVNDGGMTMU1EH9226YCVGFUBE6J6OY1Q2NJ0RA8YAPKO70";
-    public static final int NUM_BACKLOG_ACCOUNTS = 10;
+    public static final int NUM_BACKLOG_ACCOUNTS = 15;
     public static final boolean BUY_GEAR = true;
     private static final boolean TUTORIAL_COMPLETED_SLEEP = false;
     public static final boolean TUTORIAL_IDLE = false;
