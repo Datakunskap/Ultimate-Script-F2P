@@ -5,6 +5,7 @@ import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Varps;
+import org.rspeer.runetek.api.commons.BankLocation;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Dialog;
@@ -13,15 +14,17 @@ import org.rspeer.runetek.api.component.tab.*;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.movement.Movement;
+import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
+import org.rspeer.runetek.providers.RSTileDecor;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
+import script.Beggar;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class dqw4w9wgxcq extends Task {
@@ -355,6 +358,17 @@ public class dqw4w9wgxcq extends Task {
                 break;
             case 1000:
                 if (!main.onTutorialIsland()) {
+                    switch (Beggar.randInt(0, 1)) {
+                        case 0:
+                            getEmptyPosition(false, Beggar.TUTORIAL_COMPLETED_WALK_DIST, false).ifPresent(this::randWalker);
+                            break;
+                        case 1:
+                            randWalker(BankLocation.LUMBRIDGE_CASTLE.getPosition());
+                            break;
+                        case 2:
+                            randWalker(BankLocation.DRAYNOR.getPosition());
+                            break;
+                    }
                     main.beggar.startFighter(true);
                 }
                 break;
@@ -391,7 +405,7 @@ public class dqw4w9wgxcq extends Task {
             }
         }
 
-        return Random.low(1000, 1800);
+        return Random.mid(800, 2000);
     }
 
     private void useItemOn(String itemName, Interactable target) {
@@ -502,6 +516,49 @@ public class dqw4w9wgxcq extends Task {
     private void wieldItem(String name) {
         if (Inventory.getFirst(name).interact("Wield") || Inventory.getFirst(name).interact("Equip")) {
             Time.sleepUntil(() -> Equipment.contains(name), 2000, 1500);
+        }
+    }
+
+    private void randWalker(Position posRequired) {
+        Log.info("Walking to position");
+        while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping() && Game.isLoggedIn()) {
+            if (!Time.sleepUntil(() -> Players.getLocal().getPosition().equals(posRequired), Random.low(600, 1800))) {
+                Movement.walkTo(posRequired);
+            }
+        }
+        if (posRequired.distance(Players.getLocal()) <= 3) {
+            int times = Beggar.randInt(1, 2);
+            Log.info("Random walking " + times + " time(s)");
+            for (int i = 0; i < times; i++) {
+                //Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
+                getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
+                Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
+                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 600, Beggar.randInt(2000, 4000));
+            }
+        }
+    }
+
+    private Optional<Position> getEmptyPosition(boolean min, int distance, boolean removeNonInteractable) {
+        List<Position> allPositions = Area.surrounding(Players.getLocal().getPosition(), distance).getTiles();
+
+        // Remove any position with an object (except ground decorations, as they can be walked on)
+        for (SceneObject object : SceneObjects.getLoaded()) {
+            if (object.getProvider() instanceof RSTileDecor) {
+                continue;
+            }
+            allPositions.removeIf(position -> object.getPosition().equals(position));
+        }
+
+        allPositions.removeIf(position -> !position.isPositionWalkable() || !Movement.isWalkable(position, false));
+        allPositions.removeIf(position -> position.distance(Players.getLocal()) <= 0);
+        if (removeNonInteractable) {
+            allPositions.removeIf(position -> Movement.isInteractable(position, false));
+        }
+
+        if (min) {
+            return allPositions.stream().min(Comparator.comparingInt(p -> (int) Players.getLocal().getPosition().distance(p)));
+        } else {
+            return allPositions.stream().max(Comparator.comparingInt(p -> (int) Players.getLocal().getPosition().distance(p)));
         }
     }
 }
