@@ -33,6 +33,9 @@ public class SellGE extends Node {
 
     @Override
     public boolean validate() {
+        if (!GEWrapper.getSellItems())
+            return false;
+
         if (!Location.GE_AREA.containsPlayer()) {
             GEWrapper.setSellItems(false);
             itemsToSell = null;
@@ -97,11 +100,11 @@ public class SellGE extends Node {
 
         if (GrandExchange.getOffers(RSGrandExchangeOffer.Type.SELL).length > 0) {
             GrandExchange.collectAll();
-            Time.sleep(Random.mid(300, 600));
+            Time.sleep(Random.low(300, 600));
             Keyboard.pressEnter();
         }
 
-        return Beggar.randInt(1000, 2000);
+        return Beggar.randInt(800, 1400);
     }
 
     private boolean itemsLeftToSell() {
@@ -119,6 +122,7 @@ public class SellGE extends Node {
     @Override
     public void onInvalid() {
         itemsToSell = null;
+        GEWrapper.setSellItems(false);
         super.onInvalid();
     }
 

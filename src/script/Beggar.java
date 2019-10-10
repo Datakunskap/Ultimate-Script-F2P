@@ -156,6 +156,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
     public static final boolean SELENIUM_VERIFY_GEN = false;
     public static final boolean OGRESS = false;
+    public static final boolean EXPLV_TUTORIAL = false;
 
     @Override
     public void onStart() {
@@ -340,9 +341,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         QuickLaunch.Script script = qL.new Script(
                 "", "Ultimate Beggar", "", false);
         QuickLaunch.Proxy proxy;
-        if (PROXY_IP != null && !PROXY_IP.isEmpty()) {
+        if (accountInfo.length == 6) {
             proxy = qL.new Proxy(
-                    "0", "9/29/2019", "DrScatman", "proxy1", PROXY_IP, Integer.parseInt(PROXY_PORT), PROXY_USER, PROXY_PASS);
+                    "0", "9/29/2019", "DrScatman", "proxy1", accountInfo[2], Integer.parseInt(accountInfo[5]), accountInfo[3], accountInfo[4]);
         } else {
             proxy = qL.new Proxy("", "", "", "", "", 80, "", "");
         }
@@ -574,7 +575,11 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         try (FileWriter fw = new FileWriter(ACCOUNTS_FILE_PATH, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
-            out.println(info[0] + ":" + info[1]);
+            if (info.length == 6) {
+                out.println(info[0] + ":" + info[1] + ":" + info[2] + ":" + info[3] + ":" + info[4] + ":" + info[5]);
+            } else {
+                out.println(info[0] + ":" + info[1]);
+            }
         } catch (IOException e) {
             writeToErrorFile("Failed writing account");
             e.printStackTrace();
@@ -659,6 +664,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     @Override
     public void notify(RenderEvent e) {
+        if (isStopping())
+            return;
         if (!isFighterRunning) {
             Graphics g = e.getSource();
             if (!isTanning && !isChoc) {

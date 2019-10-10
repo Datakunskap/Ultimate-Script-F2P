@@ -26,7 +26,7 @@ public class DepositLootNode extends Node {
     @Override
     public int execute() {
         if (BankWrapper.openNearest()) {
-            Bank.depositAll(Config.getLoot().toArray(new String[0]));
+            Bank.depositAllExcept(Config.getProgressive().getRunes().toArray(new String[0]));
         }
         return Fighter.getLoopReturn();
     }

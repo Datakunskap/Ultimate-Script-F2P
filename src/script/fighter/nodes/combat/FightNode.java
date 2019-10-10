@@ -38,6 +38,9 @@ public class FightNode extends Node {
 
     @Override
     public boolean validate() {
+        if (Config.getProgressive().getSpell() != null && !Config.hasRunes())
+            return false;
+
         NpcResult target = CombatStore.getCurrentTarget();
         if(target != null) {
             return true;
@@ -106,6 +109,7 @@ public class FightNode extends Node {
     @Override
     public void onInvalid() {
         running = false;
+        CombatStore.resetTargetingValues();
         super.onInvalid();
     }
 
@@ -149,11 +153,11 @@ public class FightNode extends Node {
             } else {
                 castSpell(npc);
             }
-            Time.sleepUntil(() -> Players.getLocal().getTargetIndex() > 0, 1500);
+            Time.sleepUntil(() -> Players.getLocal().getTargetIndex() > 0, 2000);
             return;
         }
         status = "Walking to target.";
-        if (Config.getProgressive().getSpell() == null || !Movement.isInteractable(npc, false)) {
+        if (Config.getProgressive().getSpell() == null || Players.getLocal().getTargetIndex() <= 0) {
             Movement.walkTo(npc);
         }
     }

@@ -50,7 +50,7 @@ public class Fighter {
     }
 
     public static int getLoopReturn() {
-        return Random.high(200, 450);
+        return Random.high(200, 1000);
     }
 
     public StopWatch getRuntime() {
@@ -156,9 +156,11 @@ public class Fighter {
         progressive.setRandomIdle(true);
         progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
         progressive.setMinimumLevel(1);
-        progressive.setMaximumLevel(2);
+        int switchLvl = Beggar.randInt(2, 5);
+        progressive.setMaximumLevel(switchLvl);
         ProgressiveSet.add(progressive);
 
+        progressive = new Progressive();
         progressive.setName("Train Magic: Goblins");
         progressive.setStyle(Combat.AttackStyle.CASTING);
         progressive.setSkill(Skill.MAGIC);
@@ -185,8 +187,8 @@ public class Fighter {
         progressive.setRadius(Beggar.randInt(15, 20));
         progressive.setRandomIdle(true);
         progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
-        progressive.setMinimumLevel(2);
-        progressive.setMaximumLevel(3);
+        progressive.setMinimumLevel(switchLvl);
+        progressive.setMaximumLevel(switchLvl + 1);
         ProgressiveSet.add(progressive);
     }
 

@@ -51,7 +51,7 @@ public class BuyGE extends Node {
         HashSet<String> runes = Config.getProgressive().getRunes();
         spell = Config.getProgressive().getSpell();
         if (runes != null && runes.size() > 0 &&
-                spell != null && !hasRunes(runes)) {
+                spell != null && !Config.hasRunes()) {
             Log.fine("Restocking");
             runesIterator = runes.iterator();
             itemToBuy = runesIterator.next();
@@ -70,16 +70,19 @@ public class BuyGE extends Node {
             if (!Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition())) {
                 handleObstacles();
             }
+            Log.info("Walking to GE");
             status = "Walking to GE";
             return Fighter.getLoopReturn();
         }
 
         if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
-            if (!Inventory.contains(i -> i.getName().equals("Coins") && i.getStackSize() >= getPrice())) {
+            if (!Inventory.contains(i -> i.getName().equals("Coins") && i.getStackSize() >= (getPrice() * quantity))) {
                 if (!checkedBank) {
+                    Log.info("Need "  + (getPrice() * quantity) + " --> Checking bank");
                     BankWrapper.openAndDepositAll(true, Config.getProgressive().getRunes().toArray(new String[0]));
                     checkedBank = true;
                 } else {
+                    Log.info("Need "  + (getPrice() * quantity) + " --> Selling Items");
                     GEWrapper.setSellItems(true);
                 }
                 return Fighter.getLoopReturn();
@@ -93,14 +96,23 @@ public class BuyGE extends Node {
         }
 
         if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
-            if (ExGrandExchange.buy(itemToBuy, quantity, getPrice(), false)) {
-                if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemName().toLowerCase().equals(itemToBuy)) != null, 8000)) {
-                    Logger.debug("Buying: " + itemToBuy);
-                    if (runesIterator.hasNext()) {
-                        itemToBuy = runesIterator.next();
-                    } else {
-                        runesIterator = null;
+            if (!Inventory.contains(itemToBuy) || Inventory.getCount(true, itemToBuy) < quantity) {
+                if (ExGrandExchange.buy(itemToBuy, quantity, getPrice(), false)) {
+                    if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemName().toLowerCase().equals(itemToBuy)) != null, 8000)) {
+                        Logger.debug("Buying: " + itemToBuy);
+                        if (runesIterator.hasNext()) {
+                            itemToBuy = runesIterator.next();
+                        } else {
+                            runesIterator = null;
+                        }
                     }
+                }
+            } else {
+                Log.info("Already has item");
+                if (runesIterator.hasNext()) {
+                    itemToBuy = runesIterator.next();
+                } else {
+                    runesIterator = null;
                 }
             }
         }
@@ -132,6 +144,9 @@ public class BuyGE extends Node {
     }
 
     private int getPrice() {
+        if (itemToBuy.equalsIgnoreCase("air rune") || itemToBuy.equalsIgnoreCase("mind rune")) {
+            return 6;
+        }
         RSItemDefinition item = Definitions.getItem(itemToBuy, x -> x.isTradable() || x.isNoted());
 
         try {
@@ -142,22 +157,11 @@ public class BuyGE extends Node {
             if (price < 1) {
                 price = Inventory.getCount(true, 995) / 2;
             }
-            return price * quantity;
+            return price;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return 0;
-    }
-
-    private boolean hasRunes(HashSet<String> runes){
-        for (String rune : runes) {
-            if (!Inventory.contains(rune)) {
-                return false;
-            }
-        }
-        if (Tabs.isOpen(Tab.MAGIC))
-            return Magic.canCast(spell);
-        return true;
     }
 
     private void handleObstacles() {

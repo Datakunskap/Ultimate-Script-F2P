@@ -1,10 +1,10 @@
 package script.fighter.wrappers;
 
+import org.rspeer.runetek.adapter.component.Item;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.ui.Log;
-import script.beg.TradePlayer;
 import script.fighter.config.Config;
 import script.fighter.nodes.combat.BackToFightZone;
 
@@ -27,7 +27,7 @@ public class BankWrapper {
         }
 
         Bank.depositInventory();
-        Time.sleepUntil(Inventory::isEmpty, 5000);
+        Time.sleepUntil(Inventory::isEmpty, 1000,  5000);
 
         if (numCoinsToKeep > 0) {
             Bank.withdraw(995, numCoinsToKeep);
@@ -35,14 +35,12 @@ public class BankWrapper {
         }
         if (keepAllCoins) {
             Bank.withdrawAll(995);
-            Time.sleepUntil(() -> Inventory.contains(995), 5000);
+            Time.sleepUntil(() -> Inventory.contains(995), 1000, 5000);
         }
         if (itemsToKeep != null && itemsToKeep.length > 0) {
             for (String i : itemsToKeep) {
-                i = i.toUpperCase().charAt(0) + i.substring(1).toLowerCase();
                 Bank.withdrawAll(i);
-                String finalI = i;
-                Time.sleepUntil(() -> Inventory.contains(finalI), 5000);
+                Time.sleepUntil(() -> Inventory.contains(i), 1000, 5000);
             }
         }
     }
@@ -66,8 +64,11 @@ public class BankWrapper {
         if (!Bank.getWithdrawMode().equals(Bank.WithdrawMode.NOTE)) {
             Bank.setWithdrawMode(Bank.WithdrawMode.NOTE);
         }
-        Bank.withdrawAll(i -> i.isExchangeable() && !TradePlayer.isTradeRestrictedItem(i.getName()) &&
+        Item[] sellables = Bank.getItems(i -> i.isExchangeable() &&
                 !Config.getProgressive().getRunes().contains(i.getName().toLowerCase()));
-        Time.sleep(2000);
+        for (Item s : sellables) {
+            Bank.withdrawAll(s.getName());
+            Time.sleepUntil(() -> Inventory.contains(s.getName()), 1000, 5000);
+        }
     }
 }
