@@ -27,7 +27,7 @@ CAPTCHA_API_KEY = '4935affd16c15fb4100e8813cdccfab6'
 # driver.get(validLink);
 # utilities.waitUntilUrlContains("submit_code");
 
-def verify_email(proxies=None, sleep=60):
+def verify_email(s, sleep=60):
     server_name = "imap.gmail.com"
     username = "milleja115"
     password = "Xb32y0x5!"
@@ -57,10 +57,7 @@ def verify_email(proxies=None, sleep=60):
         typ, data = conn.store(num, '-FLAGS', '\\Seen')  # marks email as read
         link = (re.search("(?P<url>http://echo7.bluehornet.com[^\s]+VALIDATE)", raw_email).group("url")).split("\"")[0]
         if link:
-            if proxies:
-                response = requests.get(link, proxies=proxies)
-            else:
-                response = requests.get(link)
+            response = s.get(link)
             if response:
                 conn.store(num, '+FLAGS', '\Seen')  # marks email as read (again)
                 print('EMAIL VERIFIED!')
@@ -89,21 +86,6 @@ class WaitForCaptcha():
             time.sleep(1)
 
 
-def proxy_test(proxies):
-    url = 'http://ifconfig.me/ip'
-
-    response = requests.get(url)
-    local_ip = format(response.text.strip())
-    response = requests.get(url, proxies=proxies)
-    proxy_ip = format(response.text.strip())
-
-    print(proxies)
-    if local_ip != proxy_ip:
-        return True
-    else:
-        return False
-
-
 def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=None, proxyPort=None):
     proxies = None
     print('''Registering account with:
@@ -111,15 +93,12 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
     Password: %s 
     Proxy: %s''' % (email, password, ('None' if proxyIp is None else proxyIp)))
 
-    if proxyIp is None:
-        captcha_solution = solve_captcha(5)
-    else:
+    if proxyIp:
         proxies = {'http': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort),
                    'https': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort)}
-        captcha_solution = solve_captcha(5, proxies)
-        # if proxy_test(proxies):
-        # else:
-        #    raise Exception('Proxy Test Failed')
+
+    s = requests.session()
+    s.proxies = proxies
 
     data = {
         'theme': 'oldschool',
@@ -132,14 +111,11 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
         'year': randint(1995, 2005),
         'agree_email': 1,
         'agree_email_third_party': 1,
-        'g-recaptcha-response': captcha_solution,
+        'g-recaptcha-response': solve_captcha(3, s),
         'create-submit': 'Play Now'
     }
 
-    if proxyIp is None:
-        response = requests.post(RUNESCAPE_REGISTER_URL, data=data)
-    else:
-        response = requests.post(RUNESCAPE_REGISTER_URL, data=data, proxies=proxies)
+    response = s.post(RUNESCAPE_REGISTER_URL, data=data)
 
     if response.status_code == requests.codes.ok:
         if 'Account Created' in response.text:
@@ -151,15 +127,17 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
                     f.write('%s:%s\n' % (email, password))
                 f.close()
 
-            verify_email(proxies)
+            verify_email(s)
 
         else:
             print('JAGEX SAYS NO: Creation')
     else:
         print('JAGEX SAYS NO: Posting To Link')
 
+    s.close()
 
-def solve_captcha(retries, proxies=None):
+
+def solve_captcha(retries, s):
     print('Solving Captcha')
     waiting = True
     touched = False
@@ -172,10 +150,7 @@ def solve_captcha(retries, proxies=None):
         'pageurl': RUNESCAPE_REGISTER_URL
     }
 
-    if proxies is None:
-        response = requests.get(CAPTCHA_REQ_URL, params=params)
-    else:
-        response = requests.get(CAPTCHA_REQ_URL, params=params, proxies=proxies)
+    response = s.get(CAPTCHA_REQ_URL, params=params)
 
     if retries < 1:
         if response.status_code != requests.codes.ok:
@@ -205,10 +180,8 @@ def solve_captcha(retries, proxies=None):
             'action': 'get',
             'id': captcha_id
         }
-        if proxies is None:
-            solution_response = requests.get(CAPTCHA_RES_URL, params=params)
-        else:
-            solution_response = requests.get(CAPTCHA_RES_URL, params=params, proxies=proxies)
+
+        solution_response = s.get(CAPTCHA_RES_URL, params=params)
 
         if solution_response.text not in ('CAPCHA_NOT_READY', 'CAPTCHA_NOT_READY'):
             print('\nCaptcha solved after %ds! (solution: %s)' % (wait_for_captcha.waited_for, solution_response.text))
