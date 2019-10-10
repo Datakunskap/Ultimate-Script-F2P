@@ -1,6 +1,5 @@
 package script.tutorial_island;
 
-import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.data.CheckTutIsland;
@@ -35,7 +34,7 @@ public final class TutorialIsland {
     }
 
     public static int getRandSleep(){
-        return Random.high(400, 1500);
+        return Beggar.randInt(1000, 2500);
     }
 
     public static int randomSectionRun;
@@ -46,20 +45,23 @@ public final class TutorialIsland {
         randomSectionRun = Beggar.randInt(2, 5);
         Log.fine("Starting Tutorial Island");
 
-        beggar.submit(
-                new Idle(this),
-                new RuneScapeGuideSection(),
-                new EnableRun(),
-                new SurvivalSection(),
-                new CookingSection(),
-                new QuestSection(),
-                new MiningSection(),
-                new FightingSection(),
-                new BankSection(),
-                new PriestSection(),
-                new WizardSection(this)
-        );
-
+        if (!Beggar.EXPLV_TUTORIAL) {
+            beggar.submit(new dqw4w9wgxcq(main));
+        } else {
+            beggar.submit(
+                    new Idle(this),
+                    new RuneScapeGuideSection(),
+                    new EnableRun(),
+                    new SurvivalSection(),
+                    new CookingSection(),
+                    new QuestSection(),
+                    new MiningSection(),
+                    new FightingSection(),
+                    new BankSection(),
+                    new PriestSection(),
+                    new WizardSection(this)
+            );
+        }
     }
 
     public boolean isStopping(){

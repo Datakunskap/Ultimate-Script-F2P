@@ -14,10 +14,7 @@ import script.fighter.framework.BackgroundTaskExecutor;
 import script.fighter.framework.Node;
 import script.fighter.models.Progressive;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ProgressionChecker extends Node {
 
@@ -40,6 +37,8 @@ public class ProgressionChecker extends Node {
         List<Item> indexes = new ArrayList<>();
         HashMap<EquipmentSlot, String> map = progressive.getEquipmentMap();
 
+        if (map.isEmpty())
+            return indexes;
         for (Map.Entry<EquipmentSlot, String> entry : map.entrySet()) {
             String equipment = entry.getValue();
             if (equipment == null) {
@@ -70,7 +69,7 @@ public class ProgressionChecker extends Node {
             return false;
         }
         progressive = ProgressiveSet.getCurrent();
-        if (progressive == null) {
+        if (progressive == null || progressive.getSpell() != null) {
             return false;
         }
         Combat.AttackStyle style = Combat.getAttackStyle();
@@ -94,7 +93,8 @@ public class ProgressionChecker extends Node {
                     Log.severe("Equipment Error -> Using Default Style & Skill");
                     Progressive p = ProgressiveSet.getCurrent();
                     p.setStyle(Combat.AttackStyle.ACCURATE);
-                    p.setSkill(Skill.ATTACK);
+                    if (!p.getSkill().equals(Skill.MAGIC))
+                        p.setSkill(Skill.ATTACK);
                     break;
                 }
                 if (possibleStyles[i].equals(progressive.getStyle())) {
@@ -156,5 +156,6 @@ public class ProgressionChecker extends Node {
         p.setSkill(Skill.ATTACK);
         p.setEquipmentMap(map);
         Equipment.unequip("Shortbow");
+        Time.sleep(100, 350);
     }
 }

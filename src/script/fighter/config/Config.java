@@ -1,5 +1,7 @@
 package script.fighter.config;
 
+import org.rspeer.runetek.api.component.tab.Inventory;
+import org.rspeer.runetek.api.component.tab.Magic;
 import org.rspeer.runetek.api.movement.position.Position;
 import script.fighter.debug.LogLevel;
 import script.fighter.models.Progressive;
@@ -50,5 +52,16 @@ public class Config {
 
     public static void setLogLevel(LogLevel logLevel) {
         Config.logLevel = logLevel;
+    }
+
+    public static boolean hasRunes(){
+        Progressive p = getProgressive();
+        HashSet<String> runes = p.getRunes();
+        for (String rune : runes) {
+            if (!Inventory.contains(rune)) {
+                return false;
+            }
+        }
+        return Magic.canCast(p.getSpell());
     }
 }

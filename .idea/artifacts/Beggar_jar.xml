@@ -3,17 +3,6 @@
     <output-path>$USER_HOME$/Documents/RSPeer/scripts</output-path>
     <root id="archive" name="Beggar.jar">
       <element id="module-output" name="Beggar" />
-      <element id="dir-copy" path="$USER_HOME$/AppData/Local/Programs/Python/Python37/DLLs" />
-      <element id="dir-copy" path="$USER_HOME$/AppData/Local/Programs/Python/Python37/Lib" />
-      <element id="dir-copy" path="$USER_HOME$/AppData/Local/Programs/Python/Python37" />
-      <element id="dir-copy" path="$USER_HOME$/AppData/Local/Programs/Python/Python37/Lib/site-packages" />
-      <element id="extracted-dir" path="$USER_HOME$/AppData/Local/Programs/Python/Python37/Lib/site-packages/PySocks-1.7.1-py3.7.egg" path-in-jar="/" />
-      <element id="dir-copy" path="$USER_HOME$/.IdeaIC2019.1/system/python_stubs/-589777389" />
-      <element id="dir-copy" path="$APPLICATION_PLUGINS_DIR$/python-ce/helpers/python-skeletons" />
-      <element id="dir-copy" path="$APPLICATION_PLUGINS_DIR$/python-ce/helpers/typeshed/stdlib/3" />
-      <element id="dir-copy" path="$APPLICATION_PLUGINS_DIR$/python-ce/helpers/typeshed/stdlib/2and3" />
-      <element id="dir-copy" path="$APPLICATION_PLUGINS_DIR$/python-ce/helpers/typeshed/third_party/3" />
-      <element id="dir-copy" path="$APPLICATION_PLUGINS_DIR$/python-ce/helpers/typeshed/third_party/2and3" />
     </root>
   </artifact>
 </component>

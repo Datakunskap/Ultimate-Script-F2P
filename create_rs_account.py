@@ -64,6 +64,8 @@ def verify_email(proxies=None, sleep=60):
             if response:
                 conn.store(num, '+FLAGS', '\Seen')  # marks email as read (again)
                 print('EMAIL VERIFIED!')
+            else:
+                raise Exception('UNABLE TO OPEN LINK')
         else:
             raise Exception('UNABLE TO PARSE LINK FROM EMAIL')
 
@@ -143,7 +145,10 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
         if 'Account Created' in response.text:
             print('Robots win again, account successfully registered\n\n')
             with open('C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt', 'a+') as f:
-                f.write('%s:%s\n' % (email, password))
+                if proxyIp:
+                    f.write('%s:%s:%s:%s:%s:%s\n' % (email, password, proxyIp, proxyUser, proxyPass, proxyPort))
+                else:
+                    f.write('%s:%s\n' % (email, password))
                 f.close()
 
             verify_email(proxies)
