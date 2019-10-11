@@ -50,7 +50,7 @@ public class BuyEquip extends Task {
                 Tabs.open(Tab.INVENTORY);
                 Time.sleepUntil(() -> Tabs.isOpen(Tab.EQUIPMENT), 5000);
             }
-            if (Inventory.getFirst(X).interact("Wear")) {
+            if (wieldItem(X)) {
                 Log.info("Equipping");
                 Time.sleep(1000);
                 Tabs.open(Tab.EQUIPMENT);
@@ -94,6 +94,16 @@ public class BuyEquip extends Task {
 
         GrandExchange.collectAll();
         return 1000;
+    }
+
+    private boolean wieldItem(int id) {
+        if (Inventory.getFirst(id).interact("Wield") || Inventory.getFirst(id).interact("Equip")) {
+            if (Time.sleepUntil(() -> Equipment.contains(id), 1000, 5000)) {
+                Time.sleep(400, 800);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setRandBuyGP() {

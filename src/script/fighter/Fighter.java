@@ -130,7 +130,7 @@ public class Fighter {
         enemies.add("chicken");
         progressive.setEnemies(enemies);
         HashSet<String> loot = new HashSet<>();
-        loot.add("raw chicken");
+        //loot.add("raw chicken");
         loot.add("bones");
         String[] runeLoot = new String[] {"air rune", "mind rune","water rune","earth rune","fire rune",
                 "chaos rune", "cosmic rune","nature rune","law rune","death rune", "body rune"} ;
@@ -164,9 +164,7 @@ public class Fighter {
         progressive.setName("Train Magic: Goblins");
         progressive.setStyle(Combat.AttackStyle.CASTING);
         progressive.setSkill(Skill.MAGIC);
-        progressive.setRunes(runes);
         progressive.setSpell(Spell.Modern.WIND_STRIKE);
-        progressive.setEquipmentMap(map);
         enemies = new HashSet<>();
         enemies.add("goblin");
         progressive.setEnemies(enemies);

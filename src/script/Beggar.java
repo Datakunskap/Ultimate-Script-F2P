@@ -97,7 +97,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public boolean atMinPop = false;
     // ADD TO GUI
     public boolean setSendTrades = false;
-    public final int[] items = new int[]{1117, 1115, 1139, 1155, 1153, 1137, 1067};
+    public final int[] items = new int[]{1117, 1115, 1139, 1155, 1153, 1137, 1067, 1061, 1203, 1349, 1323, 1267};
     public int item = items[randInt(0, items.length - 1)];
     public StopWatch lastTradeTime;
     public boolean refreshPrices = false;
@@ -133,11 +133,11 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     private static final String PROXY_USER = null;//"qLo741";
     private static final String PROXY_PASS = null;//"z6wApt";
     private static final String PROXY_PORT = null;//"8000";
-    private static final String PYTHON_3_EXE = System.getProperty("user.home") + "\\AppData\\Local\\Programs\\Python\\Python37-32\\python.exe";
+    private static final String PYTHON_3_EXE = System.getProperty("user.home") + "\\AppData\\Local\\Programs\\Python\\Python37\\python.exe";
     private static final String ACC_GEN_PY = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\create_rs_account.py";
     public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
-    private static final String ERROR_FILE_PATH = System.getProperty("user.home") + "\\Desktop\\RSPeerErrors.txt";
-    public static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\Desktop\\RSPeer\\f2pAccounts.txt";
+    private static final String ERROR_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeerErrors.txt";
+    public static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
     public static final String BEG_LINES_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\BegLines.txt";
     private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\Runescape-Account-Generator-2.0.jar";
 
@@ -147,7 +147,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final boolean MULE_ITEMS = false;
     public static final int MUTED_MULE_AMNT = 25000;
     public static final int ALLOWED_INSTANCES = 8;
-    public static final String API_KEY = "1FFY03V3M22KU5CFQ60DF9A40B3WKAU9CP0ZPCFE5KBLAMTUX61EC981FL7ZA8TLH2HFFM";
+    public static final String API_KEY = "JV5ML4DE4M9W8Z5KBE00322RDVNDGGMTMU1EH9226YCVGFUBE6J6OY1Q2NJ0RA8YAPKO70";
     public static final int NUM_BACKLOG_ACCOUNTS = 15;
     public static final boolean BUY_GEAR = true;
     private static final boolean TUTORIAL_COMPLETED_SLEEP = false;
@@ -155,7 +155,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final boolean IDLE_LOGOUT = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
     public static final boolean SELENIUM_VERIFY_GEN = false;
-    public static final boolean OGRESS = true;
+    public static final boolean OGRESS = false;
     public static final boolean EXPLV_TUTORIAL = false;
 
     @Override

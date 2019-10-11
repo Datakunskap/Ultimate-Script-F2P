@@ -41,7 +41,8 @@ public class StartOther extends Task {
                     (hasEnoughGP(START_GP) && hasLowPPH()) ||
                     (hasEnoughGP(START_GP) && hasTopBegWorldsCovered()) ||
                     (hasEnoughGP(MIN_START_GP) && hasLongLastTradeTime(LAST_TRADE_MINUTES)) ||
-                    (hasEnoughGP(MIN_START_GP) && main.sumTopPops < SUM_TOP_3_WORLDS_POP_LIMIT)
+                    (hasEnoughGP(MIN_START_GP) && main.sumTopPops < SUM_TOP_3_WORLDS_POP_LIMIT &&
+                            (hasTopBegWorldsCovered() || hasLowPPH()))
             ) {
                 compareOtherPPH(true);
                 return true;
