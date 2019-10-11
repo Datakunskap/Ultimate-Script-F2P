@@ -94,13 +94,15 @@ public class IdleNode extends Node {
 
     @Override
     public void onInvalid() {
-        kills = 0;
-        max = 0;
-        idleTill = 0;
-        if (main.beggar.getBlockingEvent(LoginScreen.class) == null) {
-            main.beggar.addBlockingEvent(new LoginScreen(main.beggar));
+        if (!isIdling()) {
+            kills = 0;
+            max = 0;
+            idleTill = 0;
+            if (main.beggar.getBlockingEvent(LoginScreen.class) == null) {
+                main.beggar.addBlockingEvent(new LoginScreen(main.beggar));
+            }
+            super.onInvalid();
         }
-        super.onInvalid();
     }
 
     public void invalidateTask(Node active) {
