@@ -120,7 +120,7 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
     if response.status_code == requests.codes.ok:
         if 'Account Created' in response.text:
             print('Robots win again, account successfully registered\n\n')
-            with open('C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt', 'a+') as f:
+            with open('C:\\Users\\TheTheeMusketeers\\Desktop\\RSPeer\\f2pAccounts.txt', 'a+') as f:
                 if proxyIp:
                     f.write('%s:%s:%s:%s:%s:%s\n' % (email, password, proxyIp, proxyUser, proxyPass, proxyPort))
                 else:

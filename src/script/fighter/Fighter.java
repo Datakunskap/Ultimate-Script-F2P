@@ -122,7 +122,7 @@ public class Fighter {
         }
         progressive.setEquipmentMap(map);
         HashSet<String> runes = new HashSet<>();
-        runes.add("air rune");
+        //runes.add("air rune");
         runes.add("mind rune");
         progressive.setRunes(runes);
         progressive.setSpell(Spell.Modern.WIND_STRIKE);
@@ -164,7 +164,9 @@ public class Fighter {
         progressive.setName("Train Magic: Goblins");
         progressive.setStyle(Combat.AttackStyle.CASTING);
         progressive.setSkill(Skill.MAGIC);
+        progressive.setRunes(runes);
         progressive.setSpell(Spell.Modern.WIND_STRIKE);
+        progressive.setEquipmentMap(map);
         enemies = new HashSet<>();
         enemies.add("goblin");
         progressive.setEnemies(enemies);
