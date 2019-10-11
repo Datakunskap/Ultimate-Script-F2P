@@ -79,7 +79,6 @@ public class dqw4w9wgxcq extends Task {
             case 2:
                 getComponents();
                 if (nameScreenDetectionWidget != null && nameScreenDetectionWidget.isVisible()) {
-                    //Log.info("Setting IGN");
                     setDisplayName();
                 } else if (isCreationScreenVisible()) {
                     try {
@@ -89,7 +88,7 @@ public class dqw4w9wgxcq extends Task {
                     }
                 } else if (Dialog.isViewingChatOptions()) {//experienceWidget.get(getWidgets()).isPresent()) {
                     if (Dialog.process(randInt(1, 3))) {
-                        Time.sleepUntil(() -> !Dialog.isProcessing() && !Dialog.isViewingChatOptions(), 2000, 2000);
+                        Time.sleep(400, 800);
                     }
                 } else {
                     doDefault = true;
@@ -128,7 +127,7 @@ public class dqw4w9wgxcq extends Task {
             case 20:
                 if (!Movement.isRunEnabled()) {
                     Movement.toggleRun(true);
-                    Time.sleep(500);
+                    Time.sleep(400, 800);
                 }
 
                 doDefault = true;
@@ -163,7 +162,6 @@ public class dqw4w9wgxcq extends Task {
                         SceneObjects.getNearest("Tree").interact("Chop down");
                         Time.sleep(3000);
                     } else {
-                        //Log.info("Lighting fire");
                         SceneObject fire = SceneObjects.getFirstAt(Players.getLocal().getPosition());
                         if (fire == null || !fire.getName().equals("Fire")) {
                             useItemOn("Logs", Inventory.getFirst("Tinderbox"));
@@ -194,7 +192,7 @@ public class dqw4w9wgxcq extends Task {
                 Tabs.open(Tab.INVENTORY);
                 if (!Movement.isRunEnabled()) {
                     Movement.toggleRun(true);
-                    Time.sleep(500);
+                    Time.sleep(400, 800);
                 }else if(new Position(3085, 3127).distance() > 20){
                     Movement.walkTo(new Position(3085, 3127));
                 }else {
@@ -216,7 +214,7 @@ public class dqw4w9wgxcq extends Task {
             case 210:
                 if (!Movement.isRunEnabled()) {
                     Movement.toggleRun(true);
-                    Time.sleep(500);
+                    Time.sleep(400, 800);
                 }else if(new Position(3085, 3127).distance() > 20){
                     Movement.walkTo(new Position(3085, 3127));
                 }else {
@@ -405,13 +403,13 @@ public class dqw4w9wgxcq extends Task {
             }
         }
 
-        return Random.mid(800, 2000);
+        return Random.mid(800, 2500);
     }
 
     private void useItemOn(String itemName, Interactable target) {
         if (Inventory.isItemSelected()) {
             if (target.interact("Use")) {
-                Time.sleepUntil(() -> Varps.get(VARP) != config, 30 * 1000);
+                Time.sleepUntil(() -> Varps.get(VARP) != config, 2000, 30 * 1000);
             }
         } else {
             Inventory.getFirst(itemName).interact("Use");
@@ -422,6 +420,7 @@ public class dqw4w9wgxcq extends Task {
         if (nameAcceptedWidget != null && nameAcceptedWidget.isVisible() && nameAcceptedWidget.getText().contains("Great!")) {
             if (nameSetWidget != null && nameSetWidget.isVisible() && nameSetWidget.interact(ActionOpcodes.INTERFACE_ACTION)) {
                 Time.sleepUntil(() -> !nameScreenDetectionWidget.isVisible(), 2000, 8000);
+                Time.sleep(400, 800);
             }
         } else if (nameInputWidget != null && nameInputWidget.isVisible()
                 && !nameInputWidget.isExplicitlyHidden()
@@ -434,9 +433,11 @@ public class dqw4w9wgxcq extends Task {
 
             Time.sleepUntil(() -> Varps.get(1042) != configValue, 2000, 8000);
             Time.sleepUntil(() -> Varps.get(1042) == configValue || (nameAcceptedWidget != null && nameAcceptedWidget.isVisible()), 2000, 8000);
+            Time.sleep(400, 800);
         } else if (nameLookupWidget != null && nameLookupWidget.isVisible()
                 && nameLookupWidget.interact(ActionOpcodes.INTERFACE_ACTION)) {
             Time.sleepUntil(() -> nameInputWidget != null && nameInputWidget.isVisible() && !nameInputWidget.isExplicitlyHidden(), 2000,8000);
+            Time.sleep(400, 800);
         }
     }
 
@@ -464,10 +465,11 @@ public class dqw4w9wgxcq extends Task {
 
         if (Interfaces.getComponent(269, 99).interact(ActionOpcodes.INTERFACE_ACTION)) {
             Time.sleepUntil(() -> !isCreationScreenVisible(), 2000, 3000);
+            Time.sleep(400, 800);
         }
     }
 
-    private void clickRandomTimes(final InterfaceComponent widget) throws InterruptedException {
+    private void clickRandomTimes(final InterfaceComponent widget) {
         int clickCount = new java.util.Random().nextInt(8);
 
         for (int i = 0; i < clickCount; i++) {
@@ -516,6 +518,7 @@ public class dqw4w9wgxcq extends Task {
     private void wieldItem(String name) {
         if (Inventory.getFirst(name).interact("Wield") || Inventory.getFirst(name).interact("Equip")) {
             Time.sleepUntil(() -> Equipment.contains(name), 2000, 1500);
+            Time.sleep(400, 800);
         }
     }
 
