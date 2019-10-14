@@ -23,9 +23,11 @@ import java.util.Objects;
 public class BuyEquip extends Task {
 
     private Beggar main;
+    private final int ITEM;
 
     public BuyEquip(Beggar beggar){
         main = beggar;
+        ITEM = main.item;
     }
 
     @Override
@@ -36,25 +38,24 @@ public class BuyEquip extends Task {
     @Override
     public int execute() {
         Log.info("Buying from GE & Equipping");
-        final int X = main.item;
 
        // new Banking(main).execute();
 
         if(!main.bought)
             openGE();
 
-        if (Inventory.contains(X)) {
+        if (Inventory.contains(ITEM)) {
             main.bought = true;
             closeGE();
             if (!Tabs.isOpen(Tab.INVENTORY)){
                 Tabs.open(Tab.INVENTORY);
                 Time.sleepUntil(() -> Tabs.isOpen(Tab.EQUIPMENT), 5000);
             }
-            if (wieldItem(X)) {
+            if (Inventory.getFirst(ITEM).interact(a -> true)) {
                 Log.info("Equipping");
                 Time.sleep(1000);
                 Tabs.open(Tab.EQUIPMENT);
-                if (Time.sleepUntil(() -> Tabs.isOpen(Tab.EQUIPMENT) && Equipment.contains(X), 5000)) {
+                if (Time.sleepUntil(() -> Tabs.isOpen(Tab.EQUIPMENT) && Equipment.contains(ITEM), 5000)) {
                     setRandBuyGP();
                     return 1000;
                 }
@@ -63,13 +64,13 @@ public class BuyEquip extends Task {
 
         // Buys
         try {
-            if (!main.bought && (GrandExchange.isOpen() || GrandExchangeSetup.isOpen()) && GrandExchange.getFirstActive() == null && ExGrandExchange.buy(X, 1,
-                    ExPriceChecker.getOSBuddyBuyPrice(X, false) > 0 ? ExPriceChecker.getOSBuddyBuyPrice(X, false) + 500 : ExPriceChecker.getRSBuddyBuyPrice(X, false) + 500, false)) {
+            if (!main.bought && (GrandExchange.isOpen() || GrandExchangeSetup.isOpen()) && GrandExchange.getFirstActive() == null && ExGrandExchange.buy(ITEM, 1,
+                    ExPriceChecker.getOSBuddyBuyPrice(ITEM, false) > 0 ? ExPriceChecker.getOSBuddyBuyPrice(ITEM, false) + 500 : ExPriceChecker.getRSBuddyBuyPrice(ITEM, false) + 500, false)) {
                 Log.fine("Buying");
             } if(!main.bought) {
                 Log.info("Waiting to complete");
                 openGE();
-                Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED), 2000, 25000);
+                Time.sleepUntil(() -> GrandExchange.getFirst(Objects::nonNull).getProgress().equals(RSGrandExchangeOffer.Progress.FINISHED), 2000, 250000);
                 GrandExchange.collectAll();
                 Keyboard.pressEnter();
                 Time.sleep(1500);
@@ -87,23 +88,13 @@ public class BuyEquip extends Task {
             main.startTime = System.currentTimeMillis();
         }
 
-        if (Equipment.contains(X)) {
+        if (Equipment.contains(ITEM)) {
             setRandBuyGP();
             return 1000;
         }
 
         GrandExchange.collectAll();
         return 1000;
-    }
-
-    private boolean wieldItem(int id) {
-        if (Inventory.getFirst(id).interact("Wield") || Inventory.getFirst(id).interact("Equip")) {
-            if (Time.sleepUntil(() -> Equipment.contains(id), 1000, 5000)) {
-                Time.sleep(400, 800);
-                return true;
-            }
-        }
-        return false;
     }
 
     private void setRandBuyGP() {

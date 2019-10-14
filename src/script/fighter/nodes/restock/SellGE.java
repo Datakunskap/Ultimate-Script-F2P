@@ -4,6 +4,7 @@ import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.component.Item;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
+import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.GrandExchange;
 import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.tab.Inventory;
@@ -26,6 +27,7 @@ public class SellGE extends Node {
     private InterfaceComponent restrictedMsg = Interfaces.getComponent(465, 25);
     private String status;
     private Fighter main;
+    private boolean stopping;
 
     public SellGE(Fighter main) {
         this.main = main;
@@ -52,9 +54,10 @@ public class SellGE extends Node {
                 itemsToSell = sellableItems;
                 return true;
             }
-            GEWrapper.closeGE();
-            GEWrapper.setSellItems(false);
-            itemsToSell = null;
+
+            Log.severe("Not Enough GP -->");
+            Bank.close();
+            Beggar.OGRESS = false;
             return false;
         }
 

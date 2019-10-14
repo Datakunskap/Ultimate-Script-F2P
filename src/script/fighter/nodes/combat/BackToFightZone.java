@@ -24,7 +24,13 @@ public class BackToFightZone extends Node {
 
     @Override
     public boolean validate() {
-        return Players.getLocal().distance(Config.getStartingTile()) > Config.getRadius();
+        if (Config.getProgressive().isSplash() && !Config.getSplashArea().contains(Players.getLocal())) {
+            return true;
+        }
+        if (Players.getLocal().distance(Config.getStartingTile()) > Config.getRadius()) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -32,6 +38,13 @@ public class BackToFightZone extends Node {
         invalidateTask(main.getActive());
         if (!Game.isLoggedIn() || Players.getLocal() == null)
             return 2000;
+
+        if (Config.getProgressive().isSplash()) {
+            if (shouldEnableRun()) {
+                enableRun();
+            }
+            Movement.walkToRandomized(Config.getSplashArea().getCenter());
+        }
 
         //Log.info("Walking back to fight zone.");
         if(startTileRandom == null) {

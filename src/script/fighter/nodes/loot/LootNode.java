@@ -3,6 +3,7 @@ package script.fighter.nodes.loot;
 import org.rspeer.runetek.adapter.scene.Pickable;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.tab.Inventory;
+import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
 import script.fighter.CombatStore;
 import script.fighter.Fighter;
@@ -14,7 +15,7 @@ import script.fighter.services.LootService;
 public class LootNode extends Node {
 
     private Pickable[] items;
-
+    private static boolean stuckLooting;
     private Fighter main;
 
     public LootNode(Fighter main){
@@ -47,10 +48,19 @@ public class LootNode extends Node {
         //return items != null && items.length > 0;
     }
 
+    public static void setStuckLooting(boolean stuckLooting){
+        LootNode.stuckLooting = stuckLooting;
+    }
+
     @Override
     public int execute() {
-        //Log.info("Looting");
         invalidateTask(main.getActive());
+
+        if (stuckLooting) {
+            Movement.walkTo(Players.getLocal().getPosition().randomize(6));
+            Time.sleep(3000);
+            setStuckLooting(false);
+        }
 
         if(items != null && items.length > 0) {
             for (Pickable item : items) {

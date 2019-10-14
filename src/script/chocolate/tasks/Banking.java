@@ -1,5 +1,6 @@
 package script.chocolate.tasks;
 
+import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.tab.Inventory;
@@ -56,7 +57,7 @@ class Banking {
 
     void openAndDepositAll() {
         Log.fine("Depositing Inventory");
-        while (!Bank.isOpen()) {
+        while (!Bank.isOpen() && Game.isLoggedIn()) {
             Bank.open();
             Time.sleep(1000);
         }

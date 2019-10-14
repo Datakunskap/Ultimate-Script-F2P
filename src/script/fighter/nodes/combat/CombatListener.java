@@ -3,6 +3,7 @@ package script.fighter.nodes.combat;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.adapter.scene.PathingEntity;
 import org.rspeer.runetek.adapter.scene.Player;
+import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.event.types.ChatMessageEvent;
 import org.rspeer.runetek.event.types.ChatMessageType;
@@ -18,6 +19,7 @@ import script.fighter.debug.Logger;
 import script.fighter.models.NpcResult;
 import script.fighter.models.Progressive;
 import script.fighter.nodes.idle.IdleNode;
+import script.fighter.nodes.loot.LootNode;
 import script.fighter.wrappers.CombatWrapper;
 
 import java.util.HashMap;
@@ -87,11 +89,13 @@ public class CombatListener {
             }
         }
         else if(e.getMessage().toLowerCase().contains("reach that!")) {
-            Config.getProgressive().setPosition(Config.getProgressive().getPosition().randomize(3));
+            Config.getProgressive().setPosition(Config.getProgressive().getPosition()
+                    .translate(Random.nextInt(-1, 1), Random.nextInt(-1, 1)));
             CombatStore.resetTargetingValues();
         }
         else if(e.getMessage().toLowerCase().contains("the door seems to be stuck")) {
             CombatStore.resetTargetingValues();
+            LootNode.setStuckLooting(true);
         }
     }
 

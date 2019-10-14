@@ -403,7 +403,7 @@ public class dqw4w9wgxcq extends Task {
             }
         }
 
-        return Random.mid(800, 2500);
+        return Random.high(800, 2500);
     }
 
     private void useItemOn(String itemName, Interactable target) {
@@ -533,8 +533,8 @@ public class dqw4w9wgxcq extends Task {
             int times = Beggar.randInt(1, 2);
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i++) {
-                //Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
+                Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
+                //getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
                 Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
                 Time.sleepUntil(() -> !Players.getLocal().isMoving(), 600, Beggar.randInt(2000, 4000));
             }

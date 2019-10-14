@@ -1,5 +1,6 @@
 package script.beg;
 
+import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.tab.Inventory;
@@ -92,7 +93,7 @@ public class Banking extends Task {
 
     void openAndDepositAll() {
         Log.fine("Depositing Inventory");
-        while (!Bank.isOpen()) {
+        while (!Bank.isOpen() && Game.isLoggedIn()) {
             Bank.open();
             Time.sleep(1000);
         }

@@ -5,6 +5,7 @@ import org.rspeer.runetek.adapter.scene.PathingEntity;
 import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.tab.Magic;
+import org.rspeer.runetek.api.component.tab.Spell;
 import org.rspeer.runetek.api.component.tab.Tab;
 import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.runetek.api.movement.Movement;
@@ -24,11 +25,13 @@ public class FightNode extends Node {
     private NpcResult result;
     private String status;
     private boolean running;
+    private Spell spell;
 
     private Fighter main;
 
     public FightNode(Fighter main){
         this.main = main;
+        spell = Config.getProgressive().getSpell();
         BackgroundTaskExecutor.submit(this::findNextTarget, 1000);
     }
 
@@ -38,7 +41,7 @@ public class FightNode extends Node {
 
     @Override
     public boolean validate() {
-        if (Config.getProgressive().getSpell() != null && !Config.hasRunes())
+        if (spell != null && !Config.hasRunes())
             return false;
 
         NpcResult target = CombatStore.getCurrentTarget();
@@ -69,7 +72,6 @@ public class FightNode extends Node {
     public int execute() {
         invalidateTask(main.getActive());
 
-        //Log.info(status);
         running = true;
         if(result != null && !CombatStore.hasTarget()) {
             doAttack(result.getNpc());
@@ -103,12 +105,16 @@ public class FightNode extends Node {
             }
             doAttack(target.getNpc());
         }
+        else if(spell != null) {
+            doAttack(target.getNpc());
+        }
         return Fighter.getLoopReturn();
     }
 
     @Override
     public void onInvalid() {
         running = false;
+        spell = null;
         CombatStore.resetTargetingValues();
         super.onInvalid();
     }
@@ -148,7 +154,7 @@ public class FightNode extends Node {
         if(Movement.isInteractable(npc, false)) {
             status = "Attacking " + npc.getName() + " (" + npc.getIndex() + ").";
             Logger.debug("Attacking target: " + npc.getIndex());
-            if (Config.getProgressive().getSpell() == null) {
+            if (spell == null) {
                 npc.interact("Attack");
             } else {
                 castSpell(npc);
@@ -157,7 +163,7 @@ public class FightNode extends Node {
             return;
         }
         status = "Walking to target.";
-        if (Config.getProgressive().getSpell() == null || Players.getLocal().getTargetIndex() <= 0) {
+        if (spell == null || Players.getLocal().getTargetIndex() == -1) {
             Movement.walkTo(npc);
         }
     }
@@ -167,6 +173,6 @@ public class FightNode extends Node {
             Tabs.open(Tab.MAGIC);
             Time.sleepUntil(() -> Tabs.isOpen(Tab.MAGIC), 100, 1000);
         }
-        Magic.cast(Config.getProgressive().getSpell(), npc);
+        Magic.cast(spell, npc);
     }
 }

@@ -1,6 +1,7 @@
 package script.fighter.wrappers;
 
 import org.rspeer.runetek.adapter.component.Item;
+import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.tab.Inventory;
@@ -22,7 +23,7 @@ public class BankWrapper {
 
     private static void openAndDepositAll(boolean keepAllCoins, int numCoinsToKeep, String... itemsToKeep) {
         Log.fine("Depositing Inventory");
-        while (!openNearest()) {
+        while (!openNearest() && Game.isLoggedIn()) {
             Time.sleep(1000);
         }
 
@@ -63,6 +64,7 @@ public class BankWrapper {
     public static void withdrawSellableItems() {
         if (!Bank.getWithdrawMode().equals(Bank.WithdrawMode.NOTE)) {
             Bank.setWithdrawMode(Bank.WithdrawMode.NOTE);
+            Time.sleep(500);
         }
         Item[] sellables = Bank.getItems(i -> i.isExchangeable() &&
                 !Config.getProgressive().getRunes().contains(i.getName().toLowerCase()));

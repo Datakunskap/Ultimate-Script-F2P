@@ -26,6 +26,8 @@ import script.tanner.ExGrandExchange;
 import script.tanner.ExPriceChecker;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -48,14 +50,29 @@ public class BuyGE extends Node {
         if (runesIterator != null || GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY))
             return true;
 
-        HashSet<String> runes = Config.getProgressive().getRunes();
-        spell = Config.getProgressive().getSpell();
-        if (runes != null && runes.size() > 0 &&
-                spell != null && !Config.hasRunes()) {
+        Progressive p = Config.getProgressive();
+        HashSet<String> items = p.getRunes();
+        spell = p.getSpell();
+
+        if (Inventory.contains(i -> i.getName().equals("Coins") && i.getStackSize() >= 5060) &&
+                Skills.getLevel(Skill.MAGIC) < 13) {
+            Log.fine("Splash Time!");
+            p.setSplash(true);
+        }
+
+        if (items != null && items.size() > 0 && spell != null &&
+                (!Config.hasRunes() || !Config.hasEquipment() ||
+                        (p.isSplash() && !Config.hasSplashGear(false)))) {
+
             Log.fine("Restocking");
-            runesIterator = runes.iterator();
+            if (p.isSplash() && !Config.hasSplashGear(false)) {
+                items.addAll(Arrays.asList(Config.getSplashGear(false)));
+            } else {
+                items.addAll(p.getEquipmentMap().values());
+            }
+            runesIterator = items.iterator();
             itemToBuy = runesIterator.next();
-            quantity = Random.low(15, 20);
+            quantity = getQuantity(p, itemToBuy);
             return true;
         }
 
@@ -70,19 +87,19 @@ public class BuyGE extends Node {
             if (!Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition())) {
                 handleObstacles();
             }
-            Log.info("Walking to GE");
             status = "Walking to GE";
             return Fighter.getLoopReturn();
         }
 
+        // check GP
         if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
             if (!Inventory.contains(i -> i.getName().equals("Coins") && i.getStackSize() >= (getPrice() * quantity))) {
                 if (!checkedBank) {
-                    Log.info("Need "  + (getPrice() * quantity) + " --> Checking bank");
+                    Log.info(itemToBuy + " :Need "  + (getPrice() * quantity) + " --> Checking bank");
                     BankWrapper.openAndDepositAll(true, Config.getProgressive().getRunes().toArray(new String[0]));
                     checkedBank = true;
                 } else {
-                    Log.info("Need "  + (getPrice() * quantity) + " --> Selling Items");
+                    Log.info(itemToBuy + " :Need "  + (getPrice() * quantity) + " --> Selling Items");
                     GEWrapper.setSellItems(true);
                 }
                 return Fighter.getLoopReturn();
@@ -108,7 +125,7 @@ public class BuyGE extends Node {
                     }
                 }
             } else {
-                Log.info("Already has item");
+                Log.info("Already has " + itemToBuy);
                 if (runesIterator.hasNext()) {
                     itemToBuy = runesIterator.next();
                 } else {
@@ -129,12 +146,13 @@ public class BuyGE extends Node {
 
         if (!GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY) && runesIterator == null) {
             GEWrapper.closeGE();
+            Progressive p = Config.getProgressive();
+            equipEquipment(p);
             if (!Tabs.isOpen(Tab.MAGIC)) {
                 Tabs.open(Tab.MAGIC);
                 Time.sleepUntil(() -> Tabs.isOpen(Tab.MAGIC) && Magic.canCast(spell), 8000);
             }
             Log.fine("Done restocking");
-            Progressive p = Config.getProgressive();
             if (p.getEnemies().contains("chicken") || p.getEnemies().contains("lesser demon")) {
                 GEWrapper.teleportHome();
             }
@@ -143,11 +161,52 @@ public class BuyGE extends Node {
         return Fighter.getLoopReturn();
     }
 
+    private int getQuantity(Progressive p, String item) {
+        if (p.isSplash() && p.getRunes().contains(item)) {
+            return 334;
+        }
+        if (p.isSplash() && Arrays.asList(Config.getSplashGear(false)).contains(item)) {
+            return 1;
+        }
+        if (spell.equals(Spell.Modern.WIND_STRIKE) && p.getRunes().contains(item)) {
+            Random.low(25, 35);
+        }
+        if (spell.equals(Spell.Modern.FIRE_STRIKE) && p.getRunes().contains(item)) {
+            Random.low(300, 400);
+        }
+        return 1;
+    }
+
+    /*private void equipSet(Progressive p) {
+        Item set = Inventory.getFirst(x -> x.getName().toLowerCase().contains("set"));
+        Npc clerk = Npcs.getNearest(x -> x.getName().contains("Grand Exchange Clerk"));
+        if (set != null && clerk != null) {
+            Time.sleepUntil(() -> clerk.interact("Sets"), 1000, 10000);
+            Time.sleep(700, 1300);
+
+        }
+    }*/
+
+    private void equipEquipment(Progressive p) {
+        Collection<String> equip = p.getEquipmentMap().values();
+        if (p.isSplash()) {
+            equip.addAll(Arrays.asList(Config.getSplashGear(false)));
+        }
+        for (String e : equip) {
+            if (Inventory.contains(e)) {
+                Inventory.getFirst(e).interact(a -> true);
+                Time.sleepUntil(() -> Equipment.contains(e), 1000, 8000);
+            }
+        }
+    }
+
     private int getPrice() {
         if (itemToBuy.equalsIgnoreCase("air rune") || itemToBuy.equalsIgnoreCase("mind rune")) {
             return 6;
         }
-        RSItemDefinition item = Definitions.getItem(itemToBuy, x -> x.isTradable() || x.isNoted());
+
+        String upperName = itemToBuy.toUpperCase().charAt(0) + itemToBuy.substring(1);
+        RSItemDefinition item = Definitions.getItem(upperName, x -> !x.isNoted());
 
         try {
             int price = ExPriceChecker.getOSBuddyBuyPrice(item.getId(), true);
@@ -157,7 +216,7 @@ public class BuyGE extends Node {
             if (price < 1) {
                 price = Inventory.getCount(true, 995) / 2;
             }
-            return price;
+            return price + (int) (price * .15);
         } catch (IOException e) {
             e.printStackTrace();
         }

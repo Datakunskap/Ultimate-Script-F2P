@@ -35,7 +35,9 @@ public class CombatWrapper {
 
     public static NpcResult findTarget(boolean isNext) {
         for (Npc npc : CombatStore.getTargetingMe()) {
-            if(npc == null || !Movement.isInteractable(npc, false)) {
+            if(npc == null || !Movement.isInteractable(npc, false) ||
+                    Config.getProgressive().getSpell() != null) {
+
                 continue;
             }
             return new NpcResult(npc, true);
@@ -59,6 +61,7 @@ public class CombatWrapper {
                 return new NpcResult(target, false);
             }
         } catch (Exception e) {
+            Log.severe(e);
             e.printStackTrace();
             return null;
         }

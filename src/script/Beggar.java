@@ -155,7 +155,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final boolean IDLE_LOGOUT = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
     public static final boolean SELENIUM_VERIFY_GEN = false;
-    public static final boolean OGRESS = false;
+    public static boolean OGRESS = false;
     public static final boolean EXPLV_TUTORIAL = false;
 
     @Override

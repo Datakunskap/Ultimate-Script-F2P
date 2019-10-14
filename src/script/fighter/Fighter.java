@@ -100,29 +100,14 @@ public class Fighter {
 
     private void setupMagicProgressive() {
         progressive = new Progressive();
-        progressive.setName("Train Magic: Chickens");
+        progressive.setName("Train Magic");
         progressive.setStyle(Combat.AttackStyle.CASTING);
         progressive.setSkill(Skill.MAGIC);
         HashMap<EquipmentSlot, String> map = new HashMap<>();
-        switch (Beggar.randInt(0, 2)) {
-            case 0:
-                map.put(EquipmentSlot.MAINHAND, "Bronze sword");
-                map.put(EquipmentSlot.OFFHAND, "Wooden shield");
-                break;
-            case 1:
-                if (Inventory.contains("Bronze arrow")) {
-                    map.put(EquipmentSlot.MAINHAND, "Shortbow");
-                    map.put(EquipmentSlot.QUIVER, "Bronze arrow");
-                }
-                break;
-            case 2:
-                map.put(EquipmentSlot.MAINHAND, "Bronze dagger");
-                map.put(EquipmentSlot.OFFHAND, "Wooden shield");
-                break;
-        }
+
         progressive.setEquipmentMap(map);
         HashSet<String> runes = new HashSet<>();
-        //runes.add("air rune");
+        runes.add("air rune");
         runes.add("mind rune");
         progressive.setRunes(runes);
         progressive.setSpell(Spell.Modern.WIND_STRIKE);
@@ -156,39 +141,7 @@ public class Fighter {
         progressive.setRandomIdle(true);
         progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
         progressive.setMinimumLevel(1);
-        int switchLvl = Beggar.randInt(2, 5);
-        progressive.setMaximumLevel(switchLvl);
-        ProgressiveSet.add(progressive);
-
-        progressive = new Progressive();
-        progressive.setName("Train Magic: Goblins");
-        progressive.setStyle(Combat.AttackStyle.CASTING);
-        progressive.setSkill(Skill.MAGIC);
-        progressive.setSpell(Spell.Modern.WIND_STRIKE);
-        enemies = new HashSet<>();
-        enemies.add("goblin");
-        progressive.setEnemies(enemies);
-        loot = new HashSet<>();
-        loot.add("bones");
-        runeLoot = new String[] {"air rune", "mind rune","water rune","earth rune","fire rune",
-                "chaos rune", "cosmic rune","nature rune","law rune","death rune", "body rune"} ;
-        loot.addAll(Arrays.asList(runeLoot));
-        progressive.setLoot(loot);
-        progressive.setPrioritizeLooting(false);
-        progressive.setBuryBones(false);
-        switch (1) {
-            case 0:
-                //progressive.setPosition(new Position(3183, 3220)); //Behind lumbridge castle
-                break;
-            case 1:
-                progressive.setPosition(new Position(3248, 3237)); //Lumbridge east river lum
-                break;
-        }
-        progressive.setRadius(Beggar.randInt(15, 20));
-        progressive.setRandomIdle(true);
-        progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
-        progressive.setMinimumLevel(switchLvl);
-        progressive.setMaximumLevel(switchLvl + 1);
+        progressive.setMaximumLevel(13);
         ProgressiveSet.add(progressive);
     }
 
@@ -423,12 +376,11 @@ public class Fighter {
 
     public void setActive(Node task) {
         active = task;
-        if (!Beggar.OGRESS)
-            checkStopTime();
+        checkStopTime();
     }
 
     private void checkStopTime() {
-        if((System.currentTimeMillis() - startTimeMs) > stopTimeMs) {
+        if(!Beggar.OGRESS && (System.currentTimeMillis() - startTimeMs) > stopTimeMs) {
             if (Players.getLocal().getCombatLevel() > 3) {
                 Log.fine("Stopping Fighter");
                 onStop(false, 10);

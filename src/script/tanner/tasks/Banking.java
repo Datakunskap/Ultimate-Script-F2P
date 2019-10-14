@@ -1,5 +1,6 @@
 package script.tanner.tasks;
 
+import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.tab.Inventory;
@@ -68,7 +69,7 @@ public class Banking {
 
     public void openAndDepositAll(int coinsToKeep) {
         Log.fine("Depositing Inventory");
-        while (!Bank.isOpen()) {
+        while (!Bank.isOpen() && Game.isLoggedIn()) {
             Bank.open();
             Time.sleep(1000);
         }

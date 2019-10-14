@@ -31,7 +31,7 @@ public class StartupChecks extends Task {
         tutIslandCheck();
         fighterCheck();
         instanceCheck();
-        addWorldToFile();
+        //addWorldToFile();
         setNextBotWorld(300);
         main.startupChecks = true;
         return 1000;
@@ -61,7 +61,6 @@ public class StartupChecks extends Task {
         }
 
         main.runningClients = checkI.getRunningClients();
-        //main.checkBadInstances(main.cList, main.badInstances, 10);
     }
 
     private void addWorldToFile() {

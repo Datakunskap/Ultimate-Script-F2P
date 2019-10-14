@@ -29,6 +29,7 @@ public class Progressive {
     private boolean ogress;
     private HashSet<String> runes = new HashSet<>();
     private Spell spell;
+    private boolean splash;
 
     public void setRandomIdle(boolean randomIdle) {
         this.randomIdle = randomIdle;
@@ -165,4 +166,8 @@ public class Progressive {
     public Spell getSpell() {
         return spell;
     }
+
+    public void setSplash(boolean splash) { this.splash = splash; }
+
+    public boolean isSplash() { return splash; }
 }
