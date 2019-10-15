@@ -166,7 +166,7 @@ public class dqw4w9wgxcq extends Task {
                         if (fire == null || !fire.getName().equals("Fire")) {
                             useItemOn("Logs", Inventory.getFirst("Tinderbox"));
                         } else {
-                            Movement.walkTo(Players.getLocal().getPosition().translate(Random.nextInt(-1, 1), Random.nextInt(-1, 1)));
+                            Movement.walkTo(Players.getLocal().getPosition().translate(Random.nextInt(-3, 3), Random.nextInt(-3, 3)));
                             Time.sleep(3000);
                         }
                     }
@@ -194,7 +194,8 @@ public class dqw4w9wgxcq extends Task {
                     Movement.toggleRun(true);
                     Time.sleep(400, 800);
                 }else if(new Position(3085, 3127).distance() > 20){
-                    Movement.walkTo(new Position(3085, 3127));
+                    randWalker(new Position(3085, 3127), p -> p.distance() > 20);
+                    //Movement.walkTo(new Position(3085, 3127));
                 }else {
                     doDefault = true;
                 }
@@ -363,9 +364,6 @@ public class dqw4w9wgxcq extends Task {
                         case 1:
                             randWalker(BankLocation.LUMBRIDGE_CASTLE.getPosition());
                             break;
-                        case 2:
-                            randWalker(BankLocation.DRAYNOR.getPosition());
-                            break;
                     }
                     main.beggar.startFighter(true);
                 }
@@ -522,9 +520,25 @@ public class dqw4w9wgxcq extends Task {
         }
     }
 
+    private void randWalker(Position posRequired, Predicate<Position> predicate) {
+        Log.info("Walking to position");
+        while (predicate.test(posRequired) && Game.isLoggedIn()) {
+            Time.sleep(800, 1800);
+            Movement.walkToRandomized(posRequired);
+        }
+            int times = 1;//Beggar.randInt(1, 2);
+            Log.info("Random walking " + times + " time(s)");
+            for (int i = 0; i < times; i++) {
+                Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
+                //getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
+                Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
+                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(2000, 5000));
+            }
+    }
+
     private void randWalker(Position posRequired) {
         Log.info("Walking to position");
-        while (!Players.getLocal().getPosition().equals(posRequired) && !TutorialIsland.getInstance(null).isStopping() && Game.isLoggedIn()) {
+        while (!Players.getLocal().getPosition().equals(posRequired) && Game.isLoggedIn()) {
             if (!Time.sleepUntil(() -> Players.getLocal().getPosition().equals(posRequired), Random.low(600, 1800))) {
                 Movement.walkTo(posRequired);
             }
@@ -533,8 +547,8 @@ public class dqw4w9wgxcq extends Task {
             int times = Beggar.randInt(1, 2);
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i++) {
-                Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                //getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
+                //Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
+                getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
                 Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
                 Time.sleepUntil(() -> !Players.getLocal().isMoving(), 600, Beggar.randInt(2000, 4000));
             }
