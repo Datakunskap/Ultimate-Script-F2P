@@ -56,7 +56,9 @@ public class BackToFightZone extends Node {
             if (shouldEnableRun()) {
                 enableRun();
             }
-            Movement.walkTo(startTileRandom);
+            if (!Movement.walkTo(startTileRandom)) {
+                startTileRandom = null;
+            }
             Time.sleep(200, 450);
             /*if (!Players.getLocal().isMoving()) {
                 Logger.debug("Walking to: " + startTileRandom.toString());

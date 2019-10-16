@@ -169,10 +169,10 @@ public class BuyGE extends Node {
             return 1;
         }
         if (spell.equals(Spell.Modern.WIND_STRIKE) && p.getRunes().contains(item)) {
-            Random.low(25, 35);
+            return Random.low(25, 35);
         }
         if (spell.equals(Spell.Modern.FIRE_STRIKE) && p.getRunes().contains(item)) {
-            Random.low(300, 400);
+            return Random.low(300, 400);
         }
         return 1;
     }

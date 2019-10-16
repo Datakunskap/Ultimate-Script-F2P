@@ -385,7 +385,6 @@ public class dqw4w9wgxcq extends Task {
                 switch (Game.getClient().getHintArrowType()) {
                     case 0:
                         Log.info("no hint arrow");
-                        //randWalker(50, 8);
                         break;
                     case 1:
                         Npcs.getAt(Game.getClient().getHintArrowNpcIndex()).interact(defaultAction);
@@ -409,7 +408,7 @@ public class dqw4w9wgxcq extends Task {
 
     private boolean randWalker(int chanceIn100, int distance) {
         int chance = 100 / chanceIn100;
-        if (Beggar.randInt(1, chance) == 1 && !Players.getLocal().isMoving()) {
+        if (Beggar.randInt(1, chance) == 1 && !Players.getLocal().isMoving() && !Dialog.isOpen()) {
             Log.fine("Random Walk");
             //Movement.walkToRandomized(Players.getLocal().getPosition().randomize(distance));
             getEmptyPosition(false, Beggar.randInt(1, distance), true).ifPresent(Movement::walkTo);
