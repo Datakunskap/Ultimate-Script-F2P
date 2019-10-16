@@ -67,7 +67,7 @@ public class dqw4w9wgxcq extends Task {
         boolean doDefault = false;
         Predicate<String> defaultAction = a -> true;
 
-        Log.info("" + config);
+        //Log.info("" + config);
 
         if (Players.getLocal().getAnimation() != -1 || Players.getLocal().isMoving()) {
             return 1000;
@@ -385,6 +385,7 @@ public class dqw4w9wgxcq extends Task {
                 switch (Game.getClient().getHintArrowType()) {
                     case 0:
                         Log.info("no hint arrow");
+                        //randWalker(50, 8);
                         break;
                     case 1:
                         Npcs.getAt(Game.getClient().getHintArrowNpcIndex()).interact(defaultAction);
@@ -404,6 +405,19 @@ public class dqw4w9wgxcq extends Task {
         }
 
         return Random.high(800, 2500);
+    }
+
+    private boolean randWalker(int chanceIn100, int distance) {
+        int chance = 100 / chanceIn100;
+        if (Beggar.randInt(1, chance) == 1 && !Players.getLocal().isMoving()) {
+            Log.fine("Random Walk");
+            //Movement.walkToRandomized(Players.getLocal().getPosition().randomize(distance));
+            getEmptyPosition(false, Beggar.randInt(1, distance), true).ifPresent(Movement::walkTo);
+            Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
+            Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(2000, 5000));
+            return  true;
+        }
+        return false;
     }
 
     private void useItemOn(String itemName, Interactable target) {
@@ -520,13 +534,6 @@ public class dqw4w9wgxcq extends Task {
             Time.sleepUntil(() -> Equipment.contains(name), 2000, 1500);
             Time.sleep(400, 800);
         }
-    }
-
-    private void randWalker(int randDistance) {
-        Movement.walkToRandomized(Players.getLocal().getPosition().randomize(randDistance));
-        //getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
-        Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
-        Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(2000, 5000));
     }
 
     private void randWalker(Position posRequired) {
