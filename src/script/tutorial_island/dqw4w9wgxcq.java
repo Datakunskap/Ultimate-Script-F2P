@@ -194,10 +194,10 @@ public class dqw4w9wgxcq extends Task {
                     Movement.toggleRun(true);
                     Time.sleep(400, 800);
                 }else if(new Position(3085, 3127).distance() > 20){
-                    randWalker(new Position(3085, 3127), p -> p.distance() > 20);
-                    //Movement.walkTo(new Position(3085, 3127));
+                    Movement.walkToRandomized(new Position(3085, 3127));
                 }else {
                     doDefault = true;
+                    //randWalker(8);
                 }
                 break;
             case 183:
@@ -217,9 +217,10 @@ public class dqw4w9wgxcq extends Task {
                     Movement.toggleRun(true);
                     Time.sleep(400, 800);
                 }else if(new Position(3085, 3127).distance() > 20){
-                    Movement.walkTo(new Position(3085, 3127));
+                    Movement.walkToRandomized(new Position(3085, 3127));
                 }else {
                     doDefault = true;
+                    //randWalker(8);
                 }
                 break;
             case 230:
@@ -228,9 +229,10 @@ public class dqw4w9wgxcq extends Task {
                 break;
             case 260:
                 if (Players.getLocal().getY() > 9517) {
-                    Movement.walkTo(new Position(3081, 9509));
+                    Movement.walkToRandomized(new Position(3081, 9509));
                 } else {
                     doDefault = true;
+                    //randWalker(8);
                 }
                 break;
             case 270: case 280:
@@ -304,7 +306,7 @@ public class dqw4w9wgxcq extends Task {
                 break;
             case 550:
                 if (Players.getLocal().getY() > 3116) {
-                    Movement.walkTo(new Position(3134, 3116));
+                    Movement.walkToRandomized(new Position(3134, 3116));
 
                 } else if(Movement.isInteractable(new Position(3127, 3106), false)){
                     doDefault = true;
@@ -325,7 +327,7 @@ public class dqw4w9wgxcq extends Task {
                 break;
             case 620:
                 if (Players.getLocal().getY() > 3100) {
-                    Movement.walkTo(new Position(3131, 3088));
+                    Movement.walkToRandomized(new Position(3131, 3088));
                 } else {
                     doDefault = true;
                 }
@@ -341,7 +343,7 @@ public class dqw4w9wgxcq extends Task {
                         Magic.cast(Spell.Modern.WIND_STRIKE);
                     }
                 } else {
-                    Movement.walkTo(STRIKE_POS);
+                    Movement.walkToRandomized(STRIKE_POS);
                 }
                 break;
             case 670:
@@ -520,20 +522,11 @@ public class dqw4w9wgxcq extends Task {
         }
     }
 
-    private void randWalker(Position posRequired, Predicate<Position> predicate) {
-        Log.info("Walking to position");
-        while (predicate.test(posRequired) && Game.isLoggedIn()) {
-            Time.sleep(800, 1800);
-            Movement.walkToRandomized(posRequired);
-        }
-            int times = 1;//Beggar.randInt(1, 2);
-            Log.info("Random walking " + times + " time(s)");
-            for (int i = 0; i < times; i++) {
-                Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                //getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
-                Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
-                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(2000, 5000));
-            }
+    private void randWalker(int randDistance) {
+        Movement.walkToRandomized(Players.getLocal().getPosition().randomize(randDistance));
+        //getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
+        Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
+        Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(2000, 5000));
     }
 
     private void randWalker(Position posRequired) {
