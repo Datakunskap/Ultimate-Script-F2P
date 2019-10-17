@@ -38,7 +38,7 @@ public class Fighter {
     private NodeManager manager;
     private ScriptPaint paint;
     private StopWatch runtime;
-    private Progressive progressive;
+    //private Progressive progressive;
 
     private long stopTimeMs;
     public long startTimeMs;
@@ -99,7 +99,7 @@ public class Fighter {
     }
 
     private void setupMagicProgressive() {
-        progressive = new Progressive();
+        Progressive progressive = new Progressive();
         progressive.setName("Train Magic");
         progressive.setStyle(Combat.AttackStyle.CASTING);
         progressive.setSkill(Skill.MAGIC);
@@ -141,12 +141,26 @@ public class Fighter {
         progressive.setRandomIdle(true);
         progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
         progressive.setMinimumLevel(1);
-        progressive.setMaximumLevel(13);
+        int switchLvl = Beggar.randInt(5, 8);
+        progressive.setMaximumLevel(switchLvl);
         ProgressiveSet.add(progressive);
+
+        Progressive progressive2 = new Progressive();
+        progressive2.copy(progressive);
+        enemies.add("goblin");
+        progressive2.setEnemies(enemies);
+        if (Beggar.randInt(0, 1) == 0) {
+            progressive.setPosition(new Position(3248, 3237)); //Lumbridge east river lum
+        } else {
+            progressive.setPosition(new Position(3188, 3277)); //Lumbridge chickens (small)
+        }
+        progressive2.setMinimumLevel(switchLvl);
+        progressive2.setMaximumLevel(13);
+        ProgressiveSet.add(progressive2);
     }
 
     private void setupLesserDemonProgressive() {
-        progressive = new Progressive();
+        Progressive progressive = new Progressive();
         progressive.setName("Train Magic: Lesser Demon");
         progressive.setStyle(Combat.AttackStyle.CASTING);
         progressive.setSkill(Skill.ATTACK);
@@ -170,7 +184,7 @@ public class Fighter {
     }
 
     private void setupDefaultProgressive(String... enemiesToFight) {
-        progressive = new Progressive();
+        Progressive progressive = new Progressive();
         progressive.setName("Default");
         HashMap<EquipmentSlot, String> map = new HashMap<>();
         switch (Beggar.randInt(0, 2)) {

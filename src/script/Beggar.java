@@ -155,8 +155,8 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final boolean IDLE_LOGOUT = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
     public static final boolean SELENIUM_VERIFY_GEN = false;
-    public static boolean OGRESS = false;
     public static final boolean EXPLV_TUTORIAL = false;
+    public static boolean OGRESS = false;
 
     @Override
     public void onStart() {
@@ -227,7 +227,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
         resetRender();
         removeAll();
-        fighter = new Fighter(this, randInt(600_000, 900_000)); // 10 - 15
+        fighter = new Fighter(this, randInt(600_000, 1_100_000)); // 10 - 18
         fighter.onStart();
     }
 

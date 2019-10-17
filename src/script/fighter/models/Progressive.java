@@ -29,6 +29,7 @@ public class Progressive {
     private boolean ogress;
     private HashSet<String> runes = new HashSet<>();
     private Spell spell;
+
     private boolean splash;
 
     public void setRandomIdle(boolean randomIdle) {
@@ -170,4 +171,27 @@ public class Progressive {
     public void setSplash(boolean splash) { this.splash = splash; }
 
     public boolean isSplash() { return splash; }
+
+    public void copy(Progressive copy) {
+        this.name = copy.name;
+        this.minimumLevel = copy.minimumLevel;
+        this.maximumLevel = copy.maximumLevel;
+        this.skill = copy.skill;
+        this.style = copy.style;
+        this.enemies = copy.enemies;
+        this.food = copy.food;
+        this.loot = copy.loot;
+        this.equipmentMap = copy.equipmentMap;
+        this.position = copy.position;
+        this.radius = copy.radius;
+        this.prioritizeLooting = copy.prioritizeLooting;
+        this.buryBones = copy.buryBones;
+        this.randomIdle = copy.randomIdle;
+        this.randomIdleBuffer = copy.randomIdleBuffer;
+        this.ogress = copy.ogress;
+        this.runes = copy.runes;
+        this.spell = copy.spell;
+        this.splash = copy.splash;
+    }
+
 }

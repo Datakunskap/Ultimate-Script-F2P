@@ -44,7 +44,7 @@ public class TradePlayer extends Task {
             "Shrimps", "Raw anchovies", "Anchovies", "Raw lobster", "Lobster", "Clay", "Copper ore", "Tin ore", "Iron ore",
             "Silver ore", "Coal", "Cowhide", "Vial", "Vial of water", "Fishing bait", "Feather", "Eye of newt", "Adamantite ore",
             "Jug of water", "Air rune", "Water rune", "Earth rune", "Fire rune", "Chaos rune", "Mind rune", "Body rune",
-            "Mithril ore", "Bronze arrow", "Jug of wine"};
+            "Mithril ore", "Bronze arrow", "Jug of wine", "Bronze battleaxe"};
 
     @Override
     public boolean validate() {

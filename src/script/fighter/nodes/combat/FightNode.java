@@ -31,7 +31,6 @@ public class FightNode extends Node {
 
     public FightNode(Fighter main){
         this.main = main;
-        spell = Config.getProgressive().getSpell();
         BackgroundTaskExecutor.submit(this::findNextTarget, 1000);
     }
 
@@ -41,6 +40,7 @@ public class FightNode extends Node {
 
     @Override
     public boolean validate() {
+        spell = Config.getProgressive().getSpell();
         if (spell != null && !Config.hasRunes())
             return false;
 
@@ -114,7 +114,6 @@ public class FightNode extends Node {
     @Override
     public void onInvalid() {
         running = false;
-        spell = null;
         CombatStore.resetTargetingValues();
         super.onInvalid();
     }
@@ -147,8 +146,8 @@ public class FightNode extends Node {
         Player p = Players.getLocal();
         PathingEntity target = p.getTarget();
         PathingEntity targetsTarget = target == null ? null : target.getTarget();
-        if(p.getTargetIndex() != -1 && target != null && targetsTarget != null && targetsTarget.equals(p)) {
-            System.out.println("In combat.");
+        if(spell == null && p.getTargetIndex() != -1 && target != null && targetsTarget != null && targetsTarget.equals(p)) {
+            status = "In combat";
             return;
         }
         if(Movement.isInteractable(npc, false)) {
@@ -163,15 +162,19 @@ public class FightNode extends Node {
             return;
         }
         status = "Walking to target.";
-        if (spell == null || Players.getLocal().getTargetIndex() == -1) {
+        Player player = Players.getLocal();
+        if (spell == null || (player.getTargetIndex() == -1 && !player.isAnimating())) {
             Movement.walkTo(npc);
+            if (!Time.sleepUntil(() -> Players.getLocal().isMoving(), 2000)) {
+                Movement.walkTo(Players.getLocal().getPosition().randomize(5));
+            }
         }
     }
 
     private void castSpell(Npc npc) {
         if (!Tabs.isOpen(Tab.MAGIC)) {
             Tabs.open(Tab.MAGIC);
-            Time.sleepUntil(() -> Tabs.isOpen(Tab.MAGIC), 100, 1000);
+            Time.sleepUntil(() -> Tabs.isOpen(Tab.MAGIC), 500, 2000);
         }
         Magic.cast(spell, npc);
     }

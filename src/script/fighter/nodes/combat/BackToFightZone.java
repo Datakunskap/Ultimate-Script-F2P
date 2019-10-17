@@ -40,6 +40,7 @@ public class BackToFightZone extends Node {
             return 2000;
 
         if (Config.getProgressive().isSplash()) {
+            Logger.debug("Walking to: Splash Area");
             if (shouldEnableRun()) {
                 enableRun();
             }
@@ -58,6 +59,7 @@ public class BackToFightZone extends Node {
             }
             if (!Movement.walkTo(startTileRandom)) {
                 startTileRandom = null;
+                Movement.walkTo(Players.getLocal().getPosition().randomize(3));
             }
             Time.sleep(200, 450);
             /*if (!Players.getLocal().isMoving()) {

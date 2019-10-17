@@ -86,7 +86,7 @@ public class Main {
     public int cowhidePrice = 0;
     private int[] lastPrices = new int[2];
     public boolean paidToll = true;
-    public int idleTanNum = Beggar.randInt((StartOther.TANS_PER_HR / 2  - 200), (StartOther.TANS_PER_HR / 2  + 200));
+    public int idleTanNum = StartOther.TANS_PER_HR * 24;//Beggar.randInt((StartOther.TANS_PER_HR / 2  - 200), (StartOther.TANS_PER_HR / 2  + 200));
 
     //private Main tanner;
     public Beggar beggar;

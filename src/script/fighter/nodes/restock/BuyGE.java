@@ -54,7 +54,7 @@ public class BuyGE extends Node {
         HashSet<String> items = p.getRunes();
         spell = p.getSpell();
 
-        if (Inventory.contains(i -> i.getName().equals("Coins") && i.getStackSize() >= 5060) &&
+        if (Inventory.contains(i -> i.getName().equals("Coins") && i.getStackSize() >= Config.getSplashStartAmnt(true)) &&
                 Skills.getLevel(Skill.MAGIC) < 13) {
             Log.fine("Splash Time!");
             p.setSplash(true);
@@ -148,10 +148,7 @@ public class BuyGE extends Node {
             GEWrapper.closeGE();
             Progressive p = Config.getProgressive();
             equipEquipment(p);
-            if (!Tabs.isOpen(Tab.MAGIC)) {
-                Tabs.open(Tab.MAGIC);
-                Time.sleepUntil(() -> Tabs.isOpen(Tab.MAGIC) && Magic.canCast(spell), 8000);
-            }
+            BankWrapper.openAndDepositAll(true, Config.getProgressive().getRunes().toArray(new String[0]));
             Log.fine("Done restocking");
             if (p.getEnemies().contains("chicken") || p.getEnemies().contains("lesser demon")) {
                 GEWrapper.teleportHome();
@@ -163,13 +160,13 @@ public class BuyGE extends Node {
 
     private int getQuantity(Progressive p, String item) {
         if (p.isSplash() && p.getRunes().contains(item)) {
-            return 334;
+            return Config.getSplashStartAmnt(false) / 12;
         }
         if (p.isSplash() && Arrays.asList(Config.getSplashGear(false)).contains(item)) {
             return 1;
         }
         if (spell.equals(Spell.Modern.WIND_STRIKE) && p.getRunes().contains(item)) {
-            return Random.low(25, 35);
+            return Random.low(35, 55);
         }
         if (spell.equals(Spell.Modern.FIRE_STRIKE) && p.getRunes().contains(item)) {
             return Random.low(300, 400);
@@ -204,10 +201,12 @@ public class BuyGE extends Node {
         if (itemToBuy.equalsIgnoreCase("air rune") || itemToBuy.equalsIgnoreCase("mind rune")) {
             return 6;
         }
+        if (Arrays.asList(Config.getSplashGear(false)).contains(itemToBuy.toLowerCase())) {
+            return 500;
+        }
 
-        String upperName = itemToBuy.toUpperCase().charAt(0) + itemToBuy.substring(1);
-        RSItemDefinition item = Definitions.getItem(upperName, x -> !x.isNoted());
-
+        //String upperName = itemToBuy.toUpperCase().charAt(0) + itemToBuy.substring(1);
+        RSItemDefinition item = Definitions.getItem(itemToBuy, x -> !x.isNoted());
         try {
             int price = ExPriceChecker.getOSBuddyBuyPrice(item.getId(), true);
             if (price < 1) {

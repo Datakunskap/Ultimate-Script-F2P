@@ -64,7 +64,7 @@ public class BankWrapper {
     public static void withdrawSellableItems() {
         if (!Bank.getWithdrawMode().equals(Bank.WithdrawMode.NOTE)) {
             Bank.setWithdrawMode(Bank.WithdrawMode.NOTE);
-            Time.sleep(500);
+            Time.sleep(500, 800);
         }
         Item[] sellables = Bank.getItems(i -> i.isExchangeable() &&
                 !Config.getProgressive().getRunes().contains(i.getName().toLowerCase()));
