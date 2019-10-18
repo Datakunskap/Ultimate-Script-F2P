@@ -1,5 +1,6 @@
 package script.fighter.nodes.restock;
 
+import api.component.ExPriceCheck;
 import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.Definitions;
 import org.rspeer.runetek.api.commons.BankLocation;
@@ -23,7 +24,6 @@ import script.fighter.models.Progressive;
 import script.fighter.wrappers.BankWrapper;
 import script.fighter.wrappers.GEWrapper;
 import script.tanner.ExGrandExchange;
-import script.tanner.ExPriceChecker;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -216,9 +216,9 @@ public class BuyGE extends Node {
         //String upperName = itemToBuy.toUpperCase().charAt(0) + itemToBuy.substring(1);
         RSItemDefinition item = Definitions.getItem(itemToBuy, x -> !x.isNoted());
         try {
-            int price = ExPriceChecker.getOSBuddyBuyPrice(item.getId(), true);
+            int price = ExPriceCheck.getAccurateRSPrice(item.getId());
             if (price < 1) {
-                price = ExPriceChecker.getRSBuddyBuyPrice(item.getId(), true);
+                price = ExPriceCheck.getAccurateRSPrice(item.getId());
             }
             if (price < 1) {
                 price = Inventory.getCount(true, 995) / 2;

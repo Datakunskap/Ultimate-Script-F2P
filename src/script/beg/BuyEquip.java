@@ -1,12 +1,16 @@
 package script.beg;
 
+import api.component.ExPriceCheck;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.GrandExchange;
 import org.rspeer.runetek.api.component.GrandExchangeSetup;
 import org.rspeer.runetek.api.component.Interfaces;
-import org.rspeer.runetek.api.component.tab.*;
+import org.rspeer.runetek.api.component.tab.Equipment;
+import org.rspeer.runetek.api.component.tab.Inventory;
+import org.rspeer.runetek.api.component.tab.Tab;
+import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.scene.Npcs;
@@ -15,7 +19,6 @@ import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.tanner.ExGrandExchange;
-import script.tanner.ExPriceChecker;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -65,7 +68,7 @@ public class BuyEquip extends Task {
         // Buys
         try {
             if (!main.bought && (GrandExchange.isOpen() || GrandExchangeSetup.isOpen()) && GrandExchange.getFirstActive() == null && ExGrandExchange.buy(ITEM, 1,
-                    ExPriceChecker.getOSBuddyBuyPrice(ITEM, false) > 0 ? ExPriceChecker.getOSBuddyBuyPrice(ITEM, false) + 500 : ExPriceChecker.getRSBuddyBuyPrice(ITEM, false) + 500, false)) {
+                    ExPriceCheck.getOSBuddyBuyPrice(ITEM, false) > 0 ? ExPriceCheck.getOSBuddyBuyPrice(ITEM, false) + 500 : ExPriceCheck.getRSBuddyBuyPrice(ITEM, false) + 500, false)) {
                 Log.fine("Buying");
             } if(!main.bought) {
                 Log.info("Waiting to complete");

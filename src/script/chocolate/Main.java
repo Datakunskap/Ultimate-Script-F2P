@@ -1,5 +1,6 @@
 package script.chocolate;
 
+import api.component.ExPriceCheck;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.api.commons.StopWatch;
 import org.rspeer.runetek.api.commons.Time;
@@ -13,7 +14,6 @@ import org.rspeer.ui.Log;
 import script.Beggar;
 import script.chocolate.tasks.*;
 import script.data.MuleArea;
-import script.tanner.ExPriceChecker;
 import script.beg.StartOther;
 
 import java.awt.*;
@@ -106,24 +106,37 @@ public class Main {
     public void setPrices(boolean refresh) {
         try {
             Log.info("Setting prices");
-            sellPrice = ExPriceChecker.getOSBuddySellPrice(DUST, refresh);
-            buyPrice = ExPriceChecker.getOSBuddyBuyPrice(BAR, refresh);
+            sellPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.DUST);
+            buyPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.BAR);
         } catch (IOException e) {
             Log.severe("Failed getting OSBuddy price");
             e.printStackTrace();
         } finally {
             try {
-                if (sellPrice < SELL_PL) {
-                    sellPrice = ExPriceChecker.getRSBuddySellPrice(DUST, refresh);
-                    Log.fine("Using RSBuddy sell price");
-                }
-                if (buyPrice < BUY_PL) {
-                    buyPrice = ExPriceChecker.getRSBuddyBuyPrice(BAR, refresh);
-                    Log.fine("Using RSBuddy buy price");
+                for (int i = 0; sellPrice < SELL_PL && i < 3; i++) {
+                    if (i == 0)
+                        sellPrice = ExPriceCheck.getRSPrice(script.chocolate.Main.DUST);
+                    if (i == 1)
+                        sellPrice = ExPriceCheck.getOSBuddySellPrice(script.chocolate.Main.DUST, refresh);
+                    if (i == 2)
+                        sellPrice = ExPriceCheck.getRSBuddySellPrice(script.chocolate.Main.DUST, refresh);
                 }
             } catch (IOException e) {
-                Log.severe("Failed getting RSBuddy price");
-                e.printStackTrace();
+                beggar.writeToErrorFile("Failed getting sell price");
+            }
+
+            try {
+                for (int i = 0; buyPrice < BUY_PL && i < 3; i++) {
+                    if (i == 0)
+                        buyPrice = ExPriceCheck.getRSPrice(script.chocolate.Main.BAR);
+                    if (i == 1)
+                        buyPrice = ExPriceCheck.getOSBuddyBuyPrice(script.chocolate.Main.BAR, refresh);
+                    if (i == 2)
+                        buyPrice = ExPriceCheck.getRSBuddyBuyPrice(script.chocolate.Main.BAR, refresh);
+                }
+            } catch (IOException e) {
+                beggar.writeToErrorFile("Failed getting buy price");
+
             } finally {
                 fallbackPriceHelper();
             }
