@@ -57,7 +57,7 @@ public class ExPriceCheck {
      * @return the price of the item; -1 if failed
      */
     @SuppressWarnings("unchecked")
-    public static int getAccurateRSPrice(int id) throws IOException {
+    public static int getAccurateRSPrice(int id) throws Exception {
         final Request request = new Request.Builder()
                 .url(OLDSCHOOL_RUNESCAPE_API_URL + "graph/" + id + ".json")
                 .get()

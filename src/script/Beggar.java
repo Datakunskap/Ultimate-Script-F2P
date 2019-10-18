@@ -946,35 +946,40 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         {
             int COWHIDE = 1739;
             try {
-                leatherPrice = ExPriceCheck.getAccurateRSPrice(LEATHER);
-                cowhidePrice = ExPriceCheck.getAccurateRSPrice(COWHIDE);
-            } catch (IOException e) {
+                leatherPrice = ExPriceCheck.getOSBuddySellPrice(LEATHER, refresh);
+                cowhidePrice = ExPriceCheck.getOSBuddyBuyPrice(COWHIDE, refresh);
+            } catch (Exception e) {
+                Log.severe("Exception getting OSBuddy price");
                 e.printStackTrace();
             } finally {
                 try {
                     for (int i = 0; leatherPrice < 70 && i < 3; i++) {
-                        if (i == 0)
-                            leatherPrice = ExPriceCheck.getRSPrice(LEATHER);
+                        if (i == 0) {
+                            try { leatherPrice = ExPriceCheck.getAccurateRSPrice(LEATHER); }
+                            catch (Exception ignored) {}
+                        }
                         if (i == 1)
-                            leatherPrice = ExPriceCheck.getOSBuddySellPrice(LEATHER, refresh);
-                        if (i == 2)
                             leatherPrice = ExPriceCheck.getRSBuddySellPrice(LEATHER, refresh);
+                        if (i == 2)
+                            leatherPrice = ExPriceCheck.getRSPrice(LEATHER);
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     writeToErrorFile("Failed getting sell price");
                 }
 
                 try {
                     for (int i = 0; cowhidePrice < 50 && i < 3; i++) {
-                        if (i == 0)
-                            cowhidePrice = ExPriceCheck.getRSPrice(COWHIDE);
+                        if (i == 0) {
+                            try { cowhidePrice = ExPriceCheck.getAccurateRSPrice(COWHIDE); }
+                            catch (Exception ignored) {}
+                        }
                         if (i == 1)
-                            cowhidePrice = ExPriceCheck.getOSBuddyBuyPrice(COWHIDE, refresh);
-                        if (i == 2)
                             cowhidePrice = ExPriceCheck.getRSBuddyBuyPrice(COWHIDE, refresh);
+                        if (i == 2)
+                            cowhidePrice = ExPriceCheck.getRSPrice(COWHIDE);
                     }
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     writeToErrorFile("Failed getting buy price");
 
                 } finally {
@@ -1038,34 +1043,38 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     private void setChocolatePrices(boolean refresh) {
         try {
-            sellPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.DUST);
-            buyPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.BAR);
-        } catch (IOException e) {
+            sellPrice = ExPriceCheck.getOSBuddySellPrice(script.chocolate.Main.DUST, refresh);
+            buyPrice = ExPriceCheck.getOSBuddyBuyPrice(script.chocolate.Main.BAR, refresh);
+        } catch (Exception e) {
+            Log.severe("Exception getting accurate OSBuddy price");
             e.printStackTrace();
         } finally {
             try {
                 for (int i = 0; sellPrice < SELL_PL && i < 3; i++) {
-                    if (i == 0)
-                        sellPrice = ExPriceCheck.getRSPrice(script.chocolate.Main.DUST);
+                    if (i == 0) {
+                        try { sellPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.DUST); }
+                        catch (Exception ignored) {}
+                    }
                     if (i == 1)
-                        sellPrice = ExPriceCheck.getOSBuddySellPrice(script.chocolate.Main.DUST, refresh);
-                    if (i == 2)
                         sellPrice = ExPriceCheck.getRSBuddySellPrice(script.chocolate.Main.DUST, refresh);
+                    if (i == 2)
+                        sellPrice = ExPriceCheck.getRSPrice(script.chocolate.Main.DUST);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 writeToErrorFile("Failed getting sell price");
             }
 
             try {
                 for (int i = 0; buyPrice < BUY_PL && i < 3; i++) {
                     if (i == 0)
-                        buyPrice = ExPriceCheck.getRSPrice(script.chocolate.Main.BAR);
+                        try { buyPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.BAR); }
+                        catch (Exception ignored) {}
                     if (i == 1)
-                        buyPrice = ExPriceCheck.getOSBuddyBuyPrice(script.chocolate.Main.BAR, refresh);
-                    if (i == 2)
                         buyPrice = ExPriceCheck.getRSBuddyBuyPrice(script.chocolate.Main.BAR, refresh);
+                    if (i == 2)
+                        buyPrice = ExPriceCheck.getRSPrice(script.chocolate.Main.BAR);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 writeToErrorFile("Failed getting buy price");
 
             } finally {

@@ -25,7 +25,6 @@ import script.fighter.wrappers.BankWrapper;
 import script.fighter.wrappers.GEWrapper;
 import script.tanner.ExGrandExchange;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -216,15 +215,16 @@ public class BuyGE extends Node {
         //String upperName = itemToBuy.toUpperCase().charAt(0) + itemToBuy.substring(1);
         RSItemDefinition item = Definitions.getItem(itemToBuy, x -> !x.isNoted());
         try {
-            int price = ExPriceCheck.getAccurateRSPrice(item.getId());
+            int price = ExPriceCheck.getOSBuddyBuyPrice(item.getId(), true);
             if (price < 1) {
-                price = ExPriceCheck.getAccurateRSPrice(item.getId());
+                price = ExPriceCheck.getRSBuddyBuyPrice(item.getId(), true);
             }
             if (price < 1) {
                 price = Inventory.getCount(true, 995) / 2;
             }
             return price + (int) (price * .15);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            Log.severe(e.getMessage());
             e.printStackTrace();
         }
         return 0;

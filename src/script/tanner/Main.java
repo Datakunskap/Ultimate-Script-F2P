@@ -13,14 +13,13 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.event.types.RenderEvent;
 import org.rspeer.ui.Log;
 import script.Beggar;
+import script.beg.StartOther;
 import script.data.MuleArea;
 import script.tanner.data.Location;
 import script.tanner.tasks.*;
 import script.tanner.ui.Gui;
-import script.beg.StartOther;
 
 import java.awt.*;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.Duration;
 
@@ -132,37 +131,41 @@ public class Main {
         {
             try {
                 Log.info("Setting prices");
-                leatherPrice = ExPriceCheck.getAccurateRSPrice(LEATHER);
-                cowhidePrice = ExPriceCheck.getAccurateRSPrice(COWHIDE);
-                Log.fine("Using OSRS Graph prices");
-            } catch (IOException e) {
-                Log.severe("Failed getting OSRS price");
+                leatherPrice = ExPriceCheck.getOSBuddySellPrice(LEATHER, refresh);
+                cowhidePrice = ExPriceCheck.getOSBuddyBuyPrice(COWHIDE, refresh);
+                Log.fine("Using OSBuddy prices");
+            } catch (Exception e) {
+                Log.severe("Failed getting OSBuddy price");
                 e.printStackTrace();
             } finally {
                 try {
                     for (int i = 0; leatherPrice < 70 && i < 3; i++) {
-                        if (i == 0)
-                            leatherPrice = ExPriceCheck.getRSPrice(LEATHER);
+                        if (i == 0) {
+                            try { leatherPrice = ExPriceCheck.getAccurateRSPrice(LEATHER); }
+                            catch (Exception ignored) {}
+                        }
                         if (i == 1)
-                            leatherPrice = ExPriceCheck.getOSBuddySellPrice(LEATHER, refresh);
-                        if (i == 2)
                             leatherPrice = ExPriceCheck.getRSBuddySellPrice(LEATHER, refresh);
+                        if (i == 2)
+                            leatherPrice = ExPriceCheck.getRSPrice(LEATHER);
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     beggar.writeToErrorFile("Failed getting sell price");
                 }
 
                 try {
                     for (int i = 0; cowhidePrice < 50 && i < 3; i++) {
-                        if (i == 0)
-                            cowhidePrice = ExPriceCheck.getRSPrice(COWHIDE);
+                        if (i == 0) {
+                            try { cowhidePrice = ExPriceCheck.getAccurateRSPrice(COWHIDE); }
+                            catch (Exception ignored) {}
+                        }
                         if (i == 1)
-                            cowhidePrice = ExPriceCheck.getOSBuddyBuyPrice(COWHIDE, refresh);
-                        if (i == 2)
                             cowhidePrice = ExPriceCheck.getRSBuddyBuyPrice(COWHIDE, refresh);
+                        if (i == 2)
+                            cowhidePrice = ExPriceCheck.getRSPrice(COWHIDE);
                     }
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     beggar.writeToErrorFile("Failed getting buy price");
 
                 } finally {
