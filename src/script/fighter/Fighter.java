@@ -19,6 +19,7 @@ import script.fighter.backgroundTasks.TargetChecker;
 import script.fighter.config.Config;
 import script.fighter.config.ProgressiveSet;
 import script.fighter.debug.LogLevel;
+import script.fighter.debug.Logger;
 import script.fighter.framework.BackgroundTaskExecutor;
 import script.fighter.framework.Node;
 import script.fighter.framework.NodeManager;
@@ -26,6 +27,7 @@ import script.fighter.models.Progressive;
 import script.fighter.nodes.combat.CombatListener;
 import script.fighter.paint.CombatPaintRenderer;
 import script.fighter.paint.ScriptPaint;
+import script.fighter.wrappers.OgressWrapper;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -98,6 +100,32 @@ public class Fighter {
         }
     }
 
+    private void setupOgressProgressive() {
+        Progressive p = new Progressive();
+        p.setName("Ogress Killer");
+        p.setStyle(Combat.AttackStyle.CASTING);
+        p.setSkill(Skill.MAGIC);
+        HashMap<EquipmentSlot, String> map = new HashMap<>();
+        map.put(EquipmentSlot.MAINHAND, "staff of fire");
+        p.setEquipmentMap(map);
+        HashSet<String> runes = new HashSet<>();
+        runes.add("air rune");
+        runes.add("mind rune");
+        p.setRunes(runes);
+        p.setSpell(Spell.Modern.FIRE_STRIKE);
+        HashSet<String> enemies = new HashSet<>();
+        p.setEnemies(enemies);
+        HashSet<String> loot = new HashSet<>();
+        p.setLoot(loot);
+        p.setPrioritizeLooting(false);
+        p.setBuryBones(false);
+        p.setPosition(OgressWrapper.TOCK_QUEST_POSITION);
+        p.setRadius(Random.low(1, 3));
+        p.setRandomIdle(false);
+        p.setMinimumLevel(13);
+        ProgressiveSet.add(p);
+    }
+
     private void setupMagicProgressive() {
         Progressive progressive = new Progressive();
         progressive.setName("Train Magic");
@@ -147,12 +175,15 @@ public class Fighter {
 
         Progressive progressive2 = new Progressive();
         progressive2.copy(progressive);
-        enemies.add("goblin");
-        progressive2.setEnemies(enemies);
+        progressive2.setName("Train Magic 2");
+        HashSet<String> e2 = new HashSet<>();
+        e2.addAll(enemies);
+        e2.add("goblin");
+        progressive2.setEnemies(e2);
         if (Beggar.randInt(0, 1) == 0) {
-            progressive.setPosition(new Position(3248, 3237)); //Lumbridge east river lum
+            progressive2.setPosition(new Position(3248, 3237)); //Lumbridge east river lum
         } else {
-            progressive.setPosition(new Position(3188, 3277)); //Lumbridge chickens (small)
+            progressive2.setPosition(new Position(3188, 3277)); //Lumbridge chickens (small)
         }
         progressive2.setMinimumLevel(switchLvl);
         progressive2.setMaximumLevel(13);
@@ -306,19 +337,25 @@ public class Fighter {
 
     private void setupNodes() {
 
-        beggar.submit(
-                supplier.EAT,
-                supplier.GET_FOOD,
-                supplier.DEPOSIT_LOOT,
-                supplier.LOOT,
-                supplier.PROGRESSION_CHECKER,
-                supplier.BURY_BONES,
-                supplier.IDLE,
-                supplier.SELL_GE,
-                supplier.BUY_GE,
-                supplier.FIGHT,
-                supplier.BACK_TO_FIGHT
-        );
+        if (Beggar.OGRESS) {
+            beggar.submit(supplier.GO_TO_COVE);
+        } else {
+            beggar.submit(
+                    supplier.EAT,
+                    supplier.GET_FOOD,
+                    supplier.DEPOSIT_LOOT,
+                    supplier.LOOT,
+                    supplier.PROGRESSION_CHECKER,
+                    supplier.BURY_BONES,
+                    supplier.IDLE,
+                    supplier.SELL_GE,
+                    supplier.BUY_GE,
+                    supplier.FIGHT,
+                    supplier.BACK_TO_FIGHT,
+                    supplier.OGRESS,
+                    supplier.SPLASH
+            );
+        }
     }
 
     private void setBackgroundTasks() {
@@ -343,7 +380,7 @@ public class Fighter {
         }
 
         if (!scriptStopping) {
-            beggar.restartBeggar();
+            beggar.startBeggar(0);
         }
         //super.onStop();
     }
@@ -405,6 +442,14 @@ public class Fighter {
                 CombatStore.resetTargetingValues();
             }
         }
+    }
+
+    public void invalidateTask(Node curr) {
+        if (active != null && !curr.equals(active)) {
+            Logger.debug("Node has changed.");
+            active.onInvalid();
+        }
+        setActive(curr);
     }
 
     private void invalidateNodes() {

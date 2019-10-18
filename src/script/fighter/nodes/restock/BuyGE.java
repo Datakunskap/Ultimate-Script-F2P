@@ -84,10 +84,14 @@ public class BuyGE extends Node {
         invalidateTask(main.getActive());
 
         if (!Location.GE_AREA.getBegArea().contains(Players.getLocal())) {
+            status = "Walking to GE";
+            if (!GEWrapper.isSellItems()) {
+                Log.fine("Selling Loot");
+                GEWrapper.setSellItems(true);
+            }
             if (!Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition())) {
                 handleObstacles();
             }
-            status = "Walking to GE";
             return Fighter.getLoopReturn();
         }
 
@@ -115,7 +119,7 @@ public class BuyGE extends Node {
         if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
             if (!Inventory.contains(itemToBuy) || Inventory.getCount(true, itemToBuy) < quantity) {
                 if (ExGrandExchange.buy(itemToBuy, quantity, getPrice(), false)) {
-                    if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemName().toLowerCase().equals(itemToBuy)) != null, 8000)) {
+                    if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemName().toLowerCase().equals(itemToBuy)) != null, 1000, 8000)) {
                         Logger.debug("Buying: " + itemToBuy);
                         if (runesIterator.hasNext()) {
                             itemToBuy = runesIterator.next();
@@ -160,13 +164,17 @@ public class BuyGE extends Node {
 
     private int getQuantity(Progressive p, String item) {
         if (p.isSplash() && p.getRunes().contains(item)) {
-            return Config.getSplashStartAmnt(false) / 12;
+            return Config.getSplashStartAmnt(false) / (getPrice() * 2);
         }
         if (p.isSplash() && Arrays.asList(Config.getSplashGear(false)).contains(item)) {
             return 1;
         }
         if (spell.equals(Spell.Modern.WIND_STRIKE) && p.getRunes().contains(item)) {
-            return Random.low(35, 55);
+            int amnt = Inventory.getCount(true, "Coins") / (getPrice() * 2);
+            if (amnt <= 50) {
+                return amnt;
+            }
+            return Random.mid(35, 50);
         }
         if (spell.equals(Spell.Modern.FIRE_STRIKE) && p.getRunes().contains(item)) {
             return Random.low(300, 400);

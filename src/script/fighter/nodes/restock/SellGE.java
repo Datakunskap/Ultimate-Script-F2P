@@ -35,16 +35,15 @@ public class SellGE extends Node {
 
     @Override
     public boolean validate() {
-        if (!GEWrapper.getSellItems())
+        if (!GEWrapper.isSellItems())
             return false;
 
         if (!Location.GE_AREA.containsPlayer()) {
-            GEWrapper.setSellItems(false);
             itemsToSell = null;
             return false;
         }
 
-        if (GEWrapper.getSellItems() && itemsToSell == null) {
+        if (GEWrapper.isSellItems() && itemsToSell == null) {
             BankWrapper.openAndDepositAll(true);
             BankWrapper.withdrawSellableItems();
 
@@ -53,12 +52,12 @@ public class SellGE extends Node {
             if (sellableItems != null && sellableItems.length > 0) {
                 itemsToSell = sellableItems;
                 return true;
+            } else {
+                Log.severe("Nothing To Sell");
+                Bank.close();
+                GEWrapper.setSellItems(false);
+                return false;
             }
-
-            Log.severe("Not Enough GP -->");
-            Bank.close();
-            Beggar.OGRESS = false;
-            return false;
         }
 
         if (itemsLeftToSell() || GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.SELL)) {

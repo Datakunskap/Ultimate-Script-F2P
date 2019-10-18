@@ -15,7 +15,7 @@ public class Config {
     private static Progressive NULL_SAFE_PROGRESSIVE = new Progressive();
     private static final String[] SPLASH_GEAR = new String[]{"cursed goblin staff",
             "bronze platebody", "bronze full helm", "bronze platelegs", "bronze kiteshield"};
-    private static final Area SPLASH_AREA = Area.rectangular(3010, 3187, 3020, 3182);;
+    private static final Area SPLASH_AREA = Area.rectangular(3010, 3187, 3020, 3182);
 
     public static Progressive getProgressive() {
         Progressive curr = ProgressiveSet.getCurrent();

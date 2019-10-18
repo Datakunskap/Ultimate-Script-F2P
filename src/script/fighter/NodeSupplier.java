@@ -3,6 +3,7 @@ package script.fighter;
 import script.fighter.framework.Node;
 import script.fighter.nodes.combat.BackToFightZone;
 import script.fighter.nodes.combat.FightNode;
+import script.fighter.nodes.combat.Splash;
 import script.fighter.nodes.food.EatNode;
 import script.fighter.nodes.food.GetFoodNode;
 import script.fighter.nodes.idle.IdleNode;
@@ -12,6 +13,8 @@ import script.fighter.nodes.loot.LootNode;
 import script.fighter.nodes.progressive.ProgressionChecker;
 import script.fighter.nodes.restock.BuyGE;
 import script.fighter.nodes.restock.SellGE;
+import script.fighter.ogress.GoToCove;
+import script.fighter.ogress.Ogress;
 
 public class NodeSupplier {
 
@@ -27,6 +30,9 @@ public class NodeSupplier {
         FIGHT = new FightNode(main);
         BUY_GE = new BuyGE(main);
         SELL_GE = new SellGE(main);
+        SPLASH = new Splash(main);
+        OGRESS = new Ogress(main);
+        GO_TO_COVE = new GoToCove(main);
     }
 
     public final Node EAT;
@@ -40,6 +46,9 @@ public class NodeSupplier {
     public final Node FIGHT;
     public final Node BUY_GE;
     public final Node SELL_GE;
+    public final Node SPLASH;
+    public final Node OGRESS;
+    public final Node GO_TO_COVE;
 
     public Node[] getTasks() {
         Node[] tasks = new Node[]{
@@ -53,7 +62,10 @@ public class NodeSupplier {
                 FIGHT,
                 BACK_TO_FIGHT,
                 BUY_GE,
-                SELL_GE
+                SELL_GE,
+                SPLASH,
+                OGRESS,
+                GO_TO_COVE
         };
 
         return tasks;

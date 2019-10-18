@@ -20,7 +20,7 @@ public class GEWrapper {
 
     public static void setSellItems(boolean needSellItems) { GEWrapper.needSellItems = needSellItems; }
 
-    public static boolean getSellItems() { return needSellItems; }
+    public static boolean isSellItems() { return needSellItems; }
 
     public static void openGE() {
         Npc n = Npcs.getNearest(x -> x != null && x.getName().contains("Grand Exchange Clerk"));

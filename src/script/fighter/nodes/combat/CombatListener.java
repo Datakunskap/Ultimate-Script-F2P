@@ -91,7 +91,9 @@ public class CombatListener {
         else if(e.getMessage().toLowerCase().contains("reach that!")) {
             Config.getProgressive().setPosition(Config.getProgressive().getPosition()
                     .translate(Random.nextInt(-1, 1), Random.nextInt(-1, 1)));
+
             CombatStore.resetTargetingValues();
+            Splash.setShiftPosition(true);
         }
         else if(e.getMessage().toLowerCase().contains("the door seems to be stuck")) {
             CombatStore.resetTargetingValues();

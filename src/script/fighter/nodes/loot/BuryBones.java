@@ -29,7 +29,8 @@ public class BuryBones extends Node {
 
     @Override
     public int execute() {
-        //Log.info("Burying Bones");
+        main.invalidateTask(this);
+
         if(bones == null) {
             return Fighter.getLoopReturn();
         }
@@ -44,4 +45,5 @@ public class BuryBones extends Node {
     public String status() {
         return "Burying Bones";
     }
+
 }

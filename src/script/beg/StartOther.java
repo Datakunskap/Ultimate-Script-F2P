@@ -3,7 +3,7 @@ package script.beg;
 import org.rspeer.runetek.api.Worlds;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.WorldHopper;
-import org.rspeer.runetek.api.component.tab.Inventory;
+import org.rspeer.runetek.api.component.tab.*;
 import org.rspeer.runetek.providers.RSWorld;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
@@ -112,6 +112,7 @@ public class StartOther extends Task {
             if (main.isMuling) {
                 Mule.logoutMule();
             }
+            unequipAll(true);
             tanner.start();
             return 5000;
         }
@@ -131,6 +132,33 @@ public class StartOther extends Task {
             return 5000;
         }
         return 1000;
+    }
+
+    private void unequipAll(boolean dropAll) {
+        Tabs.open(Tab.EQUIPMENT);
+        Time.sleep(2000, 2500);
+        EquipmentSlot[] equipped = Equipment.getOccupiedSlots();
+        String[] itemNames = new String[10];
+        int i = 0;
+
+        for (EquipmentSlot slot : equipped) {
+            slot.unequip();
+            itemNames[i++] = slot.getItemName();
+            Time.sleep(1500, 2000);
+        }
+
+        if (dropAll) {
+            dropAllEquipment(itemNames);
+        }
+    }
+
+    private void dropAllEquipment(String[] itemNames) {
+        Tabs.open(Tab.INVENTORY);
+        Time.sleep(2000, 2500);
+        for (String name : itemNames) {
+            Inventory.getFirst(name).interact("Drop");
+            Time.sleep(1500, 2000);
+        }
     }
 
     public static void hopToLowPopWorld(int pop, int currWorld) {

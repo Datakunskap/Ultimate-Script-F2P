@@ -31,7 +31,7 @@ public class Main {
     // Decrease selling GP per leather
     public int subLeatherPrice = 5;
     // Time(min) to increase/decrease price
-    public int resetGeTime = 5;
+    public int resetGeTime = 3;
     // Amount to increase/decrease each interval
     public int intervalAmnt = 5;
     // Kill cows restock option

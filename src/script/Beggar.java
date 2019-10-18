@@ -128,6 +128,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public int idleBegNum = randInt(50, 70);
     public Fighter fighter;
     public int nextBotWorld;
+    public int begUntilGp;
 
     private static final String PROXY_IP = null;//"108.187.189.123";
     private static final String PROXY_USER = null;//"qLo741";
@@ -231,7 +232,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         fighter.onStart();
     }
 
-    public void restartBeggar() {
+    public void startBeggar(int begUntilGp) {
         removeAll();
 
         banked = false;
@@ -246,6 +247,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         isMuling = false;
         startTime = (worldHop || worldHopf2p) ? System.currentTimeMillis() : 0;
         startupChecks = false;
+        this.begUntilGp = begUntilGp;
 
         resetRender();
 
