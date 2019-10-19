@@ -9,6 +9,7 @@ import org.rspeer.runetek.api.component.tab.Spell;
 import org.rspeer.runetek.api.component.tab.Tab;
 import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.runetek.api.movement.Movement;
+import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.scene.Players;
 import script.fighter.CombatStore;
 import script.fighter.Fighter;
@@ -26,6 +27,7 @@ public class FightNode extends Node {
     private String status;
     private boolean running;
     private Spell spell;
+    private static final Area RESTRICTED_AREA = Area.rectangular(3187, 3363, 3199, 3351);;
 
     private Fighter main;
 
@@ -45,7 +47,7 @@ public class FightNode extends Node {
             return false;
 
         NpcResult target = CombatStore.getCurrentTarget();
-        if(target != null) {
+        if(target != null && !RESTRICTED_AREA.contains(target.getNpc())) {
             return true;
         }
         if(Config.getProgressive().isPrioritizeLooting()) {
@@ -58,7 +60,7 @@ public class FightNode extends Node {
         }
         status = "Looking for target.";
         NpcResult res = CombatWrapper.findTarget(false);
-        if(res == null || res.getNpc() == null) {
+        if(res == null || res.getNpc() == null || RESTRICTED_AREA.contains(res.getNpc())) {
             status = "No targets around me, waiting...";
             return false;
         }
