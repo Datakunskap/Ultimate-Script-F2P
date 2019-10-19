@@ -53,8 +53,8 @@ public class BuyGE extends Node {
         HashSet<String> items = p.getRunes();
         spell = p.getSpell();
 
-        if (Inventory.contains(i -> i.getName().equals("Coins") && i.getStackSize() >= Config.getSplashStartAmnt(true)) &&
-                Skills.getLevel(Skill.MAGIC) < 13) {
+        if (spell != null && Inventory.contains(i -> i.getName().equals("Coins") &&
+                i.getStackSize() >= Config.getSplashStartAmnt(true)) && Skills.getLevel(Skill.MAGIC) < 13) {
             Log.fine("Splash Time!");
             p.setSplash(true);
         }
