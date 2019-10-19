@@ -74,6 +74,7 @@ public class Fighter {
             beggar.isFighterRunning = true;
             if (Beggar.OGRESS) {
                 setupMagicProgressive();
+                setupOgressProgressive();
                 //setupLesserDemonProgressive();
             } else {
                 setupDefaultProgressive("chicken");
@@ -338,7 +339,9 @@ public class Fighter {
     private void setupNodes() {
 
         if (Beggar.OGRESS) {
-            beggar.submit(supplier.GO_TO_COVE);
+            beggar.submit(
+                    supplier.OGRESS,
+                    supplier.GO_TO_COVE);
         } else {
             beggar.submit(
                     supplier.EAT,

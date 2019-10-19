@@ -403,7 +403,7 @@ public class dqw4w9wgxcq extends Task {
             }
         }
 
-        return Random.high(800, 2500);
+        return Random.high(800, 3000);
     }
 
     private boolean randWalker(int chanceIn100, int distance) {

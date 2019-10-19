@@ -142,11 +142,11 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final String BEG_LINES_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\BegLines.txt";
     private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\Runescape-Account-Generator-2.0.jar";
 
-    public static final String MULE_NAME = "IBear115";
+    public static final String MULE_NAME = "jkemllr";
     public static final MuleArea MULE_AREA = MuleArea.COOKS_GUILD;
-    public static final int MULE_WORLD = 393;
+    public static final int MULE_WORLD = 454;
     public static final boolean MULE_ITEMS = false;
-    public static final int MUTED_MULE_AMNT = 25000;
+    public static final int MUTED_MULE_AMNT = 30000;
     public static final int ALLOWED_INSTANCES = 8;
     public static final String API_KEY = "JV5ML4DE4M9W8Z5KBE00322RDVNDGGMTMU1EH9226YCVGFUBE6J6OY1Q2NJ0RA8YAPKO70";
     public static final int NUM_BACKLOG_ACCOUNTS = 15;

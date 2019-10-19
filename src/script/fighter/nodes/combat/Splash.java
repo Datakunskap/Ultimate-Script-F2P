@@ -60,7 +60,7 @@ public class Splash extends Node {
             Log.info("Manual cast");
             if (!Magic.cast(spell, npc) || shiftPosition) {
                 Log.info("Shifting position");
-                Movement.walkTo(npc.getPosition().translate(Random.nextInt(-1, 1), Random.nextInt(-1, 1)));
+                Movement.walkTo(Players.getLocal().getPosition().translate(Random.nextInt(-1, 1), Random.nextInt(-1, 1)));
                 shiftPosition = false;
             }
         } else if (npc == null){

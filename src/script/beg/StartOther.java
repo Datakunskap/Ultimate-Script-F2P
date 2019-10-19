@@ -11,6 +11,7 @@ import script.Beggar;
 import script.chocolate.Main;
 
 import java.time.Duration;
+import java.util.HashSet;
 
 public class StartOther extends Task {
 
@@ -138,12 +139,11 @@ public class StartOther extends Task {
         Tabs.open(Tab.EQUIPMENT);
         Time.sleep(2000, 2500);
         EquipmentSlot[] equipped = Equipment.getOccupiedSlots();
-        String[] itemNames = new String[10];
-        int i = 0;
+        HashSet<String> itemNames = new HashSet<>();
 
         for (EquipmentSlot slot : equipped) {
+            itemNames.add(slot.getItemName());
             slot.unequip();
-            itemNames[i++] = slot.getItemName();
             Time.sleep(1500, 2000);
         }
 
@@ -152,7 +152,7 @@ public class StartOther extends Task {
         }
     }
 
-    private void dropAllEquipment(String[] itemNames) {
+    private void dropAllEquipment(HashSet<String> itemNames) {
         Tabs.open(Tab.INVENTORY);
         Time.sleep(2000, 2500);
         for (String name : itemNames) {

@@ -13,8 +13,8 @@ import script.fighter.nodes.loot.LootNode;
 import script.fighter.nodes.progressive.ProgressionChecker;
 import script.fighter.nodes.restock.BuyGE;
 import script.fighter.nodes.restock.SellGE;
-import script.fighter.ogress.GoToCove;
-import script.fighter.ogress.Ogress;
+import script.fighter.nodes.ogress.GoToCove;
+import script.fighter.nodes.ogress.Ogress;
 
 public class NodeSupplier {
 

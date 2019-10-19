@@ -1,4 +1,4 @@
-package script.fighter.ogress;
+package script.fighter.nodes.ogress;
 
 import org.rspeer.runetek.adapter.component.Item;
 import org.rspeer.runetek.adapter.scene.Npc;
@@ -15,7 +15,6 @@ import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Pickables;
 import org.rspeer.runetek.api.scene.Players;
 import script.fighter.Fighter;
-import script.fighter.config.Config;
 import script.fighter.debug.Logger;
 import script.fighter.framework.Node;
 import script.fighter.wrappers.OgressWrapper;
@@ -56,9 +55,10 @@ public class Ogress extends Node {
 
         if (invBones != null)
             invBones.interact("Bury");
-        if(!Config.hasRunes()){
+        if(Inventory.getCount(true, "Air rune") < 2 ||
+                Inventory.getCount(true, "Mind rune") < 1 ){
             Logger.debug("Out of runes");
-            Movement.walkToRandomized(docks);
+            Movement.walkTo(docks);
             return 5000;
         }
 
@@ -96,7 +96,7 @@ public class Ogress extends Node {
             }
 
         }
-        if (docks3.contains(Tzhaar3)  && looting == false){
+        if (docks3.contains(Tzhaar3)  && !looting){
             if (!docks4.equals(me.getPosition())) {
                 Movement.walkTo(docks4);
                 Time.sleep(800, 4050);

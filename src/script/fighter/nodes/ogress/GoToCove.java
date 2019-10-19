@@ -1,4 +1,4 @@
-package script.fighter.ogress;
+package script.fighter.nodes.ogress;
 
 import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.api.component.Dialog;
@@ -19,7 +19,8 @@ public class GoToCove extends Node {
 
     @Override
     public boolean validate() {
-        return !OgressWrapper.CORSAIR_COVE.contains(Players.getLocal()) &&
+        return !OgressWrapper.CORSAIR_COVE[0].contains(Players.getLocal()) &&
+                !OgressWrapper.CORSAIR_COVE[1].contains(Players.getLocal()) &&
                 !OgressWrapper.CORSAIR_COVE_DUNGEON.contains(Players.getLocal());
     }
 
@@ -45,7 +46,9 @@ public class GoToCove extends Node {
                 talkToTock(OgressWrapper.TOCK_BOAT_TO_COVE_POSITION);
 
             } else if (Dialog.isViewingChatOptions()) {
-                Dialog.process("Okay, I'm ready go to Corsair Cove.");
+                Dialog.process("Okay, I'm ready go to Corsair Cove.",
+                                        "Let's go.");
+                //if (Dialog.isViewingChatOptions() && Dialog.getChatOption(o -> o.contains("back to Rimmington.")) != null)
             }
         }
         return 1000;
