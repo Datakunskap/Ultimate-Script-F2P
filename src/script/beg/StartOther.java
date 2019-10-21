@@ -3,15 +3,16 @@ package script.beg;
 import org.rspeer.runetek.api.Worlds;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.WorldHopper;
-import org.rspeer.runetek.api.component.tab.*;
+import org.rspeer.runetek.api.component.tab.Inventory;
+import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.providers.RSWorld;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.chocolate.Main;
+import script.fighter.wrappers.OgressWrapper;
 
 import java.time.Duration;
-import java.util.HashSet;
 
 public class StartOther extends Task {
 
@@ -113,7 +114,7 @@ public class StartOther extends Task {
             if (main.isMuling) {
                 Mule.logoutMule();
             }
-            unequipAll(true);
+            OgressWrapper.unequipAll(true);
             tanner.start();
             return 5000;
         }
@@ -135,32 +136,6 @@ public class StartOther extends Task {
         return 1000;
     }
 
-    private void unequipAll(boolean dropAll) {
-        Tabs.open(Tab.EQUIPMENT);
-        Time.sleep(2000, 2500);
-        EquipmentSlot[] equipped = Equipment.getOccupiedSlots();
-        HashSet<String> itemNames = new HashSet<>();
-
-        for (EquipmentSlot slot : equipped) {
-            itemNames.add(slot.getItemName());
-            slot.unequip();
-            Time.sleep(1500, 2000);
-        }
-
-        if (dropAll) {
-            dropAllEquipment(itemNames);
-        }
-    }
-
-    private void dropAllEquipment(HashSet<String> itemNames) {
-        Tabs.open(Tab.INVENTORY);
-        Time.sleep(2000, 2500);
-        for (String name : itemNames) {
-            Inventory.getFirst(name).interact("Drop");
-            Time.sleep(1500, 2000);
-        }
-    }
-
     public static void hopToLowPopWorld(int pop, int currWorld) {
         RSWorld newWorld = Worlds.get(x -> x != null && x.getPopulation() <= pop &&
                 !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
@@ -171,6 +146,6 @@ public class StartOther extends Task {
             hopToLowPopWorld(pop + 100, currWorld);
         }
 
-        Time.sleepUntil(() -> Worlds.getCurrent() != currWorld, 12000);
+        Time.sleepUntil(() -> Worlds.getCurrent() != currWorld && Players.getLocal() != null, 12000);
     }
 }

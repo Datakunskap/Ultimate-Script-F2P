@@ -10,6 +10,7 @@ import org.rspeer.runetek.event.types.ChatMessageType;
 import org.rspeer.runetek.event.types.DeathEvent;
 import org.rspeer.runetek.event.types.TargetEvent;
 import org.rspeer.ui.Log;
+import script.Beggar;
 import script.fighter.CombatStore;
 import script.fighter.NodeSupplier;
 import script.fighter.Stats;
@@ -91,13 +92,13 @@ public class CombatListener {
         else if(e.getMessage().toLowerCase().contains("reach that!")) {
             Config.getProgressive().setPosition(Config.getProgressive().getPosition()
                     .translate(Random.nextInt(-1, 1), Random.nextInt(-1, 1)));
-
             CombatStore.resetTargetingValues();
             Splash.setShiftPosition(true);
         }
         else if(e.getMessage().toLowerCase().contains("the door seems to be stuck")) {
             CombatStore.resetTargetingValues();
             LootNode.setStuckLooting(true);
+            CombatStore.setCurrentTarget(null);
         }
     }
 
@@ -105,8 +106,10 @@ public class CombatListener {
         PathingEntity source = e.getSource();
         if (source.equals(Players.getLocal())) {
             Log.info("You Died");
-            Progressive p = ProgressiveSet.getCurrent();
-            p.setEquipmentMap(new HashMap<>());
+            if (!Beggar.OGRESS) {
+                Progressive p = ProgressiveSet.getCurrent();
+                p.setEquipmentMap(new HashMap<>());
+            }
         }
         NpcResult current = CombatStore.getCurrentTarget();
         if(current != null && source.equals(current.getNpc())) {

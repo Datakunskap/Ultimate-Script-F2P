@@ -256,7 +256,7 @@ public class Gui extends Task {
                     s = br.readLine();
                 }
                 readLines = sb.toString();
-                Log.fine("Lines loaded");
+                //Log.fine("Lines loaded");
                 br.close();
             } catch (IOException e) {
                 Log.info("File not found");

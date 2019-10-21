@@ -20,6 +20,7 @@ import script.fighter.framework.Node;
 import script.fighter.models.NpcResult;
 import script.fighter.services.LootService;
 import script.fighter.wrappers.CombatWrapper;
+import script.fighter.wrappers.GEWrapper;
 
 public class FightNode extends Node {
 
@@ -43,7 +44,7 @@ public class FightNode extends Node {
     @Override
     public boolean validate() {
         spell = Config.getProgressive().getSpell();
-        if (spell != null && !Config.hasRunes())
+        if (spell != null && !GEWrapper.hasRunes(spell))
             return false;
 
         NpcResult target = CombatStore.getCurrentTarget();

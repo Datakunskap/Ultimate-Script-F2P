@@ -14,7 +14,7 @@ import org.rspeer.ui.Log;
 import script.Beggar;
 import script.beg.TradePlayer;
 import script.fighter.Fighter;
-import script.fighter.debug.Logger;
+import script.fighter.config.Config;
 import script.fighter.framework.Node;
 import script.fighter.wrappers.BankWrapper;
 import script.fighter.wrappers.GEWrapper;
@@ -27,7 +27,7 @@ public class SellGE extends Node {
     private InterfaceComponent restrictedMsg = Interfaces.getComponent(465, 25);
     private String status;
     private Fighter main;
-    private boolean stopping;
+    private int gpStart;
 
     public SellGE(Fighter main) {
         this.main = main;
@@ -44,14 +44,16 @@ public class SellGE extends Node {
         }
 
         if (GEWrapper.isSellItems() && itemsToSell == null) {
-            BankWrapper.openAndDepositAll(true);
+            BankWrapper.openAndDepositAll(true, Config.getProgressive().getRunes().toArray(new String[0]));
             BankWrapper.withdrawSellableItems();
 
             Item[] sellableItems = Inventory.getItems(i -> i.getId() != 995 &&
-                    i.isExchangeable() && !TradePlayer.isTradeRestrictedItem(i.getName()));
+                    !Config.getProgressive().getRunes().contains(i.getName().toLowerCase()));
             if (sellableItems != null && sellableItems.length > 0) {
                 itemsToSell = sellableItems;
+                gpStart = Inventory.getCount("Coins");
                 return true;
+
             } else {
                 Log.severe("Nothing To Sell");
                 Bank.close();
@@ -72,7 +74,7 @@ public class SellGE extends Node {
 
     @Override
     public int execute() {
-        invalidateTask(main.getActive());
+        main.invalidateTask(main.getActive());
 
         if (!GrandExchange.isOpen()) {
             GEWrapper.openGE();
@@ -84,7 +86,7 @@ public class SellGE extends Node {
             for (int i = 0; i < itemsToSell.length; i++) {
                 if (itemsToSell[i] != null && GrandExchange.getOffers(RSGrandExchangeOffer.Type.SELL).length < 3) {
                     if (ExGrandExchange.sell(itemsToSell[i].getId(), itemsToSell[i].getStackSize(), Beggar.randInt(1, 5), false)) {
-                        status = "Selling: " + itemsToSell[i].getName();
+                        Log.info("Selling: " + itemsToSell[i].getName());
                         final int index = i;
                         if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemId() == itemsToSell[index].getId()) != null,8000)) {
                             itemsToSell[i] = null;
@@ -124,16 +126,9 @@ public class SellGE extends Node {
     @Override
     public void onInvalid() {
         itemsToSell = null;
+        BankWrapper.setAmountGoldGained(Inventory.getCount(true,"Coins") - gpStart);
         GEWrapper.setSellItems(false);
         super.onInvalid();
-    }
-
-    public void invalidateTask(Node active) {
-        if (active != null && !this.equals(active)) {
-            Logger.debug("Node has changed.");
-            active.onInvalid();
-        }
-        main.setActive(this);
     }
 
     @Override

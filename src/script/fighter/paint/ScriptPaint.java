@@ -1,16 +1,15 @@
 package script.fighter.paint;
 
-import org.rspeer.runetek.api.component.tab.Combat;
 import org.rspeer.runetek.event.listeners.RenderListener;
 import org.rspeer.runetek.event.types.RenderEvent;
 import script.fighter.CombatStore;
 import script.fighter.Fighter;
 import script.fighter.Stats;
-import script.fighter.config.Config;
 import script.fighter.config.ProgressiveSet;
 import script.fighter.framework.Node;
 import script.fighter.models.Progressive;
 import script.fighter.nodes.idle.IdleNode;
+import script.fighter.wrappers.BankWrapper;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -62,13 +61,12 @@ public final class ScriptPaint implements RenderListener {
         stats.put("Targeting Me", new PaintStatistic(() -> {
             return String.valueOf(CombatStore.getTargetingMe().size());
         }));
-        stats.put("Attack Style", new PaintStatistic(() -> {
-            Combat.AttackStyle style = Combat.getAttackStyle();
-            return style.getName();
+        stats.put("GP Gained", new PaintStatistic(() -> {
+            return "" + BankWrapper.getAmountGoldGained();
         }));
-        stats.put("Prioritize Loot", new PaintStatistic(() -> {
+        /*stats.put("Prioritize Loot", new PaintStatistic(() -> {
            return String.valueOf(Config.getProgressive().isPrioritizeLooting());
-        }));
+        }));*/
         stats.put("Idle", new PaintStatistic(() -> {
            IdleNode node = (IdleNode) context.getSupplier().IDLE;
             String length = node.getIdleFor() + "s";

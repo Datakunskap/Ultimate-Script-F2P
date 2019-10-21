@@ -24,9 +24,6 @@ public class BackToFightZone extends Node {
 
     @Override
     public boolean validate() {
-        if (Config.getProgressive().isSplash() && !Config.getSplashArea().contains(Players.getLocal())) {
-            return true;
-        }
         if (Players.getLocal().distance(Config.getStartingTile()) > Config.getRadius()) {
             return true;
         }
@@ -38,14 +35,6 @@ public class BackToFightZone extends Node {
         invalidateTask(main.getActive());
         if (!Game.isLoggedIn() || Players.getLocal() == null)
             return 2000;
-
-        if (Config.getProgressive().isSplash()) {
-            Logger.debug("Walking to: Splash Area");
-            if (shouldEnableRun()) {
-                enableRun();
-            }
-            Movement.walkToRandomized(Config.getSplashArea().getCenter());
-        }
 
         //Log.info("Walking back to fight zone.");
         if(startTileRandom == null) {

@@ -23,13 +23,13 @@ public class CheckInstances {
     public boolean validate() {
         try {
             runningClients = BotManagement.getRunningClients();
-            Log.fine(runningClients.size() + " Clients Running");
+            Log.fine(runningClients.size() + " / " + Beggar.ALLOWED_INSTANCES + " Clients Running");
 
             for (int t = 0; t < 2; t++) {
                 if (runningClients.size() < Beggar.ALLOWED_INSTANCES) {
                     Time.sleep(10000);
                     runningClients = BotManagement.getRunningClients();
-                    Log.info(runningClients.size() + " Clients Running");
+                    Log.fine(runningClients.size() + " / " + Beggar.ALLOWED_INSTANCES + " Clients Running");
                 }
             }
 

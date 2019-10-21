@@ -28,6 +28,7 @@ import script.fighter.nodes.combat.CombatListener;
 import script.fighter.paint.CombatPaintRenderer;
 import script.fighter.paint.ScriptPaint;
 import script.fighter.wrappers.OgressWrapper;
+import script.fighter.wrappers.SplashWrapper;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -73,9 +74,9 @@ public class Fighter {
         try {
             beggar.isFighterRunning = true;
             if (Beggar.OGRESS) {
-                setupMagicProgressive();
+                setupSplashProgressive();
+                //setupMagicProgressive();
                 setupOgressProgressive();
-                //setupLesserDemonProgressive();
             } else {
                 setupDefaultProgressive("chicken");
             }
@@ -101,6 +102,35 @@ public class Fighter {
         }
     }
 
+    private void setupNodes() {
+
+        if (Beggar.OGRESS) {
+            beggar.submit(
+                    supplier.SELL_GE,
+                    supplier.BUY_GE,
+                    supplier.DEPOSIT_LOOT,
+                    supplier.OGRESS,
+                    supplier.SPLASH,
+                    supplier.GO_TO_COVE);
+        } else {
+            beggar.submit(
+                    supplier.EAT,
+                    supplier.GET_FOOD,
+                    supplier.DEPOSIT_LOOT,
+                    supplier.LOOT,
+                    supplier.PROGRESSION_CHECKER,
+                    supplier.BURY_BONES,
+                    supplier.IDLE,
+                    supplier.SELL_GE,
+                    supplier.BUY_GE,
+                    supplier.FIGHT,
+                    supplier.BACK_TO_FIGHT,
+                    supplier.OGRESS,
+                    supplier.SPLASH
+            );
+        }
+    }
+
     private void setupOgressProgressive() {
         Progressive p = new Progressive();
         p.setName("Ogress Killer");
@@ -116,8 +146,10 @@ public class Fighter {
         p.setSpell(Spell.Modern.FIRE_STRIKE);
         HashSet<String> enemies = new HashSet<>();
         p.setEnemies(enemies);
-        HashSet<String> loot = new HashSet<>();
-        p.setLoot(loot);
+        String[] loot = new String[] {"Iron arrow", "Steel arrow", "Adamant arrow", "Mithril arrow", "Rune med helm", "Rune full helm", "Rune battleaxe", "Shaman mask", "Air rune",
+                "Mind rune", "Water rune", "Earth rune", "Fire rune", "Chaos rune", "Cosmic rune", "Nature rune", "Law rune", "Death rune", "Ranarr seed", "Snapdragon seed", "Torstol seed",
+                "Cadantine seed", "Snape grass seed", "Mithril kiteshield", "Coins", "Uncut diamond", "Uncut ruby"};
+        p.setLoot(new HashSet<>(Arrays.asList(loot)));
         p.setPrioritizeLooting(false);
         p.setBuryBones(false);
         p.setPosition(OgressWrapper.TOCK_QUEST_POSITION);
@@ -125,6 +157,34 @@ public class Fighter {
         p.setRandomIdle(false);
         p.setMinimumLevel(13);
         ProgressiveSet.add(p);
+    }
+
+    private void setupSplashProgressive() {
+        Progressive progressive = new Progressive();
+        progressive.setName("Train Magic: Splash");
+        progressive.setStyle(Combat.AttackStyle.CASTING);
+        progressive.setSkill(Skill.MAGIC);
+        HashSet<String> runes = new HashSet<>();
+        runes.add("air rune");
+        runes.add("mind rune");
+        progressive.setRunes(runes);
+        progressive.setSpell(Spell.Modern.WIND_STRIKE);
+        progressive.setMinimumLevel(1);
+        progressive.setMaximumLevel(13);
+        progressive.setPrioritizeLooting(false);
+        progressive.setPosition(SplashWrapper.getSplashArea().getCenter());
+        progressive.setRadius(3);
+        HashSet<String> enemies = new HashSet<>();
+        enemies.add("mugger");
+        enemies.add("thief");
+        progressive.setEnemies(enemies);
+        progressive.setEquipmentMap(new HashMap<>());
+        progressive.setRandomIdle(false);
+        progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
+        progressive.setSplash(true);
+        progressive.setUseSplashGear(false);
+
+        ProgressiveSet.add(progressive);
     }
 
     private void setupMagicProgressive() {
@@ -238,8 +298,8 @@ public class Fighter {
 
         progressive.setEquipmentMap(map);
 
-        switch (Beggar.randInt(0, 2)) {
-            case 0:
+        switch (Beggar.FIGHTER_TRAIN_SKILL) {
+            case ATTACK:
                 if (map.containsKey(EquipmentSlot.QUIVER)) {
                     progressive.setStyle(Combat.AttackStyle.ACCURATE);
                     //progressive.setSkill(Skill.RANGED);
@@ -248,7 +308,7 @@ public class Fighter {
                     //progressive.setSkill(Skill.ATTACK);
                 }
                 break;
-            case 1:
+            case RANGED: case STRENGTH:
                 if (map.containsKey(EquipmentSlot.QUIVER)) {
                     progressive.setStyle(Combat.AttackStyle.RAPID);
                     //progressive.setSkill(Skill.RANGED);
@@ -257,7 +317,7 @@ public class Fighter {
                     //progressive.setSkill(Skill.STRENGTH);
                 }
                 break;
-            case 2:
+            case DEFENCE:
                 if (map.containsKey(EquipmentSlot.QUIVER)) {
                     progressive.setStyle(Combat.AttackStyle.LONGRANGE);
                     //progressive.setSkill(Skill.DEFENCE);
@@ -266,6 +326,8 @@ public class Fighter {
                     //progressive.setSkill(Skill.DEFENCE);
                 }
                 break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + Beggar.FIGHTER_TRAIN_SKILL);
         }
         progressive.setSkill(Skill.ATTACK);
 
@@ -334,31 +396,6 @@ public class Fighter {
             ProgressiveSet.removeAll();
         }
         ProgressiveSet.add(progressive);
-    }
-
-    private void setupNodes() {
-
-        if (Beggar.OGRESS) {
-            beggar.submit(
-                    supplier.OGRESS,
-                    supplier.GO_TO_COVE);
-        } else {
-            beggar.submit(
-                    supplier.EAT,
-                    supplier.GET_FOOD,
-                    supplier.DEPOSIT_LOOT,
-                    supplier.LOOT,
-                    supplier.PROGRESSION_CHECKER,
-                    supplier.BURY_BONES,
-                    supplier.IDLE,
-                    supplier.SELL_GE,
-                    supplier.BUY_GE,
-                    supplier.FIGHT,
-                    supplier.BACK_TO_FIGHT,
-                    supplier.OGRESS,
-                    supplier.SPLASH
-            );
-        }
     }
 
     private void setBackgroundTasks() {

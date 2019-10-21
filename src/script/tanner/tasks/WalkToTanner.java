@@ -55,11 +55,11 @@ public class WalkToTanner extends Task {
                 Dialog.process(x -> x.toLowerCase().contains("yes"));
                 Time.sleepUntil(Dialog::canContinue, 5000);
 
-                InterfaceComponent fail = Interfaces.getComponent(217, 4);
-                if (fail != null && fail.isVisible() && fail.getText().toLowerCase().contains("oh dear")) {
-                    main.paidToll = true;
-                }
                 while (Dialog.isOpen() && Dialog.canContinue()) {
+                    InterfaceComponent fail = Interfaces.getComponent(217, 4);
+                    if (fail != null && fail.isVisible() && fail.getText().toLowerCase().contains("oh dear")) {
+                        main.paidToll = true;
+                    }
                     Dialog.processContinue();
                     Time.sleep(1000, 2000);
                 }

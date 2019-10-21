@@ -21,7 +21,7 @@ public class CombatWrapper {
         Npc current = CombatStore.getCurrentTargetNpc();
         boolean index = current == null || npc.getIndex() != current.getIndex();
         if(current != null) {
-            Log.fine("Finding npc who is not index: " + current.getIndex());
+            //Log.fine("Finding npc who is not index: " + current.getIndex());
         }
         return index && npc.containsAction("Attack")
                 && names.contains(npc.getName().toLowerCase()) && npc.distance() <= radius && !hasTargetNotMe(npc)
