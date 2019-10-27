@@ -74,14 +74,14 @@ public class SellGE extends Node {
         }
 
         if (itemsToSell == null) {
-            if (!OgressWrapper.has7QuestPoints()) {
+            Progressive p = Config.getProgressive();
+            if (p.isOgress() && !OgressWrapper.has7QuestPoints()) {
                 new QuestingDriver(main.getScript()).startSPXQuesting(Beggar.randInt(20, 30));
             }
 
             BankWrapper.openAndDepositAll(true);
             BankWrapper.withdrawSellableItems();
 
-            Progressive p = Config.getProgressive();
             Item[] sellableItems = Inventory.getItems(i -> i.getId() != 995
                     && !p.getRunes().contains(i.getName().toLowerCase())
                     && (!p.isOgress() || Config.getLoot().contains(i.getName())));
