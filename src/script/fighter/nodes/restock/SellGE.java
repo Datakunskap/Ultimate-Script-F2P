@@ -2,6 +2,7 @@ package script.fighter.nodes.restock;
 
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
 import org.rspeer.runetek.adapter.component.Item;
+import org.rspeer.runetek.adapter.scene.Player;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Bank;
@@ -9,17 +10,19 @@ import org.rspeer.runetek.api.component.GrandExchange;
 import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
+import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.ui.Log;
 import script.Beggar;
 import script.beg.TradePlayer;
+import script.data.Location;
 import script.fighter.Fighter;
+import script.fighter.QuestingDriver;
 import script.fighter.config.Config;
 import script.fighter.framework.Node;
-import script.fighter.wrappers.BankWrapper;
-import script.fighter.wrappers.GEWrapper;
+import script.fighter.models.Progressive;
+import script.fighter.wrappers.*;
 import script.tanner.ExGrandExchange;
-import script.tanner.data.Location;
 
 public class SellGE extends Node {
 
@@ -28,6 +31,7 @@ public class SellGE extends Node {
     private String status;
     private Fighter main;
     private int gpStart;
+    private boolean triedTeleport;
 
     public SellGE(Fighter main) {
         this.main = main;
@@ -38,28 +42,8 @@ public class SellGE extends Node {
         if (!GEWrapper.isSellItems())
             return false;
 
-        if (!Location.GE_AREA.containsPlayer()) {
-            itemsToSell = null;
-            return false;
-        }
-
-        if (GEWrapper.isSellItems() && itemsToSell == null) {
-            BankWrapper.openAndDepositAll(true, Config.getProgressive().getRunes().toArray(new String[0]));
-            BankWrapper.withdrawSellableItems();
-
-            Item[] sellableItems = Inventory.getItems(i -> i.getId() != 995 &&
-                    !Config.getProgressive().getRunes().contains(i.getName().toLowerCase()));
-            if (sellableItems != null && sellableItems.length > 0) {
-                itemsToSell = sellableItems;
-                gpStart = Inventory.getCount("Coins");
-                return true;
-
-            } else {
-                Log.severe("Nothing To Sell");
-                Bank.close();
-                GEWrapper.setSellItems(false);
-                return false;
-            }
+        if (itemsToSell == null) {
+            return true;
         }
 
         if (itemsLeftToSell() || GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.SELL)) {
@@ -74,7 +58,45 @@ public class SellGE extends Node {
 
     @Override
     public int execute() {
-        main.invalidateTask(main.getActive());
+        main.invalidateTask(this);
+        Player me = Players.getLocal();
+
+        if (!Location.GE_AREA_LARGE.getBegArea().contains(me)) {
+            if (!triedTeleport && (OgressWrapper.CORSAIR_COVE[0].contains(me)
+                    || SplashWrapper.getSplashArea().contains(me))) {
+
+                TeleportWrapper.tryTeleport(false);
+                triedTeleport = true;
+            }
+            status = "Walking to GE";
+            GEWrapper.walkToGE();
+            return Fighter.getLoopReturn();
+        }
+
+        if (itemsToSell == null) {
+            if (!OgressWrapper.has7QuestPoints()) {
+                new QuestingDriver(main.getScript()).startSPXQuesting(Beggar.randInt(20, 30));
+            }
+
+            BankWrapper.openAndDepositAll(true);
+            BankWrapper.withdrawSellableItems();
+
+            Progressive p = Config.getProgressive();
+            Item[] sellableItems = Inventory.getItems(i -> i.getId() != 995
+                    && !p.getRunes().contains(i.getName().toLowerCase())
+                    && (!p.isOgress() || Config.getLoot().contains(i.getName())));
+
+            if (sellableItems != null && sellableItems.length > 0) {
+                Log.info("Selling");
+                itemsToSell = sellableItems;
+                gpStart = Inventory.getCount("Coins");
+            } else {
+                Log.severe("Nothing To Sell");
+                Bank.close();
+                GEWrapper.setSellItems(false);
+                return Fighter.getLoopReturn();
+            }
+        }
 
         if (!GrandExchange.isOpen()) {
             GEWrapper.openGE();
@@ -84,8 +106,9 @@ public class SellGE extends Node {
 
         if (itemsLeftToSell()) {
             for (int i = 0; i < itemsToSell.length; i++) {
+                status = "Selling";
                 if (itemsToSell[i] != null && GrandExchange.getOffers(RSGrandExchangeOffer.Type.SELL).length < 3) {
-                    if (ExGrandExchange.sell(itemsToSell[i].getId(), itemsToSell[i].getStackSize(), Beggar.randInt(1, 5), false)) {
+                    if (ExGrandExchange.sell(itemsToSell[i].getId(), itemsToSell[i].getStackSize(), Beggar.randInt(1, 2), false)) {
                         Log.info("Selling: " + itemsToSell[i].getName());
                         final int index = i;
                         if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemId() == itemsToSell[index].getId()) != null,8000)) {
@@ -104,11 +127,11 @@ public class SellGE extends Node {
 
         if (GrandExchange.getOffers(RSGrandExchangeOffer.Type.SELL).length > 0) {
             GrandExchange.collectAll();
-            Time.sleep(Random.low(300, 600));
+            Time.sleep(300, 600);
             Keyboard.pressEnter();
         }
 
-        return Beggar.randInt(800, 1400);
+        return Random.high(600, 1800);
     }
 
     private boolean itemsLeftToSell() {
@@ -125,9 +148,12 @@ public class SellGE extends Node {
 
     @Override
     public void onInvalid() {
+        triedTeleport = false;
         itemsToSell = null;
-        BankWrapper.setAmountGoldGained(Inventory.getCount(true,"Coins") - gpStart);
         GEWrapper.setSellItems(false);
+        Interfaces.closeAll();
+        Time.sleepUntil(() -> !GrandExchange.isOpen() && !Bank.isOpen(), 2000, 6000);
+        BankWrapper.updateInventoryValue();
         super.onInvalid();
     }
 

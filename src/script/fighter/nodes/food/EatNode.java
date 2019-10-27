@@ -41,7 +41,7 @@ public class EatNode extends Node {
 
     @Override
     public int execute() {
-        invalidateTask(main.getActive());
+        main.invalidateTask(this);
 
         Logger.debug("Attempting to eat.");
         if (food == null) {

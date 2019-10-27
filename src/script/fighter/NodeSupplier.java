@@ -10,15 +10,16 @@ import script.fighter.nodes.idle.IdleNode;
 import script.fighter.nodes.loot.BuryBones;
 import script.fighter.nodes.loot.DepositLootNode;
 import script.fighter.nodes.loot.LootNode;
+import script.fighter.nodes.mule.Mule;
 import script.fighter.nodes.progressive.ProgressionChecker;
 import script.fighter.nodes.restock.BuyGE;
 import script.fighter.nodes.restock.SellGE;
-import script.fighter.nodes.ogress.GoToCove;
-import script.fighter.nodes.ogress.Ogress;
+import script.fighter.nodes.combat.GoToCove;
+import script.fighter.nodes.combat.Ogress;
 
 public class NodeSupplier {
 
-    public NodeSupplier(Fighter main) {
+    public NodeSupplier(Fighter main, boolean isOgress) {
         EAT = new EatNode(main);
         GET_FOOD = new GetFoodNode(main);
         IDLE = new IdleNode(main);
@@ -33,6 +34,7 @@ public class NodeSupplier {
         SPLASH = new Splash(main);
         OGRESS = new Ogress(main);
         GO_TO_COVE = new GoToCove(main);
+        MULE = new Mule(main);
     }
 
     public final Node EAT;
@@ -49,6 +51,7 @@ public class NodeSupplier {
     public final Node SPLASH;
     public final Node OGRESS;
     public final Node GO_TO_COVE;
+    public final Node MULE;
 
     public Node[] getTasks() {
         Node[] tasks = new Node[]{
@@ -65,7 +68,8 @@ public class NodeSupplier {
                 SELL_GE,
                 SPLASH,
                 OGRESS,
-                GO_TO_COVE
+                GO_TO_COVE,
+                MULE
         };
 
         return tasks;

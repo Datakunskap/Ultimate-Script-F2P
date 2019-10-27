@@ -10,7 +10,6 @@ import org.rspeer.runetek.event.types.ChatMessageType;
 import org.rspeer.runetek.event.types.DeathEvent;
 import org.rspeer.runetek.event.types.TargetEvent;
 import org.rspeer.ui.Log;
-import script.Beggar;
 import script.fighter.CombatStore;
 import script.fighter.NodeSupplier;
 import script.fighter.Stats;
@@ -22,6 +21,7 @@ import script.fighter.models.Progressive;
 import script.fighter.nodes.idle.IdleNode;
 import script.fighter.nodes.loot.LootNode;
 import script.fighter.wrappers.CombatWrapper;
+import script.fighter.wrappers.OgressWrapper;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -105,9 +105,11 @@ public class CombatListener {
     public static void onDeathEvent(DeathEvent e, NodeSupplier supplier) {
         PathingEntity source = e.getSource();
         if (source.equals(Players.getLocal())) {
-            Log.info("You Died");
-            if (!Beggar.OGRESS) {
-                Progressive p = ProgressiveSet.getCurrent();
+            Log.severe("You Died");
+            OgressWrapper.deaths ++;
+            Progressive p = ProgressiveSet.getCurrent();
+
+            if (!p.isOgress() && !p.isSplash()) {
                 p.setEquipmentMap(new HashMap<>());
             }
         }

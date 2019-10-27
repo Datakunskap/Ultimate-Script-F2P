@@ -121,7 +121,9 @@ public final class FightingSection extends TutorialSection {
     }
 
     private boolean inRatCage() {
-        return Npcs.getNearest("Combat Instructor") != null && !Npcs.getNearest("Combat Instructor").isPositionInteractable();//!Movement.getReachableMap().isReachable(Npcs.getNearest("Combat Instructor"), true);//!getMap().canReach(getNpcs().closest("Combat Instructor"));
+        //Movement.getReachableMap().isReachable().isReachable(Npcs.getNearest("Combat Instructor"), true);//!getMap().canReach(getNpcs().closest("Combat Instructor"));
+
+        return Npcs.getNearest("Combat Instructor") != null && !Npcs.getNearest("Combat Instructor").isPositionInteractable();
     }
 
     private void enterRatCage() {

@@ -82,7 +82,7 @@ public class ProgressionChecker extends Node {
 
     @Override
     public int execute() {
-        invalidateTask(main.getActive());
+        main.invalidateTask(this);
 
         Combat.AttackStyle style = Combat.getAttackStyle();
         if (!progressive.getStyle().equals(style)) {

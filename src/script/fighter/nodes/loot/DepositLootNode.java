@@ -29,6 +29,8 @@ public class DepositLootNode extends Node {
 
         if (BankWrapper.openNearest()) {
             Bank.depositAllExcept(Config.getProgressive().getRunes().toArray(new String[0]));
+            BankWrapper.updateBankValue();
+            BankWrapper.updateInventoryValue();
         }
         return Fighter.getLoopReturn();
     }

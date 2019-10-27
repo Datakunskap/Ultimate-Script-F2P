@@ -15,6 +15,5 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="rspeer" level="project" />
-    <orderEntry type="library" name="Python 3.7 interpreter library" level="application" />
   </component>
 </module>

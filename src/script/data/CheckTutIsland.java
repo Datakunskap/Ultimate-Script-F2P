@@ -8,6 +8,7 @@ import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.ui.Log;
 import script.Beggar;
+import script.fighter.wrappers.WorldhopWrapper;
 import script.tutorial_island.TutorialIsland;
 
 import java.io.*;
@@ -39,7 +40,7 @@ public class CheckTutIsland {
 
             if (main.currWorld != -1 && !main.isTanning) {
                 Log.info("World Removed");
-                main.removeCurrBegWorld(main.currWorld);
+                WorldhopWrapper.removeWorld(main.currWorld, Beggar.CURR_WORLD_PATH);
             }
 
             File file1 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\TutIsland1.json");
@@ -68,7 +69,7 @@ public class CheckTutIsland {
 
     private void addWorldToFile() {
         main.currWorld = Worlds.getCurrent();
-        main.writeWorldToFile(main.currWorld);
+        WorldhopWrapper.writeWorldToFile(main.currWorld, Beggar.CURR_WORLD_PATH);
     }
 
     private int[] writeJson(File file1, File file2, String account) {

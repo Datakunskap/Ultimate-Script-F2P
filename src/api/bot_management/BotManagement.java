@@ -49,6 +49,18 @@ public class BotManagement {
         );
     }
 
+    public static boolean startClient(int pcIndex, String qs, int sleep, String proxy, int count, int retries, String killKey) throws IOException {
+        return startClient(
+                pcIndex,
+                qs,
+                DEFAULT_JVM_ARGS + " -Dwhatever=" + killKey,
+                sleep,
+                proxy,
+                count,
+                retries
+        );
+    }
+
     public static boolean startClient(int pcIndex, String qs, String jvmArgs, int sleep, String proxy, int count, int retries) throws IOException {
         final String apiKey = BotManagementFileHelper.getApiKeyOrThrow();
 

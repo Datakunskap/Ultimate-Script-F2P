@@ -2,7 +2,6 @@ package script.fighter;
 
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.StopWatch;
-import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.tab.*;
 import org.rspeer.runetek.api.movement.position.Position;
@@ -27,8 +26,10 @@ import script.fighter.models.Progressive;
 import script.fighter.nodes.combat.CombatListener;
 import script.fighter.paint.CombatPaintRenderer;
 import script.fighter.paint.ScriptPaint;
+import script.fighter.wrappers.BankWrapper;
 import script.fighter.wrappers.OgressWrapper;
 import script.fighter.wrappers.SplashWrapper;
+import script.fighter.wrappers.WorldhopWrapper;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -40,23 +41,31 @@ public class Fighter {
 
     private NodeManager manager;
     private ScriptPaint paint;
-    private StopWatch runtime;
-    //private Progressive progressive;
-
+    private static StopWatch runtime;
     private long stopTimeMs;
-    public long startTimeMs;
-    public Beggar beggar;
+    private long startTimeMs;
+    private Beggar beggar;
+    private int totalItemValue;
 
     public Fighter(Beggar script, long stopTimeMs) {
         beggar = script;
         this.stopTimeMs = stopTimeMs;
     }
 
+    public Fighter(Beggar script) {
+        stopTimeMs = Long.MAX_VALUE;
+        beggar = script;
+    }
+
+    public Beggar getScript() {
+        return beggar;
+    }
+
     public static int getLoopReturn() {
         return Random.high(200, 1000);
     }
 
-    public StopWatch getRuntime() {
+    public static StopWatch getRuntime() {
         return runtime;
     }
 
@@ -70,42 +79,40 @@ public class Fighter {
         return supplier;
     }
 
-    public void onStart() {
-        try {
-            beggar.isFighterRunning = true;
-            if (Beggar.OGRESS) {
-                setupSplashProgressive();
-                //setupMagicProgressive();
-                setupOgressProgressive();
-            } else {
-                setupDefaultProgressive("chicken");
-            }
+    public void onStart(boolean isOgress, int retries) {
+        beggar.isFighterRunning = true;
+        if (isOgress) {
+            setupSplashProgressive();
+            setupOgressProgressive();
 
-            Config.setLogLevel(LogLevel.Debug);
-            supplier = new NodeSupplier(this);
-            manager = new NodeManager();
-
-            runtime = StopWatch.start();
-            startTimeMs = System.currentTimeMillis();
-            paint = new ScriptPaint(this);
-            setBackgroundTasks();
-            active = null;
-            setupNodes();
-
-            if(!GameCanvas.isInputEnabled()) {
-                GameCanvas.setInputEnabled(true);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
+            BankWrapper.updateInventoryValue();
+        } else {
+            setupDefaultProgressive("chicken");
+            //setupMagicProgressive();
         }
+
+        Config.setLogLevel(LogLevel.Debug);
+        supplier = new NodeSupplier(this, isOgress);
+        manager = new NodeManager();
+
+        runtime = beggar.runtime;
+        startTimeMs = System.currentTimeMillis();
+        paint = new ScriptPaint(this);
+        if (!isOgress)
+            setBackgroundTasks();
+        active = null;
+        setupNodes(isOgress);
+
+        if (!GameCanvas.isInputEnabled()) {
+            GameCanvas.setInputEnabled(true);
+        }
+
     }
 
-    private void setupNodes() {
-
-        if (Beggar.OGRESS) {
+    private void setupNodes(boolean isOgress) {
+        if (isOgress) {
             beggar.submit(
+                    supplier.MULE,
                     supplier.SELL_GE,
                     supplier.BUY_GE,
                     supplier.DEPOSIT_LOOT,
@@ -137,6 +144,10 @@ public class Fighter {
         p.setStyle(Combat.AttackStyle.CASTING);
         p.setSkill(Skill.MAGIC);
         HashMap<EquipmentSlot, String> map = new HashMap<>();
+        map.put(EquipmentSlot.HEAD, "blue wizard hat");
+        map.put(EquipmentSlot.NECK, "amulet of magic");
+        map.put(EquipmentSlot.CHEST, "blue wizard robe");
+        map.put(EquipmentSlot.LEGS, "zamorak monk bottom");
         map.put(EquipmentSlot.MAINHAND, "staff of fire");
         p.setEquipmentMap(map);
         HashSet<String> runes = new HashSet<>();
@@ -146,22 +157,28 @@ public class Fighter {
         p.setSpell(Spell.Modern.FIRE_STRIKE);
         HashSet<String> enemies = new HashSet<>();
         p.setEnemies(enemies);
-        String[] loot = new String[] {"Iron arrow", "Steel arrow", "Adamant arrow", "Mithril arrow", "Rune med helm", "Rune full helm", "Rune battleaxe", "Shaman mask", "Air rune",
+        String[] loot = new String[]{
+                "Iron arrow", "Steel arrow", "Adamant arrow", "Mithril arrow", "Rune med helm", "Rune full helm", "Rune battleaxe", "Shaman mask", "Air rune",
                 "Mind rune", "Water rune", "Earth rune", "Fire rune", "Chaos rune", "Cosmic rune", "Nature rune", "Law rune", "Death rune", "Ranarr seed", "Snapdragon seed", "Torstol seed",
-                "Cadantine seed", "Snape grass seed", "Mithril kiteshield", "Coins", "Uncut diamond", "Uncut ruby"};
-        p.setLoot(new HashSet<>(Arrays.asList(loot)));
+                "Cadantine seed", "Snape grass seed", "Mithril kiteshield", "Uncut diamond", "Uncut ruby", "Limpwurt root", "Bones"
+        };
+        HashSet<String> lootSet = new HashSet<>(Arrays.asList(loot));
+        lootSet.addAll(map.values());
+        p.setLoot(lootSet);
         p.setPrioritizeLooting(false);
         p.setBuryBones(false);
         p.setPosition(OgressWrapper.TOCK_QUEST_POSITION);
         p.setRadius(Random.low(1, 3));
         p.setRandomIdle(false);
         p.setMinimumLevel(13);
+        p.setOgress(true);
         ProgressiveSet.add(p);
     }
 
     private void setupSplashProgressive() {
         Progressive progressive = new Progressive();
         progressive.setName("Train Magic: Splash");
+        progressive.setSplash(true);
         progressive.setStyle(Combat.AttackStyle.CASTING);
         progressive.setSkill(Skill.MAGIC);
         HashSet<String> runes = new HashSet<>();
@@ -181,8 +198,15 @@ public class Fighter {
         progressive.setEquipmentMap(new HashMap<>());
         progressive.setRandomIdle(false);
         progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
-        progressive.setSplash(true);
-        progressive.setUseSplashGear(false);
+        HashMap<EquipmentSlot, String> map = new HashMap<>();
+        progressive.setUseSplashGear(Beggar.SPLASH_USE_EQUIPMENT);
+        if (Beggar.SPLASH_USE_EQUIPMENT) {
+            map.put(EquipmentSlot.HEAD, "bronze full helm");
+            map.put(EquipmentSlot.CHEST, "bronze platebody");
+            map.put(EquipmentSlot.LEGS, "bronze platelegs");
+            map.put(EquipmentSlot.OFFHAND, "bronze kiteshield");
+        }
+        progressive.setEquipmentMap(map);
 
         ProgressiveSet.add(progressive);
     }
@@ -206,8 +230,8 @@ public class Fighter {
         HashSet<String> loot = new HashSet<>();
         //loot.add("raw chicken");
         loot.add("bones");
-        String[] runeLoot = new String[] {"air rune", "mind rune","water rune","earth rune","fire rune",
-                "chaos rune", "cosmic rune","nature rune","law rune","death rune", "body rune"} ;
+        String[] runeLoot = new String[]{"air rune", "mind rune", "water rune", "earth rune", "fire rune",
+                "chaos rune", "cosmic rune", "nature rune", "law rune", "death rune", "body rune"};
         loot.addAll(Arrays.asList(runeLoot));
         progressive.setLoot(loot);
         progressive.setPrioritizeLooting(false);
@@ -237,8 +261,7 @@ public class Fighter {
         Progressive progressive2 = new Progressive();
         progressive2.copy(progressive);
         progressive2.setName("Train Magic 2");
-        HashSet<String> e2 = new HashSet<>();
-        e2.addAll(enemies);
+        HashSet<String> e2 = new HashSet<>(enemies);
         e2.add("goblin");
         progressive2.setEnemies(e2);
         if (Beggar.randInt(0, 1) == 0) {
@@ -254,6 +277,7 @@ public class Fighter {
     private void setupLesserDemonProgressive() {
         Progressive progressive = new Progressive();
         progressive.setName("Train Magic: Lesser Demon");
+        progressive.setSplash(true);
         progressive.setStyle(Combat.AttackStyle.CASTING);
         progressive.setSkill(Skill.ATTACK);
         HashSet<String> runes = new HashSet<>();
@@ -298,8 +322,8 @@ public class Fighter {
 
         progressive.setEquipmentMap(map);
 
-        switch (Beggar.FIGHTER_TRAIN_SKILL) {
-            case ATTACK:
+        switch (Beggar.FIGHTER_TRAIN_DEFENCE ? 2 : Beggar.randInt(0, 2)) {
+            case 0:
                 if (map.containsKey(EquipmentSlot.QUIVER)) {
                     progressive.setStyle(Combat.AttackStyle.ACCURATE);
                     //progressive.setSkill(Skill.RANGED);
@@ -308,7 +332,7 @@ public class Fighter {
                     //progressive.setSkill(Skill.ATTACK);
                 }
                 break;
-            case RANGED: case STRENGTH:
+            case 1:
                 if (map.containsKey(EquipmentSlot.QUIVER)) {
                     progressive.setStyle(Combat.AttackStyle.RAPID);
                     //progressive.setSkill(Skill.RANGED);
@@ -317,7 +341,7 @@ public class Fighter {
                     //progressive.setSkill(Skill.STRENGTH);
                 }
                 break;
-            case DEFENCE:
+            case 2:
                 if (map.containsKey(EquipmentSlot.QUIVER)) {
                     progressive.setStyle(Combat.AttackStyle.LONGRANGE);
                     //progressive.setSkill(Skill.DEFENCE);
@@ -326,8 +350,6 @@ public class Fighter {
                     //progressive.setSkill(Skill.DEFENCE);
                 }
                 break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + Beggar.FIGHTER_TRAIN_SKILL);
         }
         progressive.setSkill(Skill.ATTACK);
 
@@ -336,8 +358,8 @@ public class Fighter {
         progressive.setEnemies(enemies);
         HashSet<String> loot = new HashSet<>();
         loot.add("bronze scimitar");
-        String[] runes = new String[] {"air rune", "mind rune","water rune","earth rune","fire rune",
-                "chaos rune", "cosmic rune","nature rune","law rune","death rune", "body rune"} ;
+        String[] runes = new String[]{"air rune", "mind rune", "water rune", "earth rune", "fire rune",
+                "chaos rune", "cosmic rune", "nature rune", "law rune", "death rune", "body rune"};
         loot.addAll(Arrays.asList(runes));
         if (Beggar.randInt(0, 1) == 0) {
             loot.add("bones");
@@ -399,28 +421,32 @@ public class Fighter {
     }
 
     private void setBackgroundTasks() {
-        new TargetChecker();
+        if (!BackgroundTaskExecutor.isStarted()) {
+            new TargetChecker();
+        }
     }
 
-    public void onStop(boolean scriptStopping, int bShutdownRetries) {
-        beggar.isFighterRunning = false;
-        beggar.removeAll();
-        manager.onScriptStop();
+    public void onStop(boolean startBeggar, int bShutdownRetries) {
+        OgressWrapper.deaths = 0;
+        onStop(startBeggar, false, bShutdownRetries);
+    }
 
-        try {
-            BackgroundTaskExecutor.shutdown();
-            Time.sleep(2000);
-
-        } catch (Exception e) {
-            beggar.writeToErrorFile("Fighter onStop() -> Failed to shutdown");
-            if (bShutdownRetries > 0) {
-                onStop(scriptStopping, bShutdownRetries - 1);
-            }
-            e.printStackTrace();
+    public void onStop(boolean startBeggar, boolean ogressBeg, int bShutdownRetries) {
+        if (WorldhopWrapper.currentWorld > 0) {
+            WorldhopWrapper.removeWorld(WorldhopWrapper.currentWorld, Beggar.OGRESS_WORLD_PATH);
         }
+        if (manager != null) {
+            manager.onScriptStop();
+        }
+        beggar.removeAll();
+        ProgressiveSet.removeAll();
+        CombatStore.resetTargetingValues();
 
-        if (!scriptStopping) {
-            beggar.startBeggar(0);
+        if (startBeggar) {
+            if (!ogressBeg) {
+                beggar.isFighterRunning = false;
+            }
+            beggar.startBeggar(ogressBeg);
         }
         //super.onStop();
     }
@@ -428,7 +454,7 @@ public class Fighter {
     public void notify(RenderEvent e) {
         Graphics g = e.getSource();
         try {
-            if(manager != null) {
+            if (manager != null) {
                 paint.notify(e);
             }
         } catch (Exception ex) {
@@ -437,7 +463,7 @@ public class Fighter {
         g.setColor(Color.GREEN);
 
         Position p = Config.getStartingTile();
-        if(p != null && Game.isLoggedIn()) {
+        if (p != null && Game.isLoggedIn()) {
             Point start = Projection.toMinimap(p);
             if (start != null) {
                 int size = Config.getRadius() * 4;
@@ -467,29 +493,31 @@ public class Fighter {
 
     public void setActive(Node task) {
         active = task;
-        checkStopTime();
+        if (stopTimeMs > 0) {
+            checkStopTime();
+        }
     }
 
     private void checkStopTime() {
-        if(!Beggar.OGRESS && (System.currentTimeMillis() - startTimeMs) > stopTimeMs) {
+        if ((System.currentTimeMillis() - startTimeMs) > stopTimeMs) {
             if (Players.getLocal().getCombatLevel() > 3) {
                 Log.fine("Stopping Fighter");
-                onStop(false, 10);
+                onStop(true, 10);
             } else {
                 Log.severe("Low Combat LVL Continuing");
                 startTimeMs = System.currentTimeMillis() - (stopTimeMs / 2);
-                invalidateNodes();
+                //invalidateNodes();
                 CombatStore.resetTargetingValues();
             }
         }
     }
 
-    public void invalidateTask(Node curr) {
-        if (active != null && !curr.equals(active)) {
+    public void invalidateTask(Node thisNode) {
+        if (active != null && !thisNode.equals(active)) {
             Logger.debug("Node has changed.");
             active.onInvalid();
         }
-        setActive(curr);
+        setActive(thisNode);
     }
 
     private void invalidateNodes() {

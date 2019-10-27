@@ -10,6 +10,7 @@ public class Config {
 
     private static LogLevel logLevel;
     private static Progressive NULL_SAFE_PROGRESSIVE = new Progressive();
+    public static boolean isMuleing;
 
     public static Progressive getProgressive() {
         Progressive curr = ProgressiveSet.getCurrent();

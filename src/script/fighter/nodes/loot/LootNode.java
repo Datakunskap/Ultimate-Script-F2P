@@ -54,7 +54,7 @@ public class LootNode extends Node {
 
     @Override
     public int execute() {
-        invalidateTask(main.getActive());
+        main.invalidateTask(this);
 
         if (stuckLooting) {
             Movement.walkTo(Players.getLocal().getPosition().randomize(6));

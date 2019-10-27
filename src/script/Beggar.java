@@ -3,7 +3,6 @@ package script;
 import api.bot_management.BotManagement;
 import api.bot_management.RsPeerDownloader;
 import api.bot_management.data.LaunchedClient;
-import api.bot_management.data.QuickLaunch;
 import api.component.ExPriceCheck;
 import org.rspeer.RSPeer;
 import org.rspeer.runetek.adapter.scene.Player;
@@ -14,7 +13,6 @@ import org.rspeer.runetek.api.commons.StopWatch;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Trade;
 import org.rspeer.runetek.api.component.tab.Inventory;
-import org.rspeer.runetek.api.component.tab.Skill;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Area;
@@ -22,6 +20,7 @@ import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.event.listeners.*;
 import org.rspeer.runetek.event.types.*;
 import org.rspeer.runetek.providers.RSWorld;
+import org.rspeer.runetek.providers.subclass.GameCanvas;
 import org.rspeer.script.GameAccount;
 import org.rspeer.script.Script;
 import org.rspeer.script.ScriptMeta;
@@ -31,6 +30,11 @@ import org.rspeer.ui.Log;
 import script.beg.*;
 import script.data.*;
 import script.fighter.Fighter;
+import script.fighter.config.Config;
+import script.fighter.framework.BackgroundTaskExecutor;
+import script.fighter.services.PriceCheckService;
+import script.fighter.wrappers.BankWrapper;
+import script.fighter.wrappers.WorldhopWrapper;
 import script.tanner.Main;
 import script.ui.Gui;
 
@@ -103,12 +107,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public StopWatch lastTradeTime;
     public boolean refreshPrices = false;
     public long startTime = 0;
-    public boolean tradeGambler = false;
-    public boolean roll = false;
-    public int gambleAmnt = 0;
-    public String gamblerName = "";
-    public boolean giveGambler = false;
-    public ArrayList<Integer> OTHER_BEG_WORLDS;
     private final boolean GAMBLER = false;
     public Main tanner;
     public boolean isTanning = false;
@@ -128,26 +126,29 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public int numBegs = 0;
     public int idleBegNum = randInt(50, 70);
     public Fighter fighter;
-    public int nextBotWorld;
-    public int begUntilGp;
+    public boolean ogressBeg;
     public static final boolean BUY_GEAR = true;
     private static final boolean SELENIUM_VERIFY_GEN = false;
+    public static final boolean RESET_RUNTIME = false;
 
-    private static final String PROXY_IP = null;//"108.187.189.123";
-    private static final String PROXY_USER = null;//"qLo741";
-    private static final String PROXY_PASS = null;//"z6wApt";
-    private static final String PROXY_PORT = null;//"8000";
+
+    public static final String[] PROXY_IP = new String[]{}; // { "209.163.117.212", "167.160.71.140", "172.96.82.150", "172.96.95.99", "DEFAULT" };//"108.187.189.123";
+    public static final String PROXY_USER = "";
+    public static final String PROXY_PASS = "";
+    public static final String PROXY_PORT = "1080";
     private static final String PYTHON_3_EXE = System.getProperty("user.home") + "\\AppData\\Local\\Programs\\Python\\Python37\\python.exe";
     private static final String ACC_GEN_PY = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\create_rs_account.py";
     public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
+    public static final String OGRESS_WORLD_PATH = Script.getDataDirectory() + "\\OgressWorlds.txt";
     private static final String ERROR_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeerErrors.txt";
-    public static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
+    private static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
     public static final String BEG_LINES_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\BegLines.txt";
     private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\Runescape-Account-Generator-2.0.jar";
+    public static final String RESTART_SCRIPT_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\RestartScript.jar";
 
-    public static final String MULE_NAME = "jkemllr";
-    public static final MuleArea MULE_AREA = MuleArea.COOKS_GUILD;
-    public static final int MULE_WORLD = 454;
+    public static final String MULE_NAME = "Madman38snur";
+    public static final MuleArea MULE_AREA = MuleArea.GE_NEW;
+    public static final int MULE_WORLD = 393;
     public static final boolean MULE_ITEMS = false;
     public static final int MUTED_MULE_AMNT = 30000;
     public static final int ALLOWED_INSTANCES = 8;
@@ -158,13 +159,20 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final boolean IDLE_LOGOUT = false;
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
     public static final boolean EXPLV_TUTORIAL = false;
-    public static final Skill FIGHTER_TRAIN_SKILL = Skill.DEFENCE;
-    public static boolean OGRESS = true;
+    public static final boolean FIGHTER_TRAIN_DEFENCE = false;
+
+    public static final boolean OGRESS = true;
+    public static final int OGRESS_START_GP = 25_000;
+    public static final boolean SPLASH_USE_EQUIPMENT = true;
+    public static final int OGRESS_WORLD_HOP_MINS = 5;
+    public static final int OGRESS_MAX_MINUTES_WORTH_OF_RUNES = 120;
+    public static final int OGRESS_MULE_AMOUNT = 115_115;
 
     @Override
     public void onStart() {
         Log.fine("Script Started");
         //updateRSPeer();
+
         LoginScreen ctx = new LoginScreen(this);
         ctx.setDelayOnLoginLimit(true);
         ctx.setStopScriptOn(LoginResponseEvent.Response.ACCOUNT_DISABLED, true);
@@ -181,24 +189,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         startTime = (worldHop || worldHopf2p) ? System.currentTimeMillis() : 0;
         setRandMuleKeep(2500, 10000);
 
-        CheckTutIsland checkT = new CheckTutIsland(this);
+        submitTasks();
 
-        if (GAMBLER) {
-            /*submit(new GTradePlayer(),
-                    new GWaitTrade(),
-                    //new Mule(),
-                    new GSendTrade(),
-                    new GRoll(),
-                    new WorldHop(this),
-                    new Banking(this),
-                    new GTraverse(),
-                    new Gambler()
-            );*/
-
-        } else if (checkT.onTutIsland()) {
-            checkT.execute();
-        } else {
-            submitTasks();
+        if (!GameCanvas.isInputEnabled()) {
+            GameCanvas.setInputEnabled(true);
         }
     }
 
@@ -221,20 +215,35 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         );
     }
 
-    public void startFighter(boolean sleep) {
+    public void startOgress() {
+        Log.fine("Starting Ogress");
+
+        int world = Worlds.getCurrent();
+        if (world > 0) {
+            WorldhopWrapper.writeWorldToFile(world, OGRESS_WORLD_PATH);
+            WorldhopWrapper.currentWorld = world;
+        }
+        resetRender(RESET_RUNTIME);
+        removeAll();
+        fighter = new Fighter(this);
+        fighter.onStart(true, 5);
+    }
+
+    public void startFighter() {
         //logoutAndSwitchAcc();
-        if (sleep && TUTORIAL_COMPLETED_SLEEP) {
+        Log.fine("Starting Fighter");
+        if (TUTORIAL_COMPLETED_SLEEP) {
             int ms = randInt(300_000, 600_000);
             Log.info("Sleeping for " + TimeUnit.MILLISECONDS.toMinutes(ms) + " min(s)");
             Time.sleep(ms);
         }
-        resetRender();
+        resetRender(RESET_RUNTIME);
         removeAll();
-        fighter = new Fighter(this, randInt(600_000, 1_100_000)); // 10 - 18
-        fighter.onStart();
+        fighter = new Fighter(this, randInt(600_000, 1_200_000)); // 10 - 20
+        fighter.onStart(false, 5);
     }
 
-    public void startBeggar(int begUntilGp) {
+    public void startBeggar(boolean ogressBeg) {
         removeAll();
 
         banked = false;
@@ -249,9 +258,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         isMuling = false;
         startTime = (worldHop || worldHopf2p) ? System.currentTimeMillis() : 0;
         startupChecks = false;
-        this.begUntilGp = begUntilGp;
+        this.ogressBeg = ogressBeg;
 
-        resetRender();
+        resetRender(RESET_RUNTIME);
 
         Log.fine("Starting Beggar");
         submitTasks();
@@ -260,9 +269,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     @Override
     public void notify(LoginResponseEvent loginResponseEvent) {
         if (loginResponseEvent.getResponse().equals(LoginResponseEvent.Response.ACCOUNT_DISABLED) ||
-                loginResponseEvent.getResponse().equals(INVALID_CREDENTIALS) ||
-                loginResponseEvent.getResponse().equals(LoginResponseEvent.Response.ACCOUNT_LOCKED) ||
-                loginResponseEvent.getResponse().equals(LoginResponseEvent.Response.ACCOUNT_STOLEN)
+                loginResponseEvent.getResponse().equals(INVALID_CREDENTIALS)
         ) {
 
             disableChain = false;
@@ -272,10 +279,12 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 loginResponseEvent.getResponse().equals(RUNESCAPE_UPDATE_2)) {
 
             String[] info = new String[]{RSPeer.getGameAccount().getUsername(), RSPeer.getGameAccount().getPassword()};
-            new CheckInstances(this).execute(info);
+            int world = getNextWorld();
 
             try {
+                new ClientQuickLauncher("Ultimate Beggar", false, world).launchClient(info);
                 killClient();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -288,18 +297,24 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public void onStop() {
         Log.severe("Script Stopped");
         removeAll();
+        disposeBackgroundTasks(10);
 
         if (isFighterRunning) {
-            fighter.onStop(true, 10);
+            if (!disableChain) {
+                writeToErrorFile("Ogress  |  Runtime: "
+                        + Fighter.getRuntime().toElapsedString() + "  |  Value Gained: " + BankWrapper.getTotalValueGained()
+                        + "  |  Value / H: " + format((long) Fighter.getRuntime().getHourlyRate(BankWrapper.getTotalValueGained())));
+            }
+            fighter.onStop(false, 10);
         }
 
-        if (isMuling || (isTanning && tanner.isMuling) || (isChoc && chocolate.isMuling)) {
+        if (isMuling || (isTanning && tanner.isMuling) || (isChoc && chocolate.isMuling) || Config.isMuleing) {
             Mule.logoutMule();
         }
 
         if (currWorld != -1 && !isTanning && !isChoc) {
             Log.info("World Removed");
-            removeCurrBegWorld(currWorld);
+            WorldhopWrapper.removeWorld(currWorld, Beggar.CURR_WORLD_PATH);
         }
 
         if (!disableChain && !GAMBLER) {
@@ -310,55 +325,35 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 e.printStackTrace();
             }
 
-            if (Game.isLoggedIn())
-                Game.logout();
-
-            if (stopRetries == 5) {
-                accountGeneratorDriver(NUM_BACKLOG_ACCOUNTS);
-            }
-
-            QuickLaunch quickLaunch = setupQuickLauncher(readAccount(true));
+            accountGeneratorDriver(NUM_BACKLOG_ACCOUNTS);
+            int world = getNextWorld();
 
             try {
-
-                BotManagement.startClient(0, quickLaunch.get().toString(), 0, null, 1, 10);
+                new ClientQuickLauncher("Ultimate Beggar", false, world).launchClient(readAccount(true));
                 killClient();
 
             } catch (Exception e) {
-                writeToErrorFile("onStop():  " + e.getMessage());
                 Log.severe(e);
-                e.printStackTrace();
                 if (stopRetries > 0) {
                     stopRetries--;
                     onStop();
                 }
+                writeToErrorFile("onStop():  " + e.toString());
             }
         }
     }
 
-    public QuickLaunch setupQuickLauncher(String[] accountInfo) {
-        QuickLaunch qL = new QuickLaunch();
-        ArrayList<QuickLaunch.Client> clientList = new ArrayList<>();
+    private void disposeBackgroundTasks(int retries) {
+        try {
+            BackgroundTaskExecutor.dispose();
+            PriceCheckService.dispose();
 
-        QuickLaunch.Config config = qL.new Config(
-                true, true, 0, false, false);
-        QuickLaunch.Script script = qL.new Script(
-                "", "Ultimate Beggar", "", false);
-        QuickLaunch.Proxy proxy;
-        if (accountInfo.length == 6) {
-            proxy = qL.new Proxy(
-                    "0", "9/29/2019", "DrScatman", "proxy1", accountInfo[2], Integer.parseInt(accountInfo[5]), accountInfo[3], accountInfo[4]);
-        } else {
-            proxy = qL.new Proxy("", "", "", "", "", 80, "", "");
+        } catch (Exception e) {
+            if (retries > 0) {
+                disposeBackgroundTasks(retries - 1);
+            }
+            writeToErrorFile("FAILED TO DISPOSE BACKGROUND TASKS");
         }
-
-        int newWorld = (nextBotWorld > 0 ? nextBotWorld : (currWorld > 0 ? currWorld : popWorldsArr[randInt(0, 2)]));
-        QuickLaunch.Client qLClient = qL.new Client(
-                accountInfo[0], accountInfo[1], newWorld, proxy, script, config);
-
-        clientList.add(qLClient);
-        qL.setClients(clientList);
-        return qL;
     }
 
     public void killClient() throws IOException {
@@ -371,6 +366,35 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         System.exit(0);
     }
 
+    public int getNextWorld() {
+        int nextBotWorld = getNextBotWorld(randInt(0, 500));
+
+        if (nextBotWorld > 0) {
+            return nextBotWorld;
+        }
+        if (WorldhopWrapper.currentWorld > 0) {
+            return currWorld;
+        }
+        if (currWorld > 0) {
+            return currWorld;
+        }
+
+        return popWorldsArr[randInt(0, 2)];
+    }
+
+    private int getNextBotWorld(int pop) {
+        RSWorld newWorld = Worlds.get(x -> x.getPopulation() <= pop &&
+                !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
+
+        if (newWorld != null && newWorld.getId() > 0) {
+            return newWorld.getId();
+        }
+        if (pop <= 1000) {
+            getNextBotWorld(pop + 50);
+        }
+        return 0;
+    }
+
     private void seleniumGenerator(int numToGen) {
         int firstExt = randInt(0, 9994);
         int lastExt = firstExt + numToGen;
@@ -378,9 +402,9 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         String password = getRandString(true, 6, 20);
 
         try {
-            if (PROXY_IP != null && !PROXY_IP.isEmpty()) {
-                /*selenium.performTask(emailBase, password, firstExt, lastExt,
-                        ACCOUNTS_FILE_PATH, PROXY_IP, PROXY_PORT, PROXY_USER, PROXY_PASS);*/
+            if (PROXY_IP != null && PROXY_IP.length < 1) {
+                //selenium.performTask(emailBase, password, firstExt, lastExt,
+                //       ACCOUNTS_FILE_PATH, PROXY_IP, PROXY_PORT, PROXY_USER, PROXY_PASS);
                 Runtime.getRuntime().exec(
                         "cmd /c start cmd.exe /K \"" + "java -jar" + " " + SELENIUM_GEN_PATH + " " + emailBase
                                 + " " + password + " " + firstExt + " " + lastExt + " " + ACCOUNTS_FILE_PATH + " " +
@@ -400,16 +424,16 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
     private void pythonGenerator(int retries) {
         final String EMAIL_ARG = "-e " + getVerificationEmailAlias();
-        final String PASSWORD_ARG = "-p " + getRandString(true, 6, 20);
-        final String PROXY_IP_ARG = "-i " + PROXY_IP;
+        final String PASSWORD_ARG = "-p " + "qazzaq";//getRandString(true, 6, 20);
+        final String PROXY_IP_ARG = "-i " + (PROXY_IP.length > 0 ? PROXY_IP[randInt(0, PROXY_IP.length - 1)] : "DEFAULT");
         final String PROXY_USER_ARG = "-u " + PROXY_USER;
         final String PROXY_PASS_ARG = "-x " + PROXY_PASS;
         final String PROXY_PORT_ARG = "-o " + PROXY_PORT;
 
         try {
-            if (PROXY_IP == null || PROXY_IP.isEmpty()) {
+            if (PROXY_IP == null || PROXY_IP.length < 1 || PROXY_IP_ARG.equals("-i DEFAULT")) {
                 final String EMAIL_ARG_2 = "-e2 " + getVerificationEmailAlias();
-                final String PASSWORD_ARG_2 = "-p2 " + getRandString(true, 6, 20);
+                final String PASSWORD_ARG_2 = "-p2 " + "qazzaq";//getRandString(true, 6, 20);
                 Runtime.getRuntime().exec(
                         "cmd /c start cmd.exe /K \"" + PYTHON_3_EXE + " " + ACC_GEN_PY + " " + EMAIL_ARG_2 + " " + PASSWORD_ARG_2 + " && exit" + "\"");
             } else {
@@ -579,8 +603,11 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         try (FileWriter fw = new FileWriter(ACCOUNTS_FILE_PATH, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
+
             if (info.length == 6) {
                 out.println(info[0] + ":" + info[1] + ":" + info[2] + ":" + info[3] + ":" + info[4] + ":" + info[5]);
+            } else if (info.length == 4) {
+                out.println(info[0] + ":" + info[1] + ":" + info[2] + ":" + info[3]);
             } else {
                 out.println(info[0] + ":" + info[1]);
             }
@@ -700,9 +727,11 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public int timesTanned = 0;
     public int timesChocolate = 0;
 
-    public void resetRender() {
-        runtime.reset();
-        runtime = StopWatch.start();
+    public void resetRender(boolean resetRuntime) {
+        if (resetRuntime) {
+            runtime.reset();
+            runtime = StopWatch.start();
+        }
         startC = gainedC;
         startTime = System.currentTimeMillis();
         lastTradeTime = null;
@@ -856,73 +885,6 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         }
     }
 
-    public void removeCurrBegWorld(int currentWorld) {
-        BufferedReader reader;
-        try {
-            File inputFile = new File(CURR_WORLD_PATH);
-            File tempFile = new File(Script.getDataDirectory() + "\\TEMPCurrBegWorld.txt");
-
-            if (!inputFile.exists())
-                return;
-
-            reader = new BufferedReader(new FileReader(inputFile));
-            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-
-            String lineToRemove = Integer.toString(currentWorld);
-            String currentLine;
-
-            boolean rm = false;
-            while ((currentLine = reader.readLine()) != null) {
-                // trim newline when comparing with lineToRemove
-                String trimmedLine = currentLine.trim();
-                if (trimmedLine.contains(lineToRemove) && !rm) {
-                    rm = true;
-                    continue;
-                }
-                writer.write(currentLine + System.getProperty("line.separator"));
-            }
-            writer.close();
-            reader.close();
-
-            if (inputFile.exists() && !inputFile.delete()) {
-                Log.severe("Could not delete file | Retrying...");
-                Thread.sleep(5000);
-                removeCurrBegWorld(currentWorld);
-            }
-
-            if (tempFile.exists() && !tempFile.renameTo(inputFile)) {
-                Log.severe("Could not rename file | Retrying...");
-                Thread.sleep(5000);
-                removeCurrBegWorld(currentWorld);
-            }
-
-        } catch (Exception e) {
-            writeToErrorFile("Exception: removeCurrBegWorld(" + currentWorld + "): " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    public void writeWorldToFile(int currentWorld) {
-        File file = new File(CURR_WORLD_PATH);
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        try (FileWriter fw = new FileWriter(file, true);
-             BufferedWriter bw = new BufferedWriter(fw);
-             PrintWriter out = new PrintWriter(bw)) {
-
-            out.println(currentWorld);
-        } catch (IOException e) {
-            Log.severe("File not found");
-            writeToErrorFile("FNF: writeWorldToFile()");
-        }
-    }
-
     public void writeToErrorFile(String errMsg) {
         try (FileWriter fw = new FileWriter(new File(ERROR_FILE_PATH), true);
              BufferedWriter bw = new BufferedWriter(fw);
@@ -957,8 +919,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 try {
                     for (int i = 0; leatherPrice < 70 && i < 3; i++) {
                         if (i == 0) {
-                            try { leatherPrice = ExPriceCheck.getAccurateRSPrice(LEATHER); }
-                            catch (Exception ignored) {}
+                            try {
+                                leatherPrice = ExPriceCheck.getAccurateRSPrice(LEATHER);
+                            } catch (Exception ignored) {
+                            }
                         }
                         if (i == 1)
                             leatherPrice = ExPriceCheck.getRSBuddySellPrice(LEATHER, refresh);
@@ -972,8 +936,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
                 try {
                     for (int i = 0; cowhidePrice < 50 && i < 3; i++) {
                         if (i == 0) {
-                            try { cowhidePrice = ExPriceCheck.getAccurateRSPrice(COWHIDE); }
-                            catch (Exception ignored) {}
+                            try {
+                                cowhidePrice = ExPriceCheck.getAccurateRSPrice(COWHIDE);
+                            } catch (Exception ignored) {
+                            }
                         }
                         if (i == 1)
                             cowhidePrice = ExPriceCheck.getRSBuddyBuyPrice(COWHIDE, refresh);
@@ -1054,8 +1020,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             try {
                 for (int i = 0; sellPrice < SELL_PL && i < 3; i++) {
                     if (i == 0) {
-                        try { sellPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.DUST); }
-                        catch (Exception ignored) {}
+                        try {
+                            sellPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.DUST);
+                        } catch (Exception ignored) {
+                        }
                     }
                     if (i == 1)
                         sellPrice = ExPriceCheck.getRSBuddySellPrice(script.chocolate.Main.DUST, refresh);
@@ -1069,8 +1037,10 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             try {
                 for (int i = 0; buyPrice < BUY_PL && i < 3; i++) {
                     if (i == 0)
-                        try { buyPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.BAR); }
-                        catch (Exception ignored) {}
+                        try {
+                            buyPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.BAR);
+                        } catch (Exception ignored) {
+                        }
                     if (i == 1)
                         buyPrice = ExPriceCheck.getRSBuddyBuyPrice(script.chocolate.Main.BAR, refresh);
                     if (i == 2)
@@ -1194,6 +1164,23 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         if (isFighterRunning) {
             fighter.notify(targetEvent);
         }
+    }
+
+    public String getProxyIp(String email) {
+        try {
+            List<LaunchedClient> clients = BotManagement.getRunningClients();
+            for (LaunchedClient client : clients) {
+                if (client.getRunescapeEmail().equals(email)) {
+                    if (client.getProxyIp() != null && !client.getProxyIp().isEmpty()) {
+                        return client.getProxyIp();
+                    }
+
+                }
+            }
+        } catch (IOException e) {
+            Log.severe(e);
+        }
+        return null;
     }
 
     private void updateRSPeer() {

@@ -37,7 +37,6 @@ public class CombatStore {
         return getCurrentTarget() != null;
     }
 
-
     public static boolean hasNextTaget() {
         return getNextTarget() != null;
     }

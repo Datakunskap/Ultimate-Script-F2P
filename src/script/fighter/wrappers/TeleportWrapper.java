@@ -14,13 +14,12 @@ public class TeleportWrapper {
 
     private static StopWatch timer;
 
-    public static boolean teleportHome() {
-        if (checkTime(Spell.Modern.HOME_TELEPORT)) {
-            Tabs.open(Tab.MAGIC);
-            Time.sleepUntil(() -> Tabs.getOpen() == Tab.MAGIC, 1000, 5000);
-            Log.fine("Teleporting Home");
-            Magic.cast(Spell.Modern.HOME_TELEPORT);
-            Time.sleep(18000);
+    public static boolean tryTeleport(boolean homeTeleport) {
+        Spell spell = homeTeleport ? Spell.Modern.HOME_TELEPORT : getTeleportSpell();
+        if (checkTime(spell)) {
+            Log.fine("Teleporting: " + spell.getName());
+            Magic.cast(spell);
+            Time.sleep(18_000, 20_000);
             return true;
         }
         return false;
@@ -31,12 +30,31 @@ public class TeleportWrapper {
             timer = StopWatch.start();
             return true;
         }
-        if (timer.exceeds(Duration.ofMinutes(29))
-                && spell == Spell.Modern.HOME_TELEPORT) {
-
+        if (timer.exceeds(Duration.ofMinutes(29)) && spell == Spell.Modern.HOME_TELEPORT) {
             timer = StopWatch.start();
             return true;
         }
+        if (spell == Spell.Modern.VARROCK_TELEPORT) {
+            return true;
+        }
+        if (spell == Spell.Modern.FALADOR_TELEPORT) {
+            return true;
+        }
         return false;
+    }
+
+    private static Spell getTeleportSpell() {
+        if (!Tabs.isOpen(Tab.MAGIC)) {
+            Tabs.open(Tab.MAGIC);
+            Time.sleepUntil(() -> Tabs.getOpen() == Tab.MAGIC, 1000, 5000);
+        }
+
+        if (Magic.canCast(Spell.Modern.VARROCK_TELEPORT)) {
+            return Spell.Modern.VARROCK_TELEPORT;
+        } else if (Magic.canCast(Spell.Modern.FALADOR_TELEPORT)) {
+            return Spell.Modern.FALADOR_TELEPORT;
+        } else {
+            return Spell.Modern.HOME_TELEPORT;
+        }
     }
 }

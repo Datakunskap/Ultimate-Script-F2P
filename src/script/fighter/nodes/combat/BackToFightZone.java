@@ -6,6 +6,7 @@ import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Players;
+import script.data.CheckTutIsland;
 import script.fighter.Fighter;
 import script.fighter.config.Config;
 import script.fighter.debug.Logger;
@@ -15,11 +16,13 @@ public class BackToFightZone extends Node {
 
     private Position startTileRandom;
     private int distRandom;
+    private final CheckTutIsland checkTutIsland;
 
     private Fighter main;
 
     public BackToFightZone(Fighter main){
         this.main = main;
+        checkTutIsland = new CheckTutIsland(main.getScript());
     }
 
     @Override
@@ -32,7 +35,7 @@ public class BackToFightZone extends Node {
 
     @Override
     public int execute() {
-        invalidateTask(main.getActive());
+        main.invalidateTask(this);
         if (!Game.isLoggedIn() || Players.getLocal() == null)
             return 2000;
 

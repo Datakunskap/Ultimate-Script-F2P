@@ -2,6 +2,8 @@ package script.tutorial_island;
 
 import org.rspeer.runetek.adapter.Interactable;
 import org.rspeer.runetek.adapter.component.InterfaceComponent;
+import org.rspeer.runetek.adapter.component.Item;
+import org.rspeer.runetek.adapter.scene.Npc;
 import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Varps;
@@ -23,6 +25,7 @@ import org.rspeer.runetek.providers.RSTileDecor;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
+import script.fighter.wrappers.OgressWrapper;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -39,6 +42,9 @@ public class dqw4w9wgxcq extends Task {
     private boolean isAudioDisabled;
     private final char[] vowels = "aeiouAEIOU".toCharArray();
     private final char[] nonVowels = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ".toCharArray();
+    private boolean doDefault;
+    private Position tinPosition;
+    private Position copperPosition;
 
     private int config;
     private TutorialIsland main;
@@ -58,18 +64,19 @@ public class dqw4w9wgxcq extends Task {
 
     @Override
     public boolean validate() {
-        return true;
+        return !main.isStopping();
     }
 
     @Override
     public int execute() {
         config = Varps.get(VARP);
-        boolean doDefault = false;
+        doDefault = false;
         Predicate<String> defaultAction = a -> true;
 
         //Log.info("" + config);
 
-        if (Players.getLocal().getAnimation() != -1 || Players.getLocal().isMoving()) {
+        if (!Game.isLoggedIn() || Players.getLocal() == null
+                || Players.getLocal().getAnimation() != -1 || Players.getLocal().isMoving()) {
             return 1000;
         }
 
@@ -102,7 +109,8 @@ public class dqw4w9wgxcq extends Task {
                     doDefault = true;
                 }
                 break;
-            case 7: case 10:
+            case 7:
+            case 10:
                 int componentIndex = -1;
                 if (Varps.get(168) != 4) {
                     componentIndex = 24;
@@ -136,17 +144,14 @@ public class dqw4w9wgxcq extends Task {
                 if (Dialog.canContinue()) {
                     Dialog.processContinue();
                 } else {
-                    Interfaces.getComponent(164, 53).interact(a->true);
+                    Interfaces.getComponent(164, 53).interact(a -> true);
                 }
                 break;
             case 50:
                 Tabs.open(Tab.SKILLS);
                 break;
             case 70:
-                SceneObject tree = SceneObjects.getNearest("Tree");
-                if (tree != null && tree.interact("Chop down")) {
-                    Time.sleep(3000);
-                }
+                interact(InteractableType.SceneObject, "Tree", a -> a.equals("Chop down"), randInt(1, 6), true);
                 break;
             case 80:
             case 90:
@@ -155,7 +160,7 @@ public class dqw4w9wgxcq extends Task {
                 if (!Tabs.isOpen(Tab.INVENTORY)) {
                     Tabs.open(Tab.INVENTORY);
                 } else if (!Inventory.contains("Raw shrimps")) {
-                    Npcs.getNearest("Fishing spot").interact("Net");
+                    interact(InteractableType.Npc, "Fishing spot", a -> a.equals("Net"), randInt(1, 6), true);
                 } else if (SceneObjects.getNearest("Fire") == null || (Interfaces.getComponent(263, 1, 0) != null &&
                         Interfaces.getComponent(263, 1, 0).getText().contains("time to light a fire"))) {
                     if (!Inventory.contains("Logs")) {
@@ -173,8 +178,15 @@ public class dqw4w9wgxcq extends Task {
                 } else {
                     if (Inventory.contains("Raw shrimps")) {
                         useItemOn("Raw shrimps", SceneObjects.getNearest("Fire"));
+
+                        if (Varps.get(VARP) != config) {
+                            if (Time.sleepUntil(() -> Inventory.contains("Shrimps"), 1000, 6000)) {
+                                interact(InteractableType.Npc, "Fishing spot", a -> a.equals("Net"), randInt(1, 6), true);
+                                interact(InteractableType.SceneObject, "Tree", a -> a.equals("Chop down"), randInt(1, 6), true);
+                            }
+                        }
                     } else {
-                        Npcs.getNearest("Fishing spot").interact("Net");
+                        interact(InteractableType.Npc, "Fishing spot", a -> a.equals("Net"), randInt(1, 6), true);
                     }
                 }
                 break;
@@ -183,6 +195,7 @@ public class dqw4w9wgxcq extends Task {
                 break;
             case 160:
                 if (Inventory.isItemSelected()) {
+                    interact(InteractableType.SceneObject, "Range", defaultAction, randInt(1, 4), false);
                     doDefault = true;
                 } else {
                     Inventory.getFirst("Bread dough").interact("Use");
@@ -193,9 +206,9 @@ public class dqw4w9wgxcq extends Task {
                 if (!Movement.isRunEnabled()) {
                     Movement.toggleRun(true);
                     Time.sleep(400, 800);
-                }else if(new Position(3085, 3127).distance() > 20){
+                } else if (new Position(3085, 3127).distance() > 20) {
                     Movement.walkToRandomized(new Position(3085, 3127));
-                }else {
+                } else {
                     doDefault = true;
                     //randWalker(8);
                 }
@@ -216,9 +229,9 @@ public class dqw4w9wgxcq extends Task {
                 if (!Movement.isRunEnabled()) {
                     Movement.toggleRun(true);
                     Time.sleep(400, 800);
-                }else if(new Position(3085, 3127).distance() > 20){
+                } else if (new Position(3085, 3127).distance() > 20) {
                     Movement.walkToRandomized(new Position(3085, 3127));
-                }else {
+                } else {
                     doDefault = true;
                     //randWalker(8);
                 }
@@ -232,22 +245,38 @@ public class dqw4w9wgxcq extends Task {
                     Movement.walkToRandomized(new Position(3081, 9509));
                 } else {
                     doDefault = true;
-                    //randWalker(8);
                 }
                 break;
-            case 270: case 280:
+            case 270:
+            case 280:
                 defaultAction = a -> a.equals("Prospect");
                 doDefault = true;
                 break;
             case 320:
                 if (Inventory.isItemSelected()) {
+                    handleFurnaceButton();
                     doDefault = true;
-                } else {
+                } else if (Inventory.getFirst("Tin ore") != null) {
                     Inventory.getFirst("Tin ore").interact("Use");
+                } else {
+                    interact(InteractableType.SceneObject, "Rocks",
+                            a -> a.equals("Mine"), randInt(2, 6), tinPosition, true);
                 }
                 break;
             case 350:
-                Interfaces.getComponent(312, 9).interact("Smith");
+                if (Interfaces.getComponent(312, 9) != null) {
+                    Interfaces.getComponent(312, 9).interact("Smith");
+                    Time.sleep(800, 1200);
+                    Time.sleepUntil(() -> !Players.getLocal().isAnimating(), 1000, 5000);
+                } else {
+                    interact(InteractableType.SceneObject, "Rocks",
+                            a -> a.equals("Mine"), randInt(2, 6), copperPosition, true);
+                    interact(InteractableType.SceneObject, "Rocks",
+                            a -> a.equals("Mine"), randInt(2, 6), tinPosition, true);
+                    interact(InteractableType.SceneObject, "Furnace", a -> a.equals("Use"), 1, false);
+                    handleFurnaceButton();
+                    doDefault = true;
+                }
                 break;
             case 390:
                 Tabs.open(Tab.EQUIPMENT);
@@ -267,14 +296,20 @@ public class dqw4w9wgxcq extends Task {
                 }
                 break;
             case 430:
+                OgressWrapper.openRandomTab();
                 Tabs.open(Tab.COMBAT);
                 break;
             case 440:
-                SceneObjects.getNearest(so -> so.getName().equalsIgnoreCase("Gate") && so.getY() > 9515).interact("Open");
+                if (SceneObjects.getNearest(so -> so.getName().equalsIgnoreCase("Gate") && so.getY() > 9515) != null) {
+                    SceneObjects.getNearest(so -> so.getName().equalsIgnoreCase("Gate") && so.getY() > 9515).interact("Open");
+                } else {
+                    Log.severe("Can't find gate");
+                }
                 break;
-            case 450: case 460:
+            case 450:
+            case 460:
                 if (Players.getLocal().getTargetIndex() == -1) {
-                    Npcs.getNearest(n -> n.getName().equals("Giant rat") && n.getTargetIndex() == -1).interact(a -> true);
+                    interact(InteractableType.Npc, "Giant rat", a -> a.equals("Attack"), randInt(1, 2), false);
                 }
                 break;
             case 470:
@@ -290,7 +325,7 @@ public class dqw4w9wgxcq extends Task {
                 } else if (!Equipment.contains("Bronze arrow")) {
                     wieldItem("Bronze arrow");
                 } else if (Players.getLocal().getTargetIndex() == -1) {
-                    Npcs.getNearest(n -> n.getName().equals("Giant rat") && n.getTargetIndex() == -1).interact(a -> true);
+                    interact(InteractableType.Npc, "Giant rat", a -> a.equals("Attack"), randInt(1, 2), false);
                 }
                 break;
             case 510:
@@ -301,6 +336,7 @@ public class dqw4w9wgxcq extends Task {
                 }
                 break;
             case 531:
+                OgressWrapper.openRandomTab();
                 Tabs.open(Tab.ACCOUNT_MANAGEMENT);
                 doDefault = true;
                 break;
@@ -308,21 +344,24 @@ public class dqw4w9wgxcq extends Task {
                 if (Players.getLocal().getY() > 3116) {
                     Movement.walkToRandomized(new Position(3134, 3116));
 
-                } else if(Movement.isInteractable(new Position(3127, 3106), false)){
+                } else if (Movement.isInteractable(new Position(3127, 3106), false)) {
                     doDefault = true;
-                }else {
+                } else {
                     SceneObjects.getNearest(so -> so.distance(new Position(3127, 3106)) < 5 && so.containsAction("Open")).interact("Open");
                 }
                 break;
             case 560:
+                OgressWrapper.openRandomTab();
                 Tabs.open(Tab.PRAYER);
                 doDefault = true;
                 break;
             case 580:
+                OgressWrapper.openRandomTab();
                 Tabs.open(Tab.FRIENDS_LIST);
                 doDefault = true;
                 break;
             case 590:
+                OgressWrapper.openRandomTab();
                 Tabs.open(Tab.ACCOUNT_MANAGEMENT);
                 break;
             case 620:
@@ -336,14 +375,15 @@ public class dqw4w9wgxcq extends Task {
                 Tabs.open(Tab.MAGIC);
                 break;
             case 650:
-                if (STRIKE_POS.equals(Players.getLocal().getPosition())) {
+                if (STRIKE_POS.distance() <= 1) {
                     if (Magic.isSpellSelected()) {
+                        //interact(InteractableType.Npc, "Chicken", a -> a.contains("Cast"), randInt(1, 2), false);
                         Npcs.getNearest("Chicken").interact(8);
                     } else {
                         Magic.cast(Spell.Modern.WIND_STRIKE);
                     }
                 } else {
-                    Movement.walkToRandomized(STRIKE_POS);
+                    Movement.walkTo(STRIKE_POS.translate(Random.nextInt(-1, 1), Random.nextInt(-1, 1)));
                 }
                 break;
             case 670:
@@ -367,7 +407,7 @@ public class dqw4w9wgxcq extends Task {
                             randWalker(BankLocation.LUMBRIDGE_CASTLE.getPosition());
                             break;
                     }
-                    main.beggar.startFighter(true);
+                    main.beggar.startFighter();
                 }
                 break;
             default:
@@ -376,6 +416,7 @@ public class dqw4w9wgxcq extends Task {
         }
 
         if (doDefault) {
+            //Log.info("DEFAULT");
             InterfaceComponent wierdContinue = Interfaces.getComponent(162, 44);
             if (wierdContinue != null && wierdContinue.isVisible() && !wierdContinue.isExplicitlyHidden()) {
                 Game.getClient().fireScriptEvent(299, 1, 1);
@@ -387,23 +428,164 @@ public class dqw4w9wgxcq extends Task {
                         Log.info("no hint arrow");
                         break;
                     case 1:
-                        Npcs.getAt(Game.getClient().getHintArrowNpcIndex()).interact(defaultAction);
+                        try {
+                            Npcs.getAt(Game.getClient().getHintArrowNpcIndex()).interact(defaultAction);
+                        } catch (NullPointerException ignored) {
+                            Log.info("Random Walk");
+                            getEmptyPosition(false, randInt(3, 8), true).ifPresent(this::randWalker);
+                        }
                         break;
                     case 2:
                         Position hintPos = new Position(Game.getClient().getHintArrowX(), Game.getClient().getHintArrowY(), Players.getLocal().getFloorLevel());
-                        Log.info(hintPos.toString());
+                        //Log.info(hintPos.toString());
                         for (SceneObject so : SceneObjects.getAt(hintPos)) {
                             if (so.containsAction(defaultAction)) {
-                                so.interact(defaultAction);
+                                if (so.containsAction(a -> a.equals("Open") || a.contains("Climb") || a.equals("Use"))) {
+                                    so.interact(defaultAction);
+                                } else {
+                                    interact(InteractableType.SceneObject, so.getName(), defaultAction, randInt(1, 3), so.getPosition(), false);
+
+                                    if (tinPosition == null && Inventory.contains("Tin ore")) {
+                                        tinPosition = so.getPosition();
+                                    } else if (copperPosition == null && Inventory.contains("Copper ore")) {
+                                        copperPosition = so.getPosition();
+                                    }
+                                }
                                 break;
                             }
                         }
                         break;
                 }
             }
+
+            if (Inventory.isFull()) {
+                dropDuplicateItems();
+            }
+
+            if (randInt(0, 250) == 0) {
+                Log.fine("Opening Random Tab");
+                OgressWrapper.openRandomTab();
+            }
         }
 
         return Random.high(800, 3000);
+    }
+
+    private void handleFurnaceButton() {
+        InterfaceComponent furnaceButton = Interfaces.getComponent(270, 14);
+        if (furnaceButton != null && furnaceButton.isVisible()) {
+            Log.info("Clicking Furnace Button");
+            furnaceButton.interact(ActionOpcodes.INTERFACE_ACTION);
+            Time.sleep(500, 1000);
+        }
+    }
+
+    private void dropDuplicateItems() {
+        if (Inventory.getSelectedItem() != null) {
+            Inventory.getSelectedItem().interact("Cancel");
+        }
+
+        HashSet<String> set = new HashSet<>();
+        Item[] duplicates = Inventory.getItems(x -> !set.add(x.getName()));
+
+        if (duplicates != null && duplicates.length > 0) {
+            int randDropAmount = randInt(1, duplicates.length);
+            Log.info("Dropping " + randDropAmount + " Duplicate Items");
+            for (int i = 0; i < randDropAmount; i++) {
+                if (duplicates[i] != null) {
+                    duplicates[i].interact("Drop");
+                    Time.sleep(500, 1500);
+                }
+            }
+        } else {
+            Log.fine("Dropping All Items");
+            Inventory.getFirst(x -> x.interact("Drop"));
+        }
+        Time.sleepUntil(() -> !Inventory.isFull(), 1000, 5000);
+    }
+
+    private void interact(InteractableType type, String name, Predicate<String> action, int amount, boolean distinct) {
+        interact(type, name, action, amount, null, distinct);
+    }
+
+    private void interact(InteractableType type, String name, Predicate<String> action, int amount, Position position, boolean distinct) {
+
+        int i = 0;
+        Log.fine("Interacting with" + " " + amount + " " + name + "(s)");
+
+        while (i < amount && Game.isLoggedIn() && !main.isStopping()) {
+
+            if (Inventory.isFull()) {
+                dropDuplicateItems();
+            }
+
+            switch (type.key) {
+                case 0:
+                    SceneObject so = SceneObjects.getNearest(o -> o.getName().equals(name)
+                            && (position == null || o.getPosition().equals(position)));
+
+                    if (distinct && so != null) {
+                        Position soPosition = so.getPosition();
+                        SceneObject nextSo = SceneObjects.getNearest(o
+                                -> o.getName().equals(name) && !o.getPosition().equals(soPosition));
+
+                        if (i > 0 && nextSo != null) {
+                            so = nextSo;
+                        }
+                    }
+
+                    if (so != null && so.interact(action)) {
+                        Time.sleepUntil(() -> Players.getLocal().isAnimating() || Players.getLocal().isMoving(),
+                                1000, 6000);
+                        Time.sleep(500, 800);
+                        Time.sleepUntil(() -> !Players.getLocal().isAnimating() && !Players.getLocal().isMoving(),
+                                2000, 8000);
+                        i++;
+                    }
+                    break;
+
+                case 1:
+                    Npc npc = Npcs.getNearest(n -> n.getName().equals(name)
+                            && n.getTargetIndex() == -1 && (position == null || n.getPosition().equals(position)));
+
+                    if (distinct && npc != null) {
+                        Position npcPosition = npc.getPosition();
+                        Npc nextNpc = Npcs.getNearest(n
+                                -> n.getName().equals(name) && !n.getPosition().equals(npcPosition) && (n.getTargetIndex() == -1));
+
+                        if (i > 0 && nextNpc != null) {
+                            npc = nextNpc;
+                        }
+                    }
+
+                    if (npc != null && Players.getLocal().getTargetIndex() == -1) {
+                        npc.interact(action);
+                        Time.sleepUntil(() -> Players.getLocal().getTargetIndex() != -1 || Players.getLocal().isAnimating(),
+                                1000, 6000);
+                        Time.sleep(500, 800);
+                        Time.sleepUntil(() -> Players.getLocal().getTargetIndex() == -1 && !Players.getLocal().isAnimating(),
+                                2000, 8000);
+                        i++;
+                    }
+                    break;
+            }
+            Time.sleep(600, 3000);
+        }
+        if (Dialog.canContinue()) {
+            Dialog.processContinue();
+            Time.sleepUntil(() -> !Dialog.canContinue() && !Dialog.isProcessing(), 5000);
+        }
+    }
+
+    public enum InteractableType {
+        SceneObject(0),
+        Npc(1);
+
+        private final int key;
+
+        InteractableType(int key) {
+            this.key = key;
+        }
     }
 
     private boolean randWalker(int chanceIn100, int distance) {
@@ -414,18 +596,21 @@ public class dqw4w9wgxcq extends Task {
             getEmptyPosition(false, Beggar.randInt(1, distance), true).ifPresent(Movement::walkTo);
             Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
             Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(2000, 5000));
-            return  true;
+            return true;
         }
         return false;
     }
 
     private void useItemOn(String itemName, Interactable target) {
+        Log.info("Using " + itemName + " on " + "target");
         if (Inventory.isItemSelected()) {
             if (target.interact("Use")) {
                 Time.sleepUntil(() -> Varps.get(VARP) != config, 2000, 30 * 1000);
             }
-        } else {
+        } else if (Inventory.contains(itemName)) {
             Inventory.getFirst(itemName).interact("Use");
+        } else {
+            doDefault = true;
         }
     }
 
@@ -449,7 +634,7 @@ public class dqw4w9wgxcq extends Task {
             Time.sleep(400, 800);
         } else if (nameLookupWidget != null && nameLookupWidget.isVisible()
                 && nameLookupWidget.interact(ActionOpcodes.INTERFACE_ACTION)) {
-            Time.sleepUntil(() -> nameInputWidget != null && nameInputWidget.isVisible() && !nameInputWidget.isExplicitlyHidden(), 2000,8000);
+            Time.sleepUntil(() -> nameInputWidget != null && nameInputWidget.isVisible() && !nameInputWidget.isExplicitlyHidden(), 2000, 8000);
             Time.sleep(400, 800);
         }
     }
@@ -487,7 +672,7 @@ public class dqw4w9wgxcq extends Task {
 
         for (int i = 0; i < clickCount; i++) {
             if (widget.interact(ActionOpcodes.INTERFACE_ACTION)) {
-                Time.sleep(300,  1000);
+                Time.sleep(300, 1000);
             }
         }
     }

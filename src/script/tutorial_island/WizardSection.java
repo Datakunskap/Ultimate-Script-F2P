@@ -113,7 +113,7 @@ public final class WizardSection extends TutorialSection {
                     randWalker(BankLocation.DRAYNOR.getPosition());
                     break;
             }
-            main.beggar.startFighter(true);
+            main.beggar.startFighter();
         }
 
         return TutorialIsland.getRandSleep();

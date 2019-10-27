@@ -16,7 +16,7 @@ public class StopTimeChecker {
 
         Runnable checkStopTime = () -> {
             if ((System.currentTimeMillis() - START_TIME) > STOP_TIME) {
-                fighter.onStop(false, 10);
+                fighter.onStop(true, 10);
             }
         };
         BackgroundTaskExecutor.submit(checkStopTime, 100);

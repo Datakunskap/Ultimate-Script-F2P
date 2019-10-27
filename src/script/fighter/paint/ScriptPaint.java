@@ -8,13 +8,12 @@ import script.fighter.Stats;
 import script.fighter.config.ProgressiveSet;
 import script.fighter.framework.Node;
 import script.fighter.models.Progressive;
-import script.fighter.nodes.idle.IdleNode;
 import script.fighter.wrappers.BankWrapper;
+import script.fighter.wrappers.OgressWrapper;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.text.DecimalFormat;
+import java.util.*;
 
 public final class ScriptPaint implements RenderListener {
 
@@ -29,6 +28,7 @@ public final class ScriptPaint implements RenderListener {
     private static final Color FOREGROUND = Color.WHITE;
     private static final Color BACKGROUND = Color.BLACK;
     private static final Stroke STROKE = new BasicStroke(1.8f);
+    private final DecimalFormat formatNumber = new DecimalFormat("#,###");
 
     private final Map<String, PaintStatistic> stats;
 
@@ -38,8 +38,8 @@ public final class ScriptPaint implements RenderListener {
         stats = new LinkedHashMap<>();
         outline = new Color(240, 0, 73);
 
-        stats.put("Ultimate Beggar", new PaintStatistic(true, () -> "v" + "115" + " by " + "DrScatman"));
-        stats.put("Runtime", new PaintStatistic(() -> context.getRuntime().toElapsedString()));
+        stats.put("Ultimate Ogress", new PaintStatistic(true, () -> "v" + "115" + " by " + "DrScatman"));
+        stats.put("Runtime", new PaintStatistic(() -> Fighter.getRuntime().toElapsedString()));
         stats.put("Status", new PaintStatistic(() -> {
             Node active = context.getActive();
             return active == null ? "None" : active.getClass().getSimpleName() + " -> " + active.status();
@@ -58,25 +58,58 @@ public final class ScriptPaint implements RenderListener {
             String build = builder.toString();
             return build.substring(0, build.length() - 2);
         }));
-        stats.put("Targeting Me", new PaintStatistic(() -> {
-            return String.valueOf(CombatStore.getTargetingMe().size());
-        }));
-        stats.put("GP Gained", new PaintStatistic(() -> {
-            return "" + BankWrapper.getAmountGoldGained();
-        }));
-        /*stats.put("Prioritize Loot", new PaintStatistic(() -> {
-           return String.valueOf(Config.getProgressive().isPrioritizeLooting());
-        }));*/
-        stats.put("Idle", new PaintStatistic(() -> {
+        stats.put("Targeting Me", new PaintStatistic(() -> String.valueOf(CombatStore.getTargetingMe().size())));
+        /*stats.put("Idle", new PaintStatistic(() -> {
            IdleNode node = (IdleNode) context.getSupplier().IDLE;
             String length = node.getIdleFor() + "s";
            if(node.getIdleFor() > 0) {
                return "For " + length;
            }
            return "In " + node.getKills() + " / " + node.getMax() + " Kills";
-        }));
+        }));*/
+        stats.put("Items Alched", new PaintStatistic(()
+                -> String.valueOf(OgressWrapper.itemsAlched)));
+        stats.put("Deaths", new PaintStatistic(()
+                -> String.valueOf(OgressWrapper.deaths)));
+        stats.put("Inventory Value", new PaintStatistic(()
+                -> formatNumber.format(BankWrapper.getInventoryValue())
+                + (BankWrapper.isTradeRestricted() ? " (Trade Restricted)" : "")));
+        stats.put("Total Value", new PaintStatistic(()
+                -> formatNumber.format(BankWrapper.getTotalValue())
+                + (BankWrapper.isTradeRestricted() ? " (Trade Restricted)" : "")));
+        stats.put("Value Gained", new PaintStatistic(()
+                -> formatNumber.format(BankWrapper.getTotalValueGained())
+                + (BankWrapper.isTradeRestricted() ? " (Trade Restricted)" : "")));
+        stats.put("Value / H", new PaintStatistic(()
+                -> format((long) Fighter.getRuntime().getHourlyRate(BankWrapper.getTotalValueGained()))
+                + (BankWrapper.isTradeRestricted() ? " (Trade Restricted)" : "")));
     }
 
+    private static final NavigableMap<Long, String> suffixes = new TreeMap<>();
+
+    {
+        suffixes.put(1_000L, "k");
+        suffixes.put(1_000_000L, "M");
+        suffixes.put(1_000_000_000L, "B");
+        suffixes.put(1_000_000_000_000L, "T");
+        suffixes.put(1_000_000_000_000_000L, "P");
+        suffixes.put(1_000_000_000_000_000_000L, "E");
+    }
+
+    private String format(long value) {
+        //Long.MIN_VALUE == -Long.MIN_VALUE so we need an adjustment here
+        if (value == Long.MIN_VALUE) return format(Long.MIN_VALUE + 1);
+        if (value < 0) return "-" + format(-value);
+        if (value < 1000) return Long.toString(value); //deal with easy case
+
+        Map.Entry<Long, String> e = suffixes.floorEntry(value);
+        Long divideBy = e.getKey();
+        String suffix = e.getValue();
+
+        long truncated = value / (divideBy / 10); //the number part of the output times 10
+        boolean hasDecimal = truncated < 100 && (truncated / 10d) != (truncated / 10);
+        return hasDecimal ? (truncated / 10d) + suffix : (truncated / 10) + suffix;
+    }
 
     public Color getOutline() {
         return outline;

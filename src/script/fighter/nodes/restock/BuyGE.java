@@ -1,39 +1,28 @@
 package script.fighter.nodes.restock;
 
-import api.component.ExPriceCheck;
-import org.rspeer.runetek.adapter.scene.Npc;
-import org.rspeer.runetek.adapter.scene.SceneObject;
-import org.rspeer.runetek.api.Definitions;
-import org.rspeer.runetek.api.commons.BankLocation;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Bank;
-import org.rspeer.runetek.api.component.Dialog;
 import org.rspeer.runetek.api.component.GrandExchange;
+import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.component.tab.Equipment;
-import org.rspeer.runetek.api.component.tab.EquipmentSlot;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.component.tab.Spell;
 import org.rspeer.runetek.api.input.Keyboard;
-import org.rspeer.runetek.api.movement.Movement;
-import org.rspeer.runetek.api.movement.position.Position;
-import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
-import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
-import org.rspeer.runetek.providers.RSItemDefinition;
 import org.rspeer.ui.Log;
+import script.Beggar;
 import script.data.Location;
 import script.fighter.Fighter;
 import script.fighter.config.Config;
 import script.fighter.debug.Logger;
 import script.fighter.framework.Node;
 import script.fighter.models.Progressive;
-import script.fighter.nodes.ogress.GoToCove;
 import script.fighter.wrappers.*;
 import script.tanner.ExGrandExchange;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -48,6 +37,7 @@ public class BuyGE extends Node {
     private boolean checkedBank;
     private boolean triedTeleport;
     private int coinsToSpend;
+    private int quantity;
 
     public BuyGE(Fighter main) {
         this.main = main;
@@ -59,39 +49,30 @@ public class BuyGE extends Node {
             return true;
 
         Progressive p = Config.getProgressive();
-        items = p.getRunes();
+        items = new HashSet<>();
         spell = p.getSpell();
 
-        if (items != null && items.size() > 0 && spell != null &&
-                (!GEWrapper.hasRunes(spell) || !GEWrapper.hasEquipment() ||
-                        (p.isSplash() && p.isUseSplashGear() && !SplashWrapper.hasSplashGear(false)))) {
+        if ((p.isSplash() || p.isOgress()) && runesIterator == null &&
+                (!GEWrapper.hasRunes(spell) || !GEWrapper.hasEquipment())) {
 
-            Log.info(items != null);
-            Log.info(items.size() > 0);
-            Log.info(spell != null);
-            Log.info(!GEWrapper.hasRunes(spell));
-            Log.info(!GEWrapper.hasEquipment());
-            Log.info(p.isSplash());
-            Log.info(p.isUseSplashGear());
-            Log.info(!SplashWrapper.hasSplashGear(false));
-
-            if (p.isSplash() && p.isUseSplashGear() && !SplashWrapper.hasSplashGear(false)) {
-                Log.fine("Restocking: Runes & Splash Gear");
-                items.addAll(Arrays.asList(SplashWrapper.getSplashGear(false)));
-            } else if (!GEWrapper.hasEquipment()) {
-                Log.fine("Restocking: Runes & Equipment");
-                items.addAll(p.getEquipmentMap().values());
-            } else {
-                Log.fine("Restocking: Runes");
+            if (main.getActive() == null || !main.getActive().equals(main.supplier.SELL_GE)) {
+                Log.fine("Selling Loot");
+                GEWrapper.setSellItems(true);
+                return false;
             }
 
-            if (main.getActive() != null && !main.getActive().equals(main.supplier.SELL_GE) && !GEWrapper.isSellItems()) {
-                Log.info("Selling loot");
-                GEWrapper.setSellItems(true);
+            if (!GEWrapper.hasRunes(spell)) {
+                Log.fine("Restocking: Runes");
+                items.addAll(p.getRunes());
+            }
+            if (!GEWrapper.hasEquipment()) {
+                Log.fine("Restocking: Equipment");
+                items.addAll(GEWrapper.getEquipmentNeeded());
             }
 
             runesIterator = items.iterator();
             itemToBuy = runesIterator.next();
+            quantity = getQuantity(itemToBuy);
             return true;
         }
 
@@ -100,43 +81,65 @@ public class BuyGE extends Node {
 
     @Override
     public int execute() {
-        invalidateTask(main.getActive());
+        main.invalidateTask(this);
 
-        if (!Location.GE_AREA.getBegArea().contains(Players.getLocal())) {
+        if (!Location.GE_AREA_LARGE.getBegArea().contains(Players.getLocal())) {
             if (!triedTeleport && (OgressWrapper.CORSAIR_COVE[0].contains(Players.getLocal())
                     || SplashWrapper.getSplashArea().contains(Players.getLocal()))) {
 
-                TeleportWrapper.teleportHome();
+                TeleportWrapper.tryTeleport(false);
                 triedTeleport = true;
             }
             status = "Walking to GE";
-            walkToGE();
+            GEWrapper.walkToGE();
             return Fighter.getLoopReturn();
+        }
+
+        coinsToSpend = Inventory.getCount(true, "Coins");
+
+        // check GP
+        if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
+            if (coinsToSpend < (getPrice(itemToBuy) * quantity)) {
+                if (!checkedBank) {
+                    Log.info(itemToBuy + " : "  + (getPrice(itemToBuy) * quantity) + " --> Checking Bank");
+                    BankWrapper.openAndDepositAll(true, true, true);
+                    runesIterator = null;
+                    checkedBank = true;
+                } else {
+                    Log.fine(itemToBuy + " : "  + (getPrice(itemToBuy) * quantity) + " --> Begging");
+                    main.onStop(true, true, 10);
+                    runesIterator = null;
+                }
+                return Fighter.getLoopReturn();
+            }
         }
 
         if (!GrandExchange.isOpen()) {
             status = "Restocking";
-            coinsToSpend = Inventory.getCount(true, "Coins");
+            Bank.close();
+            BankWrapper.updateInventoryValue();
             GEWrapper.openGE();
             return Fighter.getLoopReturn();
         }
 
         if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
-            if ((!Inventory.contains(itemToBuy) || Inventory.getCount(true, itemToBuy) < getQuantity(itemToBuy)) && !Equipment.contains(itemToBuy)) {
-                if (ExGrandExchange.buy(itemToBuy, getQuantity(itemToBuy), getPrice(itemToBuy), false)) {
-                    if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemName().toLowerCase().equals(itemToBuy)) != null, 1000, 8000)) {
-                        Logger.debug("Buying: " + getQuantity(itemToBuy) + " " + itemToBuy);
+            if ((!Inventory.contains(itemToBuy) || Inventory.getCount(true, itemToBuy) < quantity) && !Equipment.contains(itemToBuy)) {
+                if (ExGrandExchange.buy(itemToBuy, quantity, getPrice(itemToBuy), false)) {
+                    Log.info("Buying: " + quantity + " " + itemToBuy);
+                    if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemName().toLowerCase().equals(itemToBuy)) != null, 8000)) {
                         if (runesIterator.hasNext()) {
                             itemToBuy = runesIterator.next();
+                            quantity = getQuantity(itemToBuy);
                         } else {
                             runesIterator = null;
                         }
                     }
                 }
             } else {
-                Log.info("Already has: " + getQuantity(itemToBuy) + " " + itemToBuy);
+                Log.info("Already has: " + quantity + " " + itemToBuy);
                 if (runesIterator.hasNext()) {
                     itemToBuy = runesIterator.next();
+                    quantity = getQuantity(itemToBuy);
                 } else {
                     runesIterator = null;
                 }
@@ -148,6 +151,7 @@ public class BuyGE extends Node {
         }
 
         if (GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
+            status = "Waiting for completion";
             GrandExchange.collectAll();
             Keyboard.pressEnter();
         }
@@ -161,146 +165,89 @@ public class BuyGE extends Node {
     }
 
     private void doneRestockingHelper() {
-        Progressive p = Config.getProgressive();
+        status = "Completed";
+        Interfaces.closeAll();
         GEWrapper.closeGE();
-        BankWrapper.openAndDepositAll(p.isSplash() ? 45 : 0, items.toArray(new String[0]));
+
+        BankWrapper.openAndDepositAll(Config.getProgressive().isSplash() ? 45 : 0, true, true);
         Bank.close();
         Time.sleepUntil(Bank::isClosed, 1000, 5000);
-        equipEquipment(p);
-        if (p.isSplash() || p.getEnemies().contains("chicken")) {
-            TeleportWrapper.teleportHome();
-        }
-    }
-
-    private void walkToGE() {
-        if (GoToCove.shouldEnableRun())
-            Movement.toggleRun(true);
-
-        if (OgressWrapper.CORSAIR_COVE_DUNGEON.contains(Players.getLocal()) ||
-                OgressWrapper.CORSAIR_COVE[0].contains(Players.getLocal())) {
-
-            Movement.walkTo(OgressWrapper.TOCK_BOAT_FROM_COVE_POSITION);
-            handleObstacles();
-
-        } else if (OgressWrapper.CORSAIR_COVE[1].contains(Players.getLocal())) {
-            Npc tock = Npcs.getNearest("Captain Tock");
-            if (tock != null) {
-                if (!Dialog.isOpen()) {
-                    tock.interact("Talk-to");
-                } else {
-                    Dialog.process(d -> d.contains("Rimmington"));
-                    Dialog.processContinue();
-                }
-            }
-        } else if (!Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition())) {
-            handleObstacles();
-        }
+        BankWrapper.updateInventoryValue();
     }
 
     private int getQuantity(String item) {
         Progressive p = Config.getProgressive();
-        int spending = coinsToSpend;
+        int amnt;
 
-        if (p.isSplash() && p.isUseSplashGear() && Arrays.asList(SplashWrapper.getSplashGear(false)).contains(item)) {
-            return 1;
-        }
         if (p.isSplash() && p.getRunes().contains(item)) {
-            return SplashWrapper.getSplashStartAmnt(p.isUseSplashGear()) / (getPrice(item) * p.getRunes().size());
+            return SplashWrapper.getSplashStartAmnt(false) / (getPrice(item) * p.getRunes().size());
         }
         if (spell.equals(Spell.Modern.WIND_STRIKE) && p.getRunes().contains(item)) {
 
-            int amnt = spending / (getPrice(item) * p.getRunes().size());
+            amnt = coinsToSpend / (getPrice(item) * p.getRunes().size());
             if (amnt <= 50) {
                 return amnt;
             }
             return Random.mid(35, 50);
         }
-        if (spell.equals(Spell.Modern.FIRE_STRIKE) && p.getRunes().contains(item) && !item.contains("staff")) {
+        if (spell.equals(Spell.Modern.FIRE_STRIKE) && p.getRunes().contains(item)) {
 
-            String staff = p.getEquipmentMap().get(EquipmentSlot.MAINHAND);
-
-            if (items.contains(staff) && !GEWrapper.hasEquipment()) {
-                spending -= (getPrice(staff) / p.getRunes().size());
+            if (!GEWrapper.hasEquipment()) {
+                Collection<String> equipment = p.getEquipmentMap().values();
+                for (String e : equipment) {
+                    if (items.contains(e)) {
+                        coinsToSpend -= (getPrice(e) / p.getRunes().size());
+                    }
+                }
             }
 
-            int amnt = spending / (getPrice(item) * p.getRunes().size());
+            if (item.equalsIgnoreCase("air rune")) {
+                amnt = coinsToSpend / (getPrice(item) * p.getRunes().size());
+                amnt = amnt * 2;
 
-            if (amnt <= 2400) {
-                return amnt;
+                if (amnt <= (20 * Beggar.OGRESS_MAX_MINUTES_WORTH_OF_RUNES * 2)) {
+                    return amnt;
+                }
+            } else {
+                amnt = coinsToSpend / (getPrice(item) * p.getRunes().size());
+
+                if (amnt <= (20 * Beggar.OGRESS_MAX_MINUTES_WORTH_OF_RUNES)) {
+                    return amnt;
+                }
             }
-            return Random.mid(1600, 2400);
+
+            return item.equalsIgnoreCase("air rune")
+                    ? Random.mid(1200, (20 * Beggar.OGRESS_MAX_MINUTES_WORTH_OF_RUNES)) * 2
+                    : Random.mid(1200, (20 * Beggar.OGRESS_MAX_MINUTES_WORTH_OF_RUNES));
         }
+
         return 1;
     }
 
-    private void equipEquipment(Progressive p) {
-        HashSet<String> equip = new HashSet<>(p.getEquipmentMap().values());
-        if (p.isSplash()) {
-            equip.addAll(Arrays.asList(SplashWrapper.getSplashGear(false)));
-        }
-        for (String e : equip) {
-            if (Inventory.contains(e)) {
-                Inventory.getFirst(e).interact(a -> true);
-                Time.sleepUntil(() -> Equipment.contains(e), 1000, 8000);
-            }
-        }
-    }
-
     private int getPrice(String item) {
+        Progressive p = Config.getProgressive();
         if (item.equalsIgnoreCase("air rune") || item.equalsIgnoreCase("mind rune")) {
             return 6;
         }
-        if (Arrays.asList(SplashWrapper.getSplashGear(false)).contains(item.toLowerCase())) {
-            return 500;
-        }
-        if (item.contains("staff")) {
+        if (item.equalsIgnoreCase("staff of fire")) {
             return 2000;
         }
-
-        //String upperName = itemToBuy.toUpperCase().charAt(0) + itemToBuy.substring(1);
-        RSItemDefinition def = Definitions.getItem(item, x -> !x.isNoted() && x.isTradable());
-        try {
-            int price = ExPriceCheck.getOSBuddyBuyPrice(def.getId(), true);
-            if (price < 1) {
-                price = ExPriceCheck.getRSBuddyBuyPrice(def.getId(), true);
+        if (p.getEquipmentMap().containsValue(item.toLowerCase())) {
+            if (p.isSplash()) {
+                return 500;
             }
-            if (price < 1) {
-                price = Inventory.getCount(true, 995) / 2;
+            if (item.equalsIgnoreCase("blue wizard robe")) {
+                return 2000;
             }
-            return price + (int) (price * .15);
-        } catch (Exception e) {
-            Log.severe(e.getMessage());
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    private void handleObstacles() {
-        status = "Handling obstacles";
-        SceneObject ladder = (OgressWrapper.CORSAIR_COVE_DUNGEON.contains(Players.getLocal())) ?
-                SceneObjects.getNearest("Vine ladder") : null;
-        SceneObject plank1 = SceneObjects.getFirstAt(new Position(2578, 2839, 0));
-        SceneObject plank2 = SceneObjects.getFirstAt(new Position(2909, 3228, 1));
-
-        if (ladder != null) {
-            if (ladder.interact("Climb")) {
-                Time.sleep(1500, 2000);
-            } else {
-                Movement.walkTo(ladder);
+            if (item.equalsIgnoreCase("blue wizard hat")) {
+                return 500;
             }
-        } else if (plank1 != null) {
-            if (plank1.interact("Cross")) {
-                Time.sleep(3000, 5000);
-            } else {
-                Movement.walkTo(plank1);
-            }
-        } else if (plank2 != null) {
-            if (plank2.interact("Cross")) {
-                Time.sleep(3000, 5000);
-            } else {
-                Movement.walkTo(plank2);
+            if (item.equalsIgnoreCase("zamorak monk bottom")) {
+                return 3000;
             }
         }
+
+        return coinsToSpend / items.size();
     }
 
     @Override
@@ -310,8 +257,8 @@ public class BuyGE extends Node {
             doneRestockingHelper();
         }
 
-        runesIterator = null;
         checkedBank = false;
+        runesIterator = null;
         triedTeleport = false;
         items = null;
         super.onInvalid();

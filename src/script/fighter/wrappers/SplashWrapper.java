@@ -1,53 +1,52 @@
 package script.fighter.wrappers;
 
-import org.rspeer.runetek.api.component.tab.Equipment;
-import org.rspeer.runetek.api.component.tab.Inventory;
-import org.rspeer.runetek.api.component.tab.Skill;
-import org.rspeer.runetek.api.component.tab.Skills;
+import org.rspeer.runetek.api.commons.Time;
+import org.rspeer.runetek.api.component.Bank;
+import org.rspeer.runetek.api.component.GrandExchange;
+import org.rspeer.runetek.api.component.tab.*;
 import org.rspeer.runetek.api.movement.position.Area;
+import org.rspeer.ui.Log;
+import script.Beggar;
 import script.fighter.config.Config;
+
+import java.util.HashMap;
 
 public class SplashWrapper {
 
-    private static final String[] SPLASH_GEAR = new String[]{"cursed goblin staff",
-            "bronze platebody", "bronze full helm", "bronze platelegs", "bronze kiteshield"};
+    public static final String STAFF = "cursed goblin staff";
     private static final Area SPLASH_AREA_MUGGER = Area.rectangular(3015, 3187, 3020, 3184);
     private static final Area SPLASH_AREA_THIEF = Area.rectangular(3011, 3195, 3012, 3191); //Area.rectangular(3011, 3195, 3012, 3194);
     public static final Area DRAYNOR_MARKET_AREA = Area.rectangular(3078, 3252, 3083, 3248);
+    private static final int RAND_AREA_INDEX = Beggar.randInt(0, 1);
 
-    public static boolean isSplash() {
-        return Config.getProgressive().isSplash();
+    public static String getStaff() {
+        return STAFF;
     }
 
-    public static void setSplash(boolean splash) {
-        Config.getProgressive().setSplash(splash);
+    public static boolean hasStaff() {
+        return Inventory.contains(STAFF) || Equipment.contains(STAFF);
     }
 
-    public static String[] getSplashGear(boolean getStaff){
-        if (getStaff) {
-            return SPLASH_GEAR;
-        } else {
-            String[] noStaff = new String[SPLASH_GEAR.length - 1];
-            for (int i = 1; i < SPLASH_GEAR.length; i ++) {
-                noStaff[i - 1] = SPLASH_GEAR[i];
-            }
-            return noStaff;
+    public static void equipEquipment() {
+        if (Bank.isOpen() || GrandExchange.isOpen()) {
+            Bank.close();
+            GEWrapper.closeGE();
+            Time.sleep(500, 800);
         }
-    }
 
-    public static boolean hasSplashGear(boolean checkStaff) {
-        for (String item : SPLASH_GEAR) {
-            if (!checkStaff && item.contains("staff"))
-                continue;
-            if (!Inventory.contains(item) && !Equipment.contains(item)) {
-                return false;
+        HashMap<EquipmentSlot, String> map = Config.getProgressive().getEquipmentMap();
+
+        for (String e : map.values()) {
+            if (Inventory.contains(e)) {
+                Log.fine("Equipping: " + e);
+                Inventory.getFirst(e).interact(a -> true);
+                Time.sleepUntil(() -> Equipment.contains(e), 1000, 8000);
             }
         }
-        return true;
     }
 
     public static Area getSplashArea() {
-        if (hasSplashGear(false)) {
+        if (RAND_AREA_INDEX == 0 && Beggar.SPLASH_USE_EQUIPMENT) {
             return SPLASH_AREA_MUGGER;
         } else {
             return SPLASH_AREA_THIEF;

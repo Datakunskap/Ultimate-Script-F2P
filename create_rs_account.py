@@ -15,18 +15,6 @@ CAPTCHA_RES_URL = CAPTCHA_URL + 'res.php'
 CAPTCHA_API_KEY = '4935affd16c15fb4100e8813cdccfab6'
 
 
-# By linkLocator = By.cssSelector("a[href*='http://echo7.bluehornet.com']");
-# String validLink = "";
-# List<WebElement> links = driver.findElements(linkLocator);
-# for (WebElement link : links) {
-# if (link.getText().contains("submit_code")) {
-# validLink = link.getText();
-# break;
-# }
-# }
-# driver.get(validLink);
-# utilities.waitUntilUrlContains("submit_code");
-
 def verify_email(s, sleep=60):
     server_name = "imap.gmail.com"
     username = "milleja115"
@@ -94,8 +82,12 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
     Proxy: %s''' % (email, password, ('None' if proxyIp is None else proxyIp)))
 
     if proxyIp:
-        proxies = {'http': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort),
-                   'https': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort)}
+        if proxyUser and proxyPass and proxyUser != 'null' and proxyPass != 'null':
+            proxies = {'http': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort),
+                        'https': 'socks5h://%s:%s@%s:%s' % (proxyUser, proxyPass, proxyIp, proxyPort)}
+        else:
+            proxies = {'http': 'socks5h://%s:%s' % (proxyIp, proxyPort),
+                        'https': 'socks5h://%s:%s' % (proxyIp, proxyPort)}
 
     s = requests.session()
     s.proxies = proxies
@@ -121,8 +113,10 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
         if 'Account Created' in response.text:
             print('Robots win again, account successfully registered\n\n')
             with open('C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt', 'a+') as f:
-                if proxyIp:
+                if proxyIp and proxyUser and proxyPass and proxyUser != 'null' and proxyPass != 'null':
                     f.write('%s:%s:%s:%s:%s:%s\n' % (email, password, proxyIp, proxyUser, proxyPass, proxyPort))
+                elif proxyIp:
+                    f.write('%s:%s:%s:%s\n' % (email, password, proxyIp, proxyPort))
                 else:
                     f.write('%s:%s\n' % (email, password))
                 f.close()

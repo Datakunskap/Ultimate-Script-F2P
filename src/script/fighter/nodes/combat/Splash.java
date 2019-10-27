@@ -1,6 +1,7 @@
 package script.fighter.nodes.combat;
 
 import org.rspeer.runetek.adapter.scene.Npc;
+import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.component.Dialog;
@@ -11,13 +12,12 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.ui.Log;
+import script.Beggar;
 import script.fighter.Fighter;
 import script.fighter.config.Config;
-import script.fighter.debug.Logger;
 import script.fighter.framework.Node;
-import script.fighter.wrappers.GEWrapper;
-import script.fighter.wrappers.OgressWrapper;
-import script.fighter.wrappers.SplashWrapper;
+import script.fighter.models.Progressive;
+import script.fighter.wrappers.*;
 
 public class Splash extends Node {
 
@@ -35,17 +35,32 @@ public class Splash extends Node {
     @Override
     public boolean validate() {
         spell = Config.getProgressive().getSpell();
+        if (Beggar.SPLASH_USE_EQUIPMENT && !GEWrapper.hasEquipment()) {
+            return false;
+        }
 
         return Config.getProgressive().isSplash() && GEWrapper.hasRunes(spell);
     }
 
     @Override
     public int execute() {
-        invalidateTask(main.getActive());
+        main.invalidateTask(this);
 
-        if (!Equipment.contains(SplashWrapper.getSplashGear(true)[0])) {
+        if (!Game.isLoggedIn() || Players.getLocal() == null) {
+            return 1000;
+        }
+
+        Progressive p = Config.getProgressive();
+        if (p.isUseSplashGear()) {
+            if (!Equipment.containsAll(p.getEquipmentMap().values().toArray(new String[0]))) {
+                SplashWrapper.equipEquipment();
+            }
+        }
+
+        if (!Equipment.contains(SplashWrapper.getStaff())) {
             status = "Getting staff";
             getStaff();
+            TeleportWrapper.tryTeleport(true);
             return Random.high(600, 1600);
         }
 
@@ -60,25 +75,29 @@ public class Splash extends Node {
 
         if (Dialog.canContinue()) {
             Dialog.processContinue();
-            if (lvl != Skills.getLevel(Skill.MAGIC)) {
-                lvl = Skills.getLevel(Skill.MAGIC);
-                Log.fine("Magic LVL: " + lvl);
-            }
-            if (lvl >= STOP_LVL) {
-                SplashWrapper.setSplash(false);
-            }
+        }
+
+        if (lvl != Skills.getLevel(Skill.MAGIC)) {
+            lvl = Skills.getLevel(Skill.MAGIC);
+            Log.fine("Magic LVL: " + lvl);
+        }
+
+        if (lvl >= STOP_LVL) {
+            p.setSplash(false);
+            TeleportWrapper.tryTeleport(false);
         }
 
         if (!Magic.Autocast.isEnabled() || !Magic.Autocast.isSpellSelected(spell)) {
             Log.info("Setting autocast");
-            if (SplashWrapper.hasSplashGear(true)) {
+            if (GEWrapper.hasEquipment()) {
                 Magic.Autocast.select(Magic.Autocast.Mode.OFFENSIVE, spell);
             } else {
                 Magic.Autocast.select(Magic.Autocast.Mode.DEFENSIVE, spell);
             }
         }
 
-        Npc npc = Npcs.getNearest(n -> Config.getProgressive().getEnemies().contains(n.getName().toLowerCase()));
+        Npc npc = Npcs.getNearest(n -> Config.getProgressive().getEnemies().contains(n.getName().toLowerCase()) && n.getTargetIndex() == -1);
+
         if (npc != null && Players.getLocal().getTargetIndex() == -1 && !Players.getLocal().isAnimating()) {
             Log.info("Manual cast");
             status = "Splashing: " + npc.getName();
@@ -91,13 +110,15 @@ public class Splash extends Node {
             Log.severe("Cant Find Npc");
         }
 
+        WorldhopWrapper.checkWorldhop(false);
+
         return Random.high(2000, 5000);
     }
 
     private void getStaff() {
         Area market = SplashWrapper.DRAYNOR_MARKET_AREA;
         Npc django = Npcs.getNearest("Diango");
-        String staff = SplashWrapper.getSplashGear(true)[0];
+        String staff = SplashWrapper.getStaff();
 
         if (Inventory.contains(staff)) {
             if (Shop.isOpen()) {
@@ -122,25 +143,19 @@ public class Splash extends Node {
 
     @Override
     public void onInvalid() {
-        if (SplashWrapper.hasSplashGear(false)) {
+        if (!Config.getProgressive().isSplash() && GEWrapper.hasEquipment()) {
             Tabs.open(Tab.EQUIPMENT);
             Time.sleepUntil(() -> Tabs.getOpen() == Tab.EQUIPMENT, 1000, 5000);
             OgressWrapper.unequipAll(false);
         }
+
+        WorldhopWrapper.resetChecker();
         super.onInvalid();
     }
 
     @Override
     public String status() {
         return status;
-    }
-
-    public void invalidateTask(Node active) {
-        if (active != null && !this.equals(active)) {
-            Logger.debug("Node has changed.");
-            active.onInvalid();
-        }
-        main.setActive(this);
     }
 
     public static void setShiftPosition(boolean shift) {

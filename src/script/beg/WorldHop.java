@@ -14,8 +14,9 @@ import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.Beggar;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.File;
+
+import static script.fighter.wrappers.WorldhopWrapper.*;
 
 public class WorldHop extends Task {
 
@@ -35,32 +36,32 @@ public class WorldHop extends Task {
         main.atMinPop = false;
         resetMinPop();
         openWorldSwitcher();
-        main.OTHER_BEG_WORLDS = getWorldsFromFile();
+        OTHER_BEG_WORLDS = getWorldsFromFile(Beggar.CURR_WORLD_PATH);
 
         if (main.runningClients != null && main.runningClients.size() > 0 &&
-                main. runningClients.size() >= Beggar.ALLOWED_INSTANCES && main.OTHER_BEG_WORLDS.size() > main.runningClients.size() - 1)
+                main. runningClients.size() >= Beggar.ALLOWED_INSTANCES && OTHER_BEG_WORLDS.size() > main.runningClients.size() - 1)
             new File(Beggar.CURR_WORLD_PATH).delete();
 
 
         if (main.worldHop) {
-            WorldHopper.randomHop(x -> x != null && !main.OTHER_BEG_WORLDS.contains(x.getId()) && x.getPopulation() >= main.worldPop &&
+            WorldHopper.randomHop(x -> x != null && !OTHER_BEG_WORLDS.contains(x.getId()) && x.getPopulation() >= main.worldPop &&
                     x.isMembers() && !x.isSkillTotal());
         }
 
         if (main.worldHopf2p) {
-            if (main.currWorld != main.popWorldsArr[0] && !containsTwoOrMoreWorlds(main.popWorldsArr[0])) {
+            if (main.currWorld != main.popWorldsArr[0] && !containsTwoOrMoreWorlds(main.popWorldsArr[0], OTHER_BEG_WORLDS)) {
 
                 WorldHopper.hopTo(main.popWorldsArr[0]);
-            } else if (main.currWorld != main.popWorldsArr[1] && ((!containsTwoOrMoreWorlds(main.popWorldsArr[1]) && Worlds.get(main.popWorldsArr[1]).getPopulation() > 950) ||
-                    (!main.OTHER_BEG_WORLDS.contains(main.popWorldsArr[1]) && Worlds.get(main.popWorldsArr[1]).getPopulation() >= main.worldPop))) {
+            } else if (main.currWorld != main.popWorldsArr[1] && ((!containsTwoOrMoreWorlds(main.popWorldsArr[1], OTHER_BEG_WORLDS) && Worlds.get(main.popWorldsArr[1]).getPopulation() > 950) ||
+                    (!OTHER_BEG_WORLDS.contains(main.popWorldsArr[1]) && Worlds.get(main.popWorldsArr[1]).getPopulation() >= main.worldPop))) {
 
                 WorldHopper.hopTo(main.popWorldsArr[1]);
-            } else if (main.currWorld != main.popWorldsArr[2] && ((!containsTwoOrMoreWorlds(main.popWorldsArr[2]) && Worlds.get(main.popWorldsArr[2]).getPopulation() > 950) ||
-                    (!main.OTHER_BEG_WORLDS.contains(main.popWorldsArr[2]) && Worlds.get(main.popWorldsArr[2]).getPopulation() >= main.worldPop))) {
+            } else if (main.currWorld != main.popWorldsArr[2] && ((!containsTwoOrMoreWorlds(main.popWorldsArr[2], OTHER_BEG_WORLDS) && Worlds.get(main.popWorldsArr[2]).getPopulation() > 950) ||
+                    (!OTHER_BEG_WORLDS.contains(main.popWorldsArr[2]) && Worlds.get(main.popWorldsArr[2]).getPopulation() >= main.worldPop))) {
 
                 WorldHopper.hopTo(main.popWorldsArr[2]);
             } else {
-                WorldHopper.randomHop(x -> x != null && !main.OTHER_BEG_WORLDS.contains(x.getId()) && x.getPopulation() >= main.worldPop &&
+                WorldHopper.randomHop(x -> x != null && !OTHER_BEG_WORLDS.contains(x.getId()) && x.getPopulation() >= main.worldPop &&
                         !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
             }
         }
@@ -88,7 +89,7 @@ public class WorldHop extends Task {
             Log.fine("World hopped to world: " + Worlds.getCurrent());
             Time.sleep(3000, 5000);
 
-            main.removeCurrBegWorld(main.currWorld);
+            removeWorld(main.currWorld, Beggar.CURR_WORLD_PATH);
             main.currWorld = Worlds.getCurrent();
 
             main.startTime = System.currentTimeMillis();
@@ -96,7 +97,7 @@ public class WorldHop extends Task {
             main.hopTryCount = 0;
 
             main.worldPop = 800;
-            main.writeWorldToFile(main.currWorld);
+            writeWorldToFile(main.currWorld, Beggar.CURR_WORLD_PATH);
             return 1000;
         } else {
             Log.info("World hop failed... Retrying");
@@ -130,11 +131,11 @@ public class WorldHop extends Task {
     }
 
     private void resetMinPop() {
-        main.OTHER_BEG_WORLDS = getWorldsFromFile();
+        OTHER_BEG_WORLDS = getWorldsFromFile(Beggar.CURR_WORLD_PATH);
 
         RSWorld[] f2pCriteriaWorlds = null;
         while (f2pCriteriaWorlds == null || f2pCriteriaWorlds.length == 0) {
-            f2pCriteriaWorlds = Worlds.getLoaded(x -> x != null && !main.OTHER_BEG_WORLDS.contains(x.getId()) && x.getId() != Worlds.getCurrent() &&
+            f2pCriteriaWorlds = Worlds.getLoaded(x -> x != null && !OTHER_BEG_WORLDS.contains(x.getId()) && x.getId() != Worlds.getCurrent() &&
                     x.getPopulation() >= main.worldPop && !x.isMembers() && !x.isBounty() && !x.isSkillTotal());
 
             if (f2pCriteriaWorlds == null || f2pCriteriaWorlds.length == 0) {
@@ -148,55 +149,5 @@ public class WorldHop extends Task {
                 }
             }
         }
-    }
-
-    private ArrayList<Integer> getWorldsFromFile() {
-        Log.info("Checking file");
-
-        ArrayList<Integer> worlds = new ArrayList<>();
-        try {
-            File file = new File(Beggar.CURR_WORLD_PATH);
-
-            if (!file.exists()) {
-                return new ArrayList<>();
-            }
-
-            FileReader fr = new FileReader(file);
-            BufferedReader br = new BufferedReader(fr);
-
-            String line = br.readLine();
-            while (line != null) {
-                line = line.trim();
-                if (!line.equals("") && !line.equals(" ") && !line.equals(System.lineSeparator())) {
-                    worlds.add(Integer.parseInt(line));
-                }
-                line = br.readLine();
-            }
-            br.close();
-        } catch (IOException e) {
-            Log.info("No other beggar FNF");
-            main.writeToErrorFile("FNF: getWorldsFromFile()");
-            return new ArrayList<>();
-        }
-
-        return worlds;
-    }
-
-    private boolean containsTwoOrMoreWorlds(int world) {
-        if (main.OTHER_BEG_WORLDS == null) {
-            main.writeToErrorFile("OTHER_BEG_WORLDS == null: containsTwoWorlds(int world)");
-            return false;
-        }
-
-        boolean one = false;
-        for (int x : main.OTHER_BEG_WORLDS) {
-            if (x == world) {
-                if (one) {
-                    return true;
-                }
-                one = true;
-            }
-        }
-        return false;
     }
 }

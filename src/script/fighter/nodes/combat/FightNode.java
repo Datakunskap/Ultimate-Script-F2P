@@ -33,8 +33,8 @@ public class FightNode extends Node {
     private Fighter main;
 
     public FightNode(Fighter main){
-        this.main = main;
         BackgroundTaskExecutor.submit(this::findNextTarget, 1000);
+        this.main = main;
     }
 
     public FightNode() {
@@ -73,7 +73,7 @@ public class FightNode extends Node {
 
     @Override
     public int execute() {
-        invalidateTask(main.getActive());
+        main.invalidateTask(this);
 
         running = true;
         if(result != null && !CombatStore.hasTarget()) {

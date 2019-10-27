@@ -24,7 +24,7 @@ public class GetFoodNode extends Node {
 
     @Override
     public int execute() {
-        invalidateTask(main.getActive());
+        main.invalidateTask(this);
 
         if(!BankWrapper.openNearest()) {
             return Fighter.getLoopReturn();

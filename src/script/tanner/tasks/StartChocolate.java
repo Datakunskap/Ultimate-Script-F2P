@@ -4,6 +4,7 @@ import org.rspeer.runetek.api.Worlds;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.ui.Log;
 import script.Beggar;
+import script.fighter.wrappers.WorldhopWrapper;
 import script.tanner.Main;
 import script.beg.Mule;
 import script.beg.StartOther;
@@ -39,14 +40,14 @@ public class StartChocolate {
 
         int currWorld = Worlds.getCurrent();
         if (Worlds.get(currWorld).getPopulation() > 400) {
-            StartOther.hopToLowPopWorld(400, currWorld);
+            WorldhopWrapper.hopToLowPopWorld(400, currWorld);
         }
 
 
         if (tanner.isMuling) {
             Mule.logoutMule();
         }
-        beggar.removeCurrBegWorld(beggar.currWorld);
+        WorldhopWrapper.removeWorld(beggar.currWorld, Beggar.CURR_WORLD_PATH);
         beggar.isChoc = true;
         beggar.isTanning = false;
         beggar.timesChocolate++;

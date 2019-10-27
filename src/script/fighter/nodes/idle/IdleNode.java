@@ -66,7 +66,7 @@ public class IdleNode extends Node {
 
     @Override
     public int execute() {
-        invalidateTask(main.getActive());
+        main.invalidateTask(this);
         //Log.info("Idling");
 
         if (idleTill == 0) {
@@ -76,7 +76,7 @@ public class IdleNode extends Node {
         long timeout = getIdleFor();
         if (timeout > 60 && Game.isLoggedIn() && Beggar.IDLE_LOGOUT) {
             Log.fine("Logging out....");
-            main.beggar.removeBlockingEvent(LoginScreen.class);
+            main.getScript().removeBlockingEvent(LoginScreen.class);
             Game.logout();
             Time.sleep(200, 500);
         }
@@ -86,8 +86,8 @@ public class IdleNode extends Node {
         }
         max = 0;
         kills = 0;
-        if (main.beggar.getBlockingEvent(LoginScreen.class) == null) {
-            main.beggar.addBlockingEvent(new LoginScreen(main.beggar));
+        if (main.getScript().getBlockingEvent(LoginScreen.class) == null) {
+            main.getScript().addBlockingEvent(new LoginScreen(main.getScript()));
         }
         return Fighter.getLoopReturn();
     }
@@ -98,8 +98,8 @@ public class IdleNode extends Node {
             kills = 0;
             max = 0;
             idleTill = 0;
-            if (main.beggar.getBlockingEvent(LoginScreen.class) == null) {
-                main.beggar.addBlockingEvent(new LoginScreen(main.beggar));
+            if (main.getScript().getBlockingEvent(LoginScreen.class) == null) {
+                main.getScript().addBlockingEvent(new LoginScreen(main.getScript()));
             }
             super.onInvalid();
         }
