@@ -2,7 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="11">
-      <module name="Ultimate Script" target="11" />
+      <module name="UltimateScript" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

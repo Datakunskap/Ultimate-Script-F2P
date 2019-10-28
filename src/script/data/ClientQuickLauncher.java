@@ -84,7 +84,7 @@ public class ClientQuickLauncher {
         ArrayList<QuickLaunch.Client> clientList = new ArrayList<>();
 
         QuickLaunch.Config config = qL.new Config(
-                true, true, 0, false, false);
+                false, false, 0, false, false);
         QuickLaunch.Script script = qL.new Script(
                 scriptArgs, scriptName, "", isRepositoryScript);
         QuickLaunch.Proxy proxy;

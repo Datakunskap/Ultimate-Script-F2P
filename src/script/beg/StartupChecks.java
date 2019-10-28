@@ -13,7 +13,7 @@ import org.rspeer.ui.Log;
 import script.Script;
 import script.data.CheckTutIsland;
 import script.data.ClientQuickLauncher;
-import script.fighter.QuestingDriver;
+import script.data.QuestingDriver;
 import script.fighter.wrappers.*;
 
 import java.io.IOException;

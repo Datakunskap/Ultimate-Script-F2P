@@ -17,7 +17,7 @@ import script.Script;
 import script.beg.TradePlayer;
 import script.data.Location;
 import script.fighter.Fighter;
-import script.fighter.QuestingDriver;
+import script.data.QuestingDriver;
 import script.fighter.config.Config;
 import script.fighter.framework.Node;
 import script.fighter.models.Progressive;

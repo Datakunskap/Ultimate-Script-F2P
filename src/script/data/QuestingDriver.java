@@ -1,4 +1,4 @@
-package script.fighter;
+package script.data;
 
 import org.rspeer.RSPeer;
 import org.rspeer.runetek.api.Game;
@@ -6,7 +6,6 @@ import org.rspeer.runetek.api.Worlds;
 import org.rspeer.script.GameAccount;
 import org.rspeer.ui.Log;
 import script.Script;
-import script.data.ClientQuickLauncher;
 
 import java.io.IOException;
 

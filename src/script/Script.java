@@ -136,14 +136,14 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
     public static final String PROXY_PASS = "";
     public static final String PROXY_PORT = "1080";
     private static final String PYTHON_3_EXE = System.getProperty("user.home") + "\\AppData\\Local\\Programs\\Python\\Python37\\python.exe";
-    private static final String ACC_GEN_PY = System.getProperty("user.home") + "\\IdeaProjects\\Ultimate Script\\create_rs_account.py";
+    private static final String ACC_GEN_PY = System.getProperty("user.home") + "\\IdeaProjects\\UltimateScript\\create_rs_account.py";
     public static final String CURR_WORLD_PATH = org.rspeer.script.Script.getDataDirectory() + "\\CurrBegWorld.txt";
     public static final String OGRESS_WORLD_PATH = org.rspeer.script.Script.getDataDirectory() + "\\OgressWorlds.txt";
     private static final String ERROR_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeerErrors.txt";
     private static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
-    public static final String BEG_LINES_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Ultimate Script\\BegLines.txt";
-    private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Ultimate Script\\Runescape-Account-Generator-2.0.jar";
-    public static final String RESTART_SCRIPT_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Ultimate Script\\RestartScript.jar";
+    public static final String BEG_LINES_PATH = System.getProperty("user.home") + "\\IdeaProjects\\UltimateScript\\BegLines.txt";
+    private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\UltimateScript\\Runescape-Account-Generator-2.0.jar";
+    public static final String RESTART_SCRIPT_PATH = System.getProperty("user.home") + "\\IdeaProjects\\UltimateScript\\RestartScript.jar";
 
     public static final String MULE_NAME = "Madman38snur";
     public static final MuleArea MULE_AREA = MuleArea.GE_NEW;
