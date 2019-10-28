@@ -1,23 +1,23 @@
 package script.tutorial_island;
 
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.data.CheckTutIsland;
 
 public final class TutorialIsland {
 
     private static TutorialIsland main;
-    public Beggar beggar;
-    final int idleTutSection = Beggar.randInt(0, 20);
-    boolean hasIdled = !Beggar.TUTORIAL_IDLE;
+    public Script script;
+    final int idleTutSection = Script.randInt(0, 20);
+    boolean hasIdled = !Script.TUTORIAL_IDLE;
     boolean isIdling;
 
-    private TutorialIsland(Beggar script) {
-        beggar = script;
+    private TutorialIsland(Script script) {
+        this.script = script;
     }
 
     //method to return instance of class
-    public static TutorialIsland getInstance(Beggar script) {
+    public static TutorialIsland getInstance(Script script) {
         if (main == null) {
             // if instance is null, initialize
             main = new TutorialIsland(script);
@@ -26,7 +26,7 @@ public final class TutorialIsland {
     }
 
     public boolean onTutorialIsland() {
-        if (new CheckTutIsland(beggar).onTutIsland()) {
+        if (new CheckTutIsland(script).onTutIsland()) {
             return true;
         }
         Log.fine("Tutorial Island Complete");
@@ -34,21 +34,21 @@ public final class TutorialIsland {
     }
 
     public static int getRandSleep(){
-        return Beggar.randInt(1000, 2500);
+        return Script.randInt(1000, 2500);
     }
 
     public static int randomSectionRun;
 
     public void start() {
-        beggar.removeAll();
+        script.removeAll();
 
-        randomSectionRun = Beggar.randInt(2, 5);
+        randomSectionRun = Script.randInt(2, 5);
         Log.fine("Starting Tutorial Island");
 
-        if (!Beggar.EXPLV_TUTORIAL) {
-            beggar.submit(new dqw4w9wgxcq(main));
+        if (!Script.EXPLV_TUTORIAL) {
+            script.submit(new dqw4w9wgxcq(main));
         } else {
-            beggar.submit(
+            script.submit(
                     new Idle(this),
                     new RuneScapeGuideSection(),
                     new EnableRun(),
@@ -65,10 +65,10 @@ public final class TutorialIsland {
     }
 
     public boolean isStopping(){
-        return beggar.isStopping();
+        return script.isStopping();
     }
 
     public TutorialIsland copy() {
-        return new TutorialIsland(beggar);
+        return new TutorialIsland(script);
     }
 }

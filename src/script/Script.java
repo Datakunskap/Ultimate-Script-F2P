@@ -22,7 +22,6 @@ import org.rspeer.runetek.event.types.*;
 import org.rspeer.runetek.providers.RSWorld;
 import org.rspeer.runetek.providers.subclass.GameCanvas;
 import org.rspeer.script.GameAccount;
-import org.rspeer.script.Script;
 import org.rspeer.script.ScriptMeta;
 import org.rspeer.script.events.LoginScreen;
 import org.rspeer.script.task.TaskScript;
@@ -47,8 +46,8 @@ import java.util.concurrent.TimeUnit;
 import static org.rspeer.runetek.event.types.LoginResponseEvent.Response.INVALID_CREDENTIALS;
 import static org.rspeer.runetek.event.types.LoginResponseEvent.Response.RUNESCAPE_UPDATE_2;
 
-@ScriptMeta(name = "Ultimate Beggar", desc = "Begs for gp", developer = "DrScatman")
-public class Beggar extends TaskScript implements RenderListener, ChatMessageListener, LoginResponseListener, DeathListener, TargetListener {
+@ScriptMeta(name = "Ultimate Script", desc = "My Script", developer = "DrScatman")
+public class Script extends TaskScript implements RenderListener, ChatMessageListener, LoginResponseListener, DeathListener, TargetListener {
 
     public int startC = -1;
     public StopWatch runtime;
@@ -129,7 +128,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public boolean ogressBeg;
     public static final boolean BUY_GEAR = true;
     private static final boolean SELENIUM_VERIFY_GEN = false;
-    public static final boolean RESET_RUNTIME = false;
+    public static final boolean RESET_RUNTIME = true;
 
 
     public static final String[] PROXY_IP = new String[]{}; // { "209.163.117.212", "167.160.71.140", "172.96.82.150", "172.96.95.99", "DEFAULT" };//"108.187.189.123";
@@ -137,14 +136,14 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final String PROXY_PASS = "";
     public static final String PROXY_PORT = "1080";
     private static final String PYTHON_3_EXE = System.getProperty("user.home") + "\\AppData\\Local\\Programs\\Python\\Python37\\python.exe";
-    private static final String ACC_GEN_PY = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\create_rs_account.py";
-    public static final String CURR_WORLD_PATH = Script.getDataDirectory() + "\\CurrBegWorld.txt";
-    public static final String OGRESS_WORLD_PATH = Script.getDataDirectory() + "\\OgressWorlds.txt";
+    private static final String ACC_GEN_PY = System.getProperty("user.home") + "\\IdeaProjects\\Ultimate Script\\create_rs_account.py";
+    public static final String CURR_WORLD_PATH = org.rspeer.script.Script.getDataDirectory() + "\\CurrBegWorld.txt";
+    public static final String OGRESS_WORLD_PATH = org.rspeer.script.Script.getDataDirectory() + "\\OgressWorlds.txt";
     private static final String ERROR_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeerErrors.txt";
     private static final String ACCOUNTS_FILE_PATH = System.getProperty("user.home") + "\\OneDrive\\Desktop\\RSPeer\\f2pAccounts.txt";
-    public static final String BEG_LINES_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\BegLines.txt";
-    private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\Runescape-Account-Generator-2.0.jar";
-    public static final String RESTART_SCRIPT_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Beggar\\RestartScript.jar";
+    public static final String BEG_LINES_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Ultimate Script\\BegLines.txt";
+    private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Ultimate Script\\Runescape-Account-Generator-2.0.jar";
+    public static final String RESTART_SCRIPT_PATH = System.getProperty("user.home") + "\\IdeaProjects\\Ultimate Script\\RestartScript.jar";
 
     public static final String MULE_NAME = "Madman38snur";
     public static final MuleArea MULE_AREA = MuleArea.GE_NEW;
@@ -165,7 +164,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
     public static final int OGRESS_START_GP = 25_000;
     public static final boolean SPLASH_USE_EQUIPMENT = true;
     public static final int OGRESS_WORLD_HOP_MINS = 5;
-    public static final int OGRESS_MAX_MINUTES_WORTH_OF_RUNES = 120;
+    public static final int OGRESS_MAX_MINUTES_WORTH_OF_RUNES = 150;
     public static final int OGRESS_MULE_AMOUNT = 115_115;
 
     @Override
@@ -254,7 +253,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
         trading = false;
         equipped = false;
         bought = false;
-        randBuyGP = Beggar.randInt(1500, 5000);
+        randBuyGP = Script.randInt(1500, 5000);
         isMuling = false;
         startTime = (worldHop || worldHopf2p) ? System.currentTimeMillis() : 0;
         startupChecks = false;
@@ -262,7 +261,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         resetRender(RESET_RUNTIME);
 
-        Log.fine("Starting Beggar");
+        Log.fine("Starting Script");
         submitTasks();
     }
 
@@ -282,7 +281,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             int world = getNextWorld();
 
             try {
-                new ClientQuickLauncher("Ultimate Beggar", false, world).launchClient(info);
+                new ClientQuickLauncher("Ultimate Script", false, world).launchClient(info);
                 killClient();
 
             } catch (IOException e) {
@@ -314,7 +313,7 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
 
         if (currWorld != -1 && !isTanning && !isChoc) {
             Log.info("World Removed");
-            WorldhopWrapper.removeWorld(currWorld, Beggar.CURR_WORLD_PATH);
+            WorldhopWrapper.removeWorld(currWorld, Script.CURR_WORLD_PATH);
         }
 
         if (!disableChain && !GAMBLER) {
@@ -324,12 +323,15 @@ public class Beggar extends TaskScript implements RenderListener, ChatMessageLis
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            if (Game.isLoggedIn()) {
+                Game.logout();
+            }
 
             accountGeneratorDriver(NUM_BACKLOG_ACCOUNTS);
             int world = getNextWorld();
 
             try {
-                new ClientQuickLauncher("Ultimate Beggar", false, world).launchClient(readAccount(true));
+                new ClientQuickLauncher("Ultimate Script", false, world).launchClient(readAccount(true));
                 killClient();
 
             } catch (Exception e) {

@@ -6,7 +6,7 @@ import org.rspeer.runetek.api.component.GrandExchange;
 import org.rspeer.runetek.api.component.tab.*;
 import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.fighter.config.Config;
 
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class SplashWrapper {
     private static final Area SPLASH_AREA_MUGGER = Area.rectangular(3015, 3187, 3020, 3184);
     private static final Area SPLASH_AREA_THIEF = Area.rectangular(3011, 3195, 3012, 3191); //Area.rectangular(3011, 3195, 3012, 3194);
     public static final Area DRAYNOR_MARKET_AREA = Area.rectangular(3078, 3252, 3083, 3248);
-    private static final int RAND_AREA_INDEX = Beggar.randInt(0, 1);
+    private static final int RAND_AREA_INDEX = Script.randInt(0, 1);
 
     public static String getStaff() {
         return STAFF;
@@ -46,7 +46,7 @@ public class SplashWrapper {
     }
 
     public static Area getSplashArea() {
-        if (RAND_AREA_INDEX == 0 && Beggar.SPLASH_USE_EQUIPMENT) {
+        if (RAND_AREA_INDEX == 0 && Script.SPLASH_USE_EQUIPMENT) {
             return SPLASH_AREA_MUGGER;
         } else {
             return SPLASH_AREA_THIEF;

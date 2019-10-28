@@ -13,7 +13,7 @@ import org.rspeer.runetek.event.types.RenderEvent;
 import org.rspeer.runetek.event.types.TargetEvent;
 import org.rspeer.runetek.providers.subclass.GameCanvas;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.fighter.backgroundTasks.TargetChecker;
 import script.fighter.config.Config;
 import script.fighter.config.ProgressiveSet;
@@ -44,21 +44,21 @@ public class Fighter {
     private static StopWatch runtime;
     private long stopTimeMs;
     private long startTimeMs;
-    private Beggar beggar;
+    private Script script;
     private int totalItemValue;
 
-    public Fighter(Beggar script, long stopTimeMs) {
-        beggar = script;
+    public Fighter(Script script, long stopTimeMs) {
+        this.script = script;
         this.stopTimeMs = stopTimeMs;
     }
 
-    public Fighter(Beggar script) {
+    public Fighter(Script script) {
         stopTimeMs = Long.MAX_VALUE;
-        beggar = script;
+        this.script = script;
     }
 
-    public Beggar getScript() {
-        return beggar;
+    public Script getScript() {
+        return script;
     }
 
     public static int getLoopReturn() {
@@ -80,7 +80,7 @@ public class Fighter {
     }
 
     public void onStart(boolean isOgress, int retries) {
-        beggar.isFighterRunning = true;
+        script.isFighterRunning = true;
         if (isOgress) {
             setupSplashProgressive();
             setupOgressProgressive();
@@ -95,7 +95,7 @@ public class Fighter {
         supplier = new NodeSupplier(this, isOgress);
         manager = new NodeManager();
 
-        runtime = beggar.runtime;
+        runtime = StopWatch.start();
         startTimeMs = System.currentTimeMillis();
         paint = new ScriptPaint(this);
         if (!isOgress)
@@ -111,7 +111,7 @@ public class Fighter {
 
     private void setupNodes(boolean isOgress) {
         if (isOgress) {
-            beggar.submit(
+            script.submit(
                     supplier.MULE,
                     supplier.SELL_GE,
                     supplier.BUY_GE,
@@ -120,7 +120,7 @@ public class Fighter {
                     supplier.SPLASH,
                     supplier.GO_TO_COVE);
         } else {
-            beggar.submit(
+            script.submit(
                     supplier.EAT,
                     supplier.GET_FOOD,
                     supplier.DEPOSIT_LOOT,
@@ -197,10 +197,10 @@ public class Fighter {
         progressive.setEnemies(enemies);
         progressive.setEquipmentMap(new HashMap<>());
         progressive.setRandomIdle(false);
-        progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
+        progressive.setRandomIdleBuffer(Script.randInt(20, 30));
         HashMap<EquipmentSlot, String> map = new HashMap<>();
-        progressive.setUseSplashGear(Beggar.SPLASH_USE_EQUIPMENT);
-        if (Beggar.SPLASH_USE_EQUIPMENT) {
+        progressive.setUseSplashGear(Script.SPLASH_USE_EQUIPMENT);
+        if (Script.SPLASH_USE_EQUIPMENT) {
             map.put(EquipmentSlot.HEAD, "bronze full helm");
             map.put(EquipmentSlot.CHEST, "bronze platebody");
             map.put(EquipmentSlot.LEGS, "bronze platelegs");
@@ -236,7 +236,7 @@ public class Fighter {
         progressive.setLoot(loot);
         progressive.setPrioritizeLooting(false);
         progressive.setBuryBones(false);
-        switch (Beggar.randInt(0, 3)) {
+        switch (Script.randInt(0, 3)) {
             case 0:
                 progressive.setPosition(new Position(3017, 3290)); //Sarim chickens
                 break;
@@ -252,9 +252,9 @@ public class Fighter {
         }
         progressive.setRadius(Random.low(10, 15));
         progressive.setRandomIdle(true);
-        progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
+        progressive.setRandomIdleBuffer(Script.randInt(20, 30));
         progressive.setMinimumLevel(1);
-        int switchLvl = Beggar.randInt(5, 8);
+        int switchLvl = Script.randInt(5, 8);
         progressive.setMaximumLevel(switchLvl);
         ProgressiveSet.add(progressive);
 
@@ -264,7 +264,7 @@ public class Fighter {
         HashSet<String> e2 = new HashSet<>(enemies);
         e2.add("goblin");
         progressive2.setEnemies(e2);
-        if (Beggar.randInt(0, 1) == 0) {
+        if (Script.randInt(0, 1) == 0) {
             progressive2.setPosition(new Position(3248, 3237)); //Lumbridge east river lum
         } else {
             progressive2.setPosition(new Position(3188, 3277)); //Lumbridge chickens (small)
@@ -294,7 +294,7 @@ public class Fighter {
         progressive.setEnemies(enemies);
         progressive.setEquipmentMap(new HashMap<>());
         progressive.setRandomIdle(true);
-        progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
+        progressive.setRandomIdleBuffer(Script.randInt(20, 30));
 
         ProgressiveSet.add(progressive);
     }
@@ -303,7 +303,7 @@ public class Fighter {
         Progressive progressive = new Progressive();
         progressive.setName("Default");
         HashMap<EquipmentSlot, String> map = new HashMap<>();
-        switch (Beggar.randInt(0, 2)) {
+        switch (Script.randInt(0, 2)) {
             case 0:
                 map.put(EquipmentSlot.MAINHAND, "Bronze sword");
                 map.put(EquipmentSlot.OFFHAND, "Wooden shield");
@@ -322,7 +322,7 @@ public class Fighter {
 
         progressive.setEquipmentMap(map);
 
-        switch (Beggar.FIGHTER_TRAIN_DEFENCE ? 2 : Beggar.randInt(0, 2)) {
+        switch (Script.FIGHTER_TRAIN_DEFENCE ? 2 : Script.randInt(0, 2)) {
             case 0:
                 if (map.containsKey(EquipmentSlot.QUIVER)) {
                     progressive.setStyle(Combat.AttackStyle.ACCURATE);
@@ -361,7 +361,7 @@ public class Fighter {
         String[] runes = new String[]{"air rune", "mind rune", "water rune", "earth rune", "fire rune",
                 "chaos rune", "cosmic rune", "nature rune", "law rune", "death rune", "body rune"};
         loot.addAll(Arrays.asList(runes));
-        if (Beggar.randInt(0, 1) == 0) {
+        if (Script.randInt(0, 1) == 0) {
             loot.add("bones");
         }
         progressive.setLoot(loot);
@@ -375,7 +375,7 @@ public class Fighter {
         progressive.setEnemies(enemies);
 
         if (progressive.getEnemies().contains("chicken")) {
-            switch (Beggar.randInt(0, 3)) {
+            switch (Script.randInt(0, 3)) {
                 case 0:
                     progressive.setPosition(new Position(3017, 3290)); //Sarim chickens
                     break;
@@ -390,7 +390,7 @@ public class Fighter {
                     break;
             }
         } else if (progressive.getEnemies().contains("cow")) {
-            switch (Beggar.randInt(0, 1)) {
+            switch (Script.randInt(0, 1)) {
                 case 0:
                     progressive.setPosition(new Position(3032, 3305)); //Sarim cows
                     break;
@@ -410,7 +410,7 @@ public class Fighter {
         }
 
         progressive.setRandomIdle(true);
-        progressive.setRandomIdleBuffer(Beggar.randInt(20, 30));
+        progressive.setRandomIdleBuffer(Script.randInt(20, 30));
 
 
         CombatStore.resetTargetingValues();
@@ -433,20 +433,20 @@ public class Fighter {
 
     public void onStop(boolean startBeggar, boolean ogressBeg, int bShutdownRetries) {
         if (WorldhopWrapper.currentWorld > 0) {
-            WorldhopWrapper.removeWorld(WorldhopWrapper.currentWorld, Beggar.OGRESS_WORLD_PATH);
+            WorldhopWrapper.removeWorld(WorldhopWrapper.currentWorld, Script.OGRESS_WORLD_PATH);
         }
         if (manager != null) {
             manager.onScriptStop();
         }
-        beggar.removeAll();
+        script.removeAll();
         ProgressiveSet.removeAll();
         CombatStore.resetTargetingValues();
 
         if (startBeggar) {
             if (!ogressBeg) {
-                beggar.isFighterRunning = false;
+                script.isFighterRunning = false;
             }
-            beggar.startBeggar(ogressBeg);
+            script.startBeggar(ogressBeg);
         }
         //super.onStop();
     }

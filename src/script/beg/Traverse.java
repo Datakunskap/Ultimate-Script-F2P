@@ -6,15 +6,15 @@ import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.data.CheckTutIsland;
 
 public class Traverse extends Task {
 
-    private Beggar main;
+    private Script main;
     private WalkingHelper walk;
 
-    public Traverse(Beggar main){
+    public Traverse(Script main){
         this.main = main;
         walk = new WalkingHelper(main);
     }
@@ -27,22 +27,22 @@ public class Traverse extends Task {
     @Override
     public int execute() {
 
-        int rand = Beggar.randInt(1, main.walkChance);
+        int rand = Script.randInt(1, main.walkChance);
 
         if(!main.location.getBegArea().contains(Players.getLocal())){
             //Log.info("Walking to GE");
             //tutIslandCheck();
             Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition());
         } else if (rand != 1 && rand != 2 && rand != 3 && rand != 4 && rand != 5 && rand != 6 && rand != 7) {
-            //main.daxWalker.walkTo(main.location.getBegArea().getTiles().get(Beggar.randInt(0, main.location.getBegArea().getTiles().size() - 1)));
-            Movement.walkToRandomized(main.location.getBegArea().getTiles().get(Beggar.randInt(0, main.location.getBegArea().getTiles().size() - 1)));
+            //main.daxWalker.walkTo(main.location.getBegArea().getTiles().get(Script.randInt(0, main.location.getBegArea().getTiles().size() - 1)));
+            Movement.walkToRandomized(main.location.getBegArea().getTiles().get(Script.randInt(0, main.location.getBegArea().getTiles().size() - 1)));
             Log.info("Walking to random GE location");
             main.walk = false;
-            return Beggar.randInt(4000, 5000);
+            return Script.randInt(4000, 5000);
         } else {
             main.walk = false;
             main.sendTrade = false;
-            return Beggar.randInt(2000, 3000);
+            return Script.randInt(2000, 3000);
         }
         return Random.mid(1800, 2400);
     }

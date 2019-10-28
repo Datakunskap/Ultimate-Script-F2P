@@ -19,7 +19,7 @@ public class EnableRun extends Task {
         Movement.toggleRun(true);
         /*Movement.walkToRandomized(Players.getLocal().getPosition().randomize(6));
         Time.sleep(1000);
-        Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Beggar.randInt(2000, 4000));*/
+        Time.sleepUntil(() -> !Players.getLocal().isMoving(), 2000, Script.randInt(2000, 4000));*/
         return TutorialIsland.getRandSleep();
     }
 }

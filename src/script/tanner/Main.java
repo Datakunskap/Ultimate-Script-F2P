@@ -12,7 +12,7 @@ import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.event.types.RenderEvent;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.beg.StartOther;
 import script.data.MuleArea;
 import script.tanner.data.Location;
@@ -86,17 +86,17 @@ public class Main {
     public int cowhidePrice = 0;
     private int[] lastPrices = new int[2];
     public boolean paidToll = true;
-    public int idleTanNum = StartOther.TANS_PER_HR * 24;//Beggar.randInt((StartOther.TANS_PER_HR / 2  - 200), (StartOther.TANS_PER_HR / 2  + 200));
+    public int idleTanNum = StartOther.TANS_PER_HR * 24;//Script.randInt((StartOther.TANS_PER_HR / 2  - 200), (StartOther.TANS_PER_HR / 2  + 200));
 
     //private Main tanner;
-    public Beggar beggar;
+    public Script script;
 
-    public Main(Beggar script) {
-        beggar = script;
+    public Main(Script script) {
+        this.script = script;
     }
 
     /*//method to return instance of class
-    public static Main getInstance(Beggar script) {
+    public static Main getInstance(Script script) {
         if (tanner == null) {
             // if instance is null, initialize
             tanner = new Main(script);
@@ -150,7 +150,7 @@ public class Main {
                             leatherPrice = ExPriceCheck.getRSPrice(LEATHER);
                     }
                 } catch (Exception e) {
-                    beggar.writeToErrorFile("Failed getting sell price");
+                    script.writeToErrorFile("Failed getting sell price");
                 }
 
                 try {
@@ -166,7 +166,7 @@ public class Main {
                     }
 
                 } catch (Exception e) {
-                    beggar.writeToErrorFile("Failed getting buy price");
+                    script.writeToErrorFile("Failed getting buy price");
 
                 } finally {
                     //Fall-back prices
@@ -202,21 +202,21 @@ public class Main {
     public StopWatch timeRan = null; // stopwatch is started by GUI
 
     public void start() {
-        beggar.removeAll();
+        script.removeAll();
         setPrices(true);
 
         javax.swing.SwingUtilities.invokeLater(() ->
                 new Gui(this)
         );
 
-        beggar.submit(new Mule(this),
+        script.submit(new Mule(this),
                 new CheckRestock(this),
                 new Eat(this),
                 new WalkToCows(this),
                 new LootHide(this),
                 new AttackCow(this),
                 new WalkToGE(this),
-                new SellGE(this, beggar),
+                new SellGE(this, script),
                 new BuyGE(this),
                 new WalkToBank(this),
                 new BankAK(this),

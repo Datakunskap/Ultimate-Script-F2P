@@ -2,14 +2,14 @@ package script.beg;
 
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.script.task.Task;
-import script.Beggar;
+import script.Script;
 
 public class ToggleRun extends Task {
 
-    private Beggar main;
+    private Script main;
 
-    public ToggleRun(Beggar beggar){
-        main = beggar;
+    public ToggleRun(Script script){
+        main = script;
     }
 
     @Override

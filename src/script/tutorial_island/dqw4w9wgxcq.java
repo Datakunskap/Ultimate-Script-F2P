@@ -24,7 +24,7 @@ import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.runetek.providers.RSTileDecor;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.fighter.wrappers.OgressWrapper;
 
 import java.util.*;
@@ -399,15 +399,15 @@ public class dqw4w9wgxcq extends Task {
                 break;
             case 1000:
                 if (!main.onTutorialIsland()) {
-                    switch (Beggar.randInt(0, 1)) {
+                    switch (Script.randInt(0, 1)) {
                         case 0:
-                            getEmptyPosition(false, Beggar.TUTORIAL_COMPLETED_WALK_DIST, false).ifPresent(this::randWalker);
+                            getEmptyPosition(false, Script.TUTORIAL_COMPLETED_WALK_DIST, false).ifPresent(this::randWalker);
                             break;
                         case 1:
                             randWalker(BankLocation.LUMBRIDGE_CASTLE.getPosition());
                             break;
                     }
-                    main.beggar.startFighter();
+                    main.script.startFighter();
                 }
                 break;
             default:
@@ -432,7 +432,7 @@ public class dqw4w9wgxcq extends Task {
                             Npcs.getAt(Game.getClient().getHintArrowNpcIndex()).interact(defaultAction);
                         } catch (NullPointerException ignored) {
                             Log.info("Random Walk");
-                            getEmptyPosition(false, randInt(3, 8), true).ifPresent(this::randWalker);
+                            getEmptyPosition(false, randInt(3, 8), false).ifPresent(this::randWalker);
                         }
                         break;
                     case 2:
@@ -590,12 +590,12 @@ public class dqw4w9wgxcq extends Task {
 
     private boolean randWalker(int chanceIn100, int distance) {
         int chance = 100 / chanceIn100;
-        if (Beggar.randInt(1, chance) == 1 && !Players.getLocal().isMoving() && !Dialog.isOpen()) {
+        if (Script.randInt(1, chance) == 1 && !Players.getLocal().isMoving() && !Dialog.isOpen()) {
             Log.fine("Random Walk");
             //Movement.walkToRandomized(Players.getLocal().getPosition().randomize(distance));
-            getEmptyPosition(false, Beggar.randInt(1, distance), true).ifPresent(Movement::walkTo);
-            Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
-            Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Beggar.randInt(2000, 5000));
+            getEmptyPosition(false, Script.randInt(1, distance), true).ifPresent(Movement::walkTo);
+            Time.sleepUntil(() -> Players.getLocal().isMoving(), Script.randInt(800, 1500));
+            Time.sleepUntil(() -> !Players.getLocal().isMoving(), 1000, Script.randInt(2000, 5000));
             return true;
         }
         return false;
@@ -728,13 +728,13 @@ public class dqw4w9wgxcq extends Task {
             }
         }
         if (posRequired.distance(Players.getLocal()) <= 3) {
-            int times = Beggar.randInt(1, 2);
+            int times = Script.randInt(1, 2);
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i++) {
                 //Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
-                Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
-                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 600, Beggar.randInt(2000, 4000));
+                getEmptyPosition(false, Script.randInt(1, 9), false).ifPresent(Movement::walkTo);
+                Time.sleepUntil(() -> Players.getLocal().isMoving(), Script.randInt(800, 1500));
+                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 600, Script.randInt(2000, 4000));
             }
         }
     }

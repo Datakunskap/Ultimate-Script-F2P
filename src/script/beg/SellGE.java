@@ -16,7 +16,7 @@ import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.tanner.ExGrandExchange;
 import script.tanner.data.Location;
 
@@ -24,16 +24,16 @@ public class SellGE extends Task {
 
     private Item[] itemsToSell;
     private InterfaceComponent restrictedMsg = Interfaces.getComponent(465, 25);
-    private Beggar beggar;
+    private Script script;
     private int startGP;
 
-    public SellGE(Beggar beggar) {
-        this.beggar = beggar;
+    public SellGE(Script script) {
+        this.script = script;
     }
 
     @Override
     public boolean validate() {
-        if (!Location.GE_AREA.containsPlayer() || beggar.isMuling || !beggar.equipped) {
+        if (!Location.GE_AREA.containsPlayer() || script.isMuling || !script.equipped) {
             itemsToSell = null;
             return false;
         }
@@ -76,7 +76,7 @@ public class SellGE extends Task {
         if (itemsLeftToSell()) {
             for (int i = 0; i < itemsToSell.length; i++) {
                 if (itemsToSell[i] != null && GrandExchange.getOffers(RSGrandExchangeOffer.Type.SELL).length < 3) {
-                    if (ExGrandExchange.sell(itemsToSell[i].getId(), itemsToSell[i].getStackSize(), Beggar.randInt(1, 5), false)) {
+                    if (ExGrandExchange.sell(itemsToSell[i].getId(), itemsToSell[i].getStackSize(), Script.randInt(1, 5), false)) {
                         final int index = i;
                         if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemId() == itemsToSell[index].getId()) != null,8000)) {
                             itemsToSell[i] = null;
@@ -98,7 +98,7 @@ public class SellGE extends Task {
             Keyboard.pressEnter();
         }
 
-        return Beggar.randInt(1000, 2000);
+        return Script.randInt(1000, 2000);
     }
 
     private boolean itemsLeftToSell() {
@@ -123,7 +123,7 @@ public class SellGE extends Task {
             Movement.walkToRandomized(Players.getLocal().getPosition().randomize(4));
             Time.sleepUntil(() -> !GrandExchange.isOpen(), 2000, 6000);
             if (startGP > 0 && Inventory.contains(995)) {
-                Beggar.itemsSoldProfitAmount += (Inventory.getCount(true, 995) - startGP);
+                Script.itemsSoldProfitAmount += (Inventory.getCount(true, 995) - startGP);
             }
         }
     }

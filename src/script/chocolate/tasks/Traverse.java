@@ -7,9 +7,7 @@ import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
 import script.chocolate.Main;
-import script.data.CheckTutIsland;
 import script.tanner.data.Location;
 
 public class Traverse extends Task {

@@ -2,14 +2,14 @@ package script.beg;
 
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 
 public class ChangeAmount extends Task {
 
-    private Beggar main;
+    private Script main;
 
-    public ChangeAmount(Beggar beggar){
-        main = beggar;
+    public ChangeAmount(Script script){
+        main = script;
     }
 
     @Override

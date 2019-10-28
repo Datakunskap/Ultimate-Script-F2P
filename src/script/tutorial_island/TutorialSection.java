@@ -18,7 +18,7 @@ import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.runetek.providers.RSTileDecor;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 
 import java.util.Comparator;
 import java.util.List;
@@ -89,13 +89,13 @@ public abstract class TutorialSection extends Task {
             }
         }
         if (posRequired.distance(Players.getLocal()) <= 3) {
-            int times = Beggar.randInt(1, 2);
+            int times = Script.randInt(1, 2);
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i++) {
                 //Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                getEmptyPosition(false, Beggar.randInt(1, 9), false).ifPresent(Movement::walkTo);
-                Time.sleepUntil(() -> Players.getLocal().isMoving(), Beggar.randInt(800, 1500));
-                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 600, Beggar.randInt(2000, 4000));
+                getEmptyPosition(false, Script.randInt(1, 9), false).ifPresent(Movement::walkTo);
+                Time.sleepUntil(() -> Players.getLocal().isMoving(), Script.randInt(800, 1500));
+                Time.sleepUntil(() -> !Players.getLocal().isMoving(), 600, Script.randInt(2000, 4000));
             }
         }
     }

@@ -3,14 +3,14 @@ package script.beg;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 
 public class Beg extends Task {
 
-    private Beggar main;
+    private Script main;
 
-    public Beg(Beggar beggar){
-        main = beggar;
+    public Beg(Script script){
+        main = script;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class Beg extends Task {
     }
 
     private void maybeAmount(){
-        if(Beggar.randInt(1, main.amountChance) == 1){
+        if(Script.randInt(1, main.amountChance) == 1){
             main.changeAmount = true;
         }
     }

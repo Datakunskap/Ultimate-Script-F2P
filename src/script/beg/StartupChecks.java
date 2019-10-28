@@ -10,7 +10,7 @@ import org.rspeer.runetek.api.component.tab.Skills;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.data.CheckTutIsland;
 import script.data.ClientQuickLauncher;
 import script.fighter.QuestingDriver;
@@ -20,9 +20,9 @@ import java.io.IOException;
 
 public class StartupChecks extends Task {
 
-    private Beggar main;
+    private Script main;
 
-    public StartupChecks(Beggar main) {
+    public StartupChecks(Script main) {
         this.main = main;
     }
 
@@ -51,7 +51,7 @@ public class StartupChecks extends Task {
             Log.fine("Starting Quests");
             TeleportWrapper.tryTeleport(true);
             instanceCheck();
-            new QuestingDriver(main).startSPXQuesting(Beggar.randInt(15, 20));
+            new QuestingDriver(main).startSPXQuesting(Script.randInt(15, 20));
         }
         else if (isOgress() && !main.ogressBeg) {
             instanceCheck();
@@ -59,7 +59,7 @@ public class StartupChecks extends Task {
         }
         else {
             instanceCheck();
-            Log.fine("Starting Beggar");
+            Log.fine("Starting Script");
             //addWorldToFile();
             main.startupChecks = true;
         }
@@ -69,13 +69,13 @@ public class StartupChecks extends Task {
 
     private boolean isQuesting() {
         if (isOgress()) {
-            return !OgressWrapper.has7QuestPoints();
+            return !OgressWrapper.has7QuestPoints() && Skills.getLevel(Skill.MAGIC) >= 13;
         }
         return false;
     }
 
     private boolean isOgress() {
-        return Beggar.OGRESS && (Skills.getLevel(Skill.MAGIC) >= 13
+        return Script.OGRESS && (Skills.getLevel(Skill.MAGIC) >= 13
                 || Equipment.contains("Cursed goblin staff")
                 || (Inventory.contains(r -> r.getName().equals("Air rune") && r.getStackSize() > 300)
                 && Inventory.contains(r -> r.getName().equals("Mind rune") && r.getStackSize() > 300)));
@@ -84,11 +84,11 @@ public class StartupChecks extends Task {
 
     public void instanceCheck() {
         ClientQuickLauncher launcher = new ClientQuickLauncher(
-                "Ultimate Beggar", false, main.getNextWorld());
+                "Ultimate Script", false, main.getNextWorld());
 
         while (!launcher.isInstanceLimit() && Game.isLoggedIn() && !main.isStopping()) {
             try {
-                main.accountGeneratorDriver(Beggar.NUM_BACKLOG_ACCOUNTS);
+                main.accountGeneratorDriver(Script.NUM_BACKLOG_ACCOUNTS);
                 launcher.launchClient(main.readAccount(true));
                 Time.sleep(60_000);
             } catch (IOException e) {
@@ -102,6 +102,6 @@ public class StartupChecks extends Task {
 
     private void addWorldToFile() {
         main.currWorld = Worlds.getCurrent();
-        WorldhopWrapper.writeWorldToFile(main.currWorld, Beggar.CURR_WORLD_PATH);
+        WorldhopWrapper.writeWorldToFile(main.currWorld, Script.CURR_WORLD_PATH);
     }
 }

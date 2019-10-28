@@ -8,7 +8,7 @@ import org.rspeer.runetek.api.component.tab.*;
 import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.fighter.config.Config;
 
 import java.util.HashSet;
@@ -29,7 +29,7 @@ public class OgressWrapper {
     public static int itemsAlched;
 
     public static void openRandomTab() {
-        Tabs.open(SWITCH_TABS[Beggar.randInt(0, SWITCH_TABS.length - 1)]);
+        Tabs.open(SWITCH_TABS[Script.randInt(0, SWITCH_TABS.length - 1)]);
     }
 
     public static boolean has7QuestPoints() {

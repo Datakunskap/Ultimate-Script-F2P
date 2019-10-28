@@ -14,7 +14,7 @@ import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.tanner.Main;
 
 import java.util.Objects;
@@ -24,17 +24,17 @@ public class SellGE extends Task {
     private Main main;
     private Banking banking;
 
-    private Beggar beggar;
+    private Script script;
     private StartChocolate startChocolate;
 
-    public SellGE (Main main, Beggar beggar) {
+    public SellGE (Main main, Script script) {
         this.main = main;
-        this.beggar = beggar;
+        this.script = script;
         banking = new Banking(main);
     }
 
     private boolean checkStartChocolate() {
-        startChocolate = new StartChocolate(main, beggar, banking);
+        startChocolate = new StartChocolate(main, script, banking);
         return startChocolate.validate();
     }
 

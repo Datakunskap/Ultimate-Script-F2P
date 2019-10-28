@@ -8,9 +8,8 @@ import org.rspeer.runetek.api.component.*;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
-import org.rspeer.script.Script;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.fighter.Fighter;
 import script.fighter.config.Config;
 import script.fighter.framework.Node;
@@ -29,7 +28,7 @@ public class Mule extends Node {
 
     private boolean trading;
     private int begWorld = -1;
-    private static final String MULE_FILE_PATH = Script.getDataDirectory() + "\\mule.txt";
+    private static final String MULE_FILE_PATH = org.rspeer.script.Script.getDataDirectory() + "\\mule.txt";
     private boolean banked;
     private String status2;
     private boolean soldItems;
@@ -86,7 +85,7 @@ public class Mule extends Node {
 
     @Override
     public boolean validate() {
-        return (!GEWrapper.isSellItems() && BankWrapper.getTotalValue() >= Beggar.OGRESS_MULE_AMOUNT) || trading;
+        return (!GEWrapper.isSellItems() && BankWrapper.getTotalValue() >= Script.OGRESS_MULE_AMOUNT) || trading;
     }
 
     @Override
@@ -124,18 +123,20 @@ public class Mule extends Node {
                 Log.fine("Withdrawing Coins");
                 Item coins = Bank.getFirst("Coins");
                 if (coins != null) {
-                    Bank.withdraw("Coins", coins.getStackSize() - Beggar.OGRESS_START_GP);
+                    Bank.withdraw("Coins", coins.getStackSize() - Script.OGRESS_START_GP);
                 }
             } else {
                 Log.fine("Withdrawing Trade Restricted Items!!!");
                 Item[] restrictedItems = Bank.getItems(i -> !runes.contains(i.getName().toLowerCase()));
 
                 for(Item i : restrictedItems) {
-                    Bank.withdrawAll(i.getId());
-                    Time.sleepUntil(() -> !Inventory.contains(i.getId()), 2000, 10_000);
                     if (i.getName().equals("Coins")) {
-                        Bank.deposit(i.getId(), Beggar.OGRESS_START_GP);
+                        Bank.withdraw(i.getId(), i.getStackSize() - Script.OGRESS_START_GP);
+                        main.getScript().amntMuled += i.getStackSize() - Script.OGRESS_START_GP;
+                    } else {
+                        Bank.withdrawAll(i.getId());
                     }
+                    Time.sleepUntil(() -> !Inventory.contains(i.getId()), 2000, 10_000);
                 }
             }
 
@@ -147,9 +148,9 @@ public class Mule extends Node {
             return Fighter.getLoopReturn();
         }
 
-        if (Worlds.getCurrent() != Beggar.MULE_WORLD) {
+        if (Worlds.getCurrent() != Script.MULE_WORLD) {
             begWorld = Worlds.getCurrent();
-            WorldHopper.hopTo(Beggar.MULE_WORLD);
+            WorldHopper.hopTo(Script.MULE_WORLD);
 
             if (Dialog.isOpen()) {
                 if (Dialog.canContinue()) {
@@ -160,7 +161,7 @@ public class Mule extends Node {
                 Time.sleepUntil(() -> !Dialog.isProcessing(), 10000);
             }
 
-            Time.sleepUntil(() -> Worlds.getCurrent() == Beggar.MULE_WORLD && Players.getLocal() != null, 10000);
+            Time.sleepUntil(() -> Worlds.getCurrent() == Script.MULE_WORLD && Players.getLocal() != null, 10000);
             return Fighter.getLoopReturn();
         }
 
@@ -171,20 +172,20 @@ public class Mule extends Node {
 
         loginMule();
 
-        if (!Beggar.MULE_AREA.getMuleArea().contains(Players.getLocal())) {
+        if (!Script.MULE_AREA.getMuleArea().contains(Players.getLocal())) {
 
             if (BackToFightZone.shouldEnableRun()) {
                 BackToFightZone.enableRun();
             }
-            Movement.walkTo(Beggar.MULE_AREA.getMuleArea().getCenter());
+            Movement.walkTo(Script.MULE_AREA.getMuleArea().getCenter());
 
             return Fighter.getLoopReturn();
         }
 
 
-        Player mulePlayer = Players.getNearest(Beggar.MULE_NAME);
+        Player mulePlayer = Players.getNearest(Script.MULE_NAME);
 
-        if (mulePlayer != null && Beggar.MULE_AREA.getMuleArea().contains(mulePlayer)) {
+        if (mulePlayer != null && Script.MULE_AREA.getMuleArea().contains(mulePlayer)) {
 
             /*boolean notRestricted = main.getRuntime().exceeds(Duration.ofHours(24));
             Item[] dropItems = null;
@@ -195,8 +196,8 @@ public class Mule extends Node {
 
             if (dropItems != null && dropItems.length > 0) {
                 for (Item i : dropItems) {
-                    mulePlayer = Players.getNearest(Beggar.MULE_NAME);
-                    if (mulePlayer != null && Beggar.MULE_AREA.getMuleArea().contains(mulePlayer)) {
+                    mulePlayer = Players.getNearest(Script.MULE_NAME);
+                    if (mulePlayer != null && Script.MULE_AREA.getMuleArea().contains(mulePlayer)) {
                         i.interact("Drop");
                         Time.sleep(600, 1200);
                     } else {
@@ -208,8 +209,8 @@ public class Mule extends Node {
 
             if (!Inventory.isEmpty()) {
 
-                if (Players.getNearest(Beggar.MULE_NAME) != null && !Trade.isOpen()) {
-                    Players.getNearest(Beggar.MULE_NAME).interact("Trade with");
+                if (Players.getNearest(Script.MULE_NAME) != null && !Trade.isOpen()) {
+                    Players.getNearest(Script.MULE_NAME).interact("Trade with");
                     Time.sleep(3000, 5000);
                 }
                 if (!Inventory.isEmpty()) {
@@ -247,7 +248,7 @@ public class Mule extends Node {
                             logoutMule();
                             trading = false;
                             BankWrapper.updateInventoryValue();
-                            //main.amntMuled += (Coins - main.muleKeep);
+                            //main.getScript().amntMuled += (Coins - main.muleKeep);
                             //main.setRandMuleKeep(main.minKeep, main.maxKeep);
                             if (begWorld != -1) {
                                 WorldHopper.hopTo(begWorld);

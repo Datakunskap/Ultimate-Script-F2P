@@ -11,14 +11,14 @@ import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 
 public class TradePlayer extends Task {
 
-    private Beggar main;
+    private Script main;
 
-    public TradePlayer(Beggar beggar) {
-        main = beggar;
+    public TradePlayer(Script script) {
+        main = script;
     }
 
     private int sameTraderCount = 0;
@@ -130,7 +130,7 @@ public class TradePlayer extends Task {
                     Log.fine("Trade completed");
                     Time.sleep(3000, 3500);
                     completeLines = main.randSpecialLines(completeLines);
-                    Keyboard.sendText(completeLines[Beggar.randInt(0, completeLines.length - 1)]);
+                    Keyboard.sendText(completeLines[Script.randInt(0, completeLines.length - 1)]);
                     Keyboard.pressEnter();
 
                     if (main.lastTradeTime != null) {

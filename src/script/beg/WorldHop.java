@@ -12,7 +12,7 @@ import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.providers.RSWorld;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 
 import java.io.File;
 
@@ -20,10 +20,10 @@ import static script.fighter.wrappers.WorldhopWrapper.*;
 
 public class WorldHop extends Task {
 
-    private Beggar main;
+    private Script main;
 
-    public WorldHop(Beggar beggar) {
-        main = beggar;
+    public WorldHop(Script script) {
+        main = script;
     }
 
     @Override
@@ -36,11 +36,11 @@ public class WorldHop extends Task {
         main.atMinPop = false;
         resetMinPop();
         openWorldSwitcher();
-        OTHER_BEG_WORLDS = getWorldsFromFile(Beggar.CURR_WORLD_PATH);
+        OTHER_BEG_WORLDS = getWorldsFromFile(Script.CURR_WORLD_PATH);
 
         if (main.runningClients != null && main.runningClients.size() > 0 &&
-                main. runningClients.size() >= Beggar.ALLOWED_INSTANCES && OTHER_BEG_WORLDS.size() > main.runningClients.size() - 1)
-            new File(Beggar.CURR_WORLD_PATH).delete();
+                main. runningClients.size() >= Script.ALLOWED_INSTANCES && OTHER_BEG_WORLDS.size() > main.runningClients.size() - 1)
+            new File(Script.CURR_WORLD_PATH).delete();
 
 
         if (main.worldHop) {
@@ -89,7 +89,7 @@ public class WorldHop extends Task {
             Log.fine("World hopped to world: " + Worlds.getCurrent());
             Time.sleep(3000, 5000);
 
-            removeWorld(main.currWorld, Beggar.CURR_WORLD_PATH);
+            removeWorld(main.currWorld, Script.CURR_WORLD_PATH);
             main.currWorld = Worlds.getCurrent();
 
             main.startTime = System.currentTimeMillis();
@@ -97,7 +97,7 @@ public class WorldHop extends Task {
             main.hopTryCount = 0;
 
             main.worldPop = 800;
-            writeWorldToFile(main.currWorld, Beggar.CURR_WORLD_PATH);
+            writeWorldToFile(main.currWorld, Script.CURR_WORLD_PATH);
             return 1000;
         } else {
             Log.info("World hop failed... Retrying");
@@ -131,7 +131,7 @@ public class WorldHop extends Task {
     }
 
     private void resetMinPop() {
-        OTHER_BEG_WORLDS = getWorldsFromFile(Beggar.CURR_WORLD_PATH);
+        OTHER_BEG_WORLDS = getWorldsFromFile(Script.CURR_WORLD_PATH);
 
         RSWorld[] f2pCriteriaWorlds = null;
         while (f2pCriteriaWorlds == null || f2pCriteriaWorlds.length == 0) {

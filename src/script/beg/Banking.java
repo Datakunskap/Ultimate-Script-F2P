@@ -7,16 +7,16 @@ import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.chocolate.Main;
 
 public class Banking extends Task {
 
-    private Beggar main;
+    private Script main;
     private Main chocolate;
 
-    public Banking(Beggar beggar){
-        main = beggar;
+    public Banking(Script script){
+        main = script;
     }
 
     public Banking(Main chocolate) { this.chocolate = chocolate; }
@@ -85,7 +85,7 @@ public class Banking extends Task {
     void calcSpendAmount(int qBought) {
         // Calculate GP to spend
         chocolate.gp = (Bank.isOpen()) ? Bank.getCount(995) : Inventory.getCount(true, 995);
-        chocolate.gp -= Beggar.SAVE_BEG_GP;
+        chocolate.gp -= Script.SAVE_BEG_GP;
         if (!chocolate.hasKnife)
             chocolate.gp -= chocolate.knifePrice;
         chocolate.setPrices(true);

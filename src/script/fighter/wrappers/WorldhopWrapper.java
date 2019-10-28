@@ -7,9 +7,8 @@ import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.WorldHopper;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.providers.RSWorld;
-import org.rspeer.script.Script;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 
 import java.io.*;
 import java.time.Duration;
@@ -33,20 +32,20 @@ public class WorldhopWrapper {
             worldHopTimer = StopWatch.start();
         }
         if (ogressWorlds == null) {
-            ogressWorlds = getWorldsFromFile(Beggar.OGRESS_WORLD_PATH);
+            ogressWorlds = getWorldsFromFile(Script.OGRESS_WORLD_PATH);
         }
 
         if (ogressWorlds.contains(Worlds.getCurrent())
                 && ((!targetCheck || Players.getLocal().getTargetIndex() == -1))) {
 
-            if (worldHopTimer.exceeds(Duration.ofMinutes(Beggar.OGRESS_WORLD_HOP_MINS))) {
+            if (worldHopTimer.exceeds(Duration.ofMinutes(Script.OGRESS_WORLD_HOP_MINS))) {
                 Log.fine("World-Hopping");
 
-                removeWorld(Worlds.getCurrent(), Beggar.OGRESS_WORLD_PATH);
+                removeWorld(Worlds.getCurrent(), Script.OGRESS_WORLD_PATH);
 
-                hopToLowPopWorld(50, Worlds.getCurrent(), getWorldsFromFile(Beggar.OGRESS_WORLD_PATH));
+                hopToLowPopWorld(50, Worlds.getCurrent(), getWorldsFromFile(Script.OGRESS_WORLD_PATH));
 
-                writeWorldToFile(Worlds.getCurrent(), Beggar.OGRESS_WORLD_PATH);
+                writeWorldToFile(Worlds.getCurrent(), Script.OGRESS_WORLD_PATH);
                 currentWorld = Worlds.getCurrent();
 
                 resetChecker();
@@ -55,7 +54,7 @@ public class WorldhopWrapper {
                 if (worldHopTimer.getElapsed().toMinutes() != elapsedMinutes) {
                     elapsedMinutes = worldHopTimer.getElapsed().toMinutes();
                     Log.fine("World Hopping in: "
-                            + (Beggar.OGRESS_WORLD_HOP_MINS - worldHopTimer.getElapsed().toMinutes()) + "min(s)");
+                            + (Script.OGRESS_WORLD_HOP_MINS - worldHopTimer.getElapsed().toMinutes()) + "min(s)");
                 }
             }
         } else {
@@ -99,7 +98,7 @@ public class WorldhopWrapper {
         BufferedReader reader;
         try {
             File inputFile = new File(filePath);
-            File tempFile = new File(Script.getDataDirectory() + "\\TEMP" + inputFile.getName());
+            File tempFile = new File(org.rspeer.script.Script.getDataDirectory() + "\\TEMP" + inputFile.getName());
 
             if (!inputFile.exists())
                 return;

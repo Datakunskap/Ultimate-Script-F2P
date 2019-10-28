@@ -1,7 +1,6 @@
 package api.bot_management;
 
-import org.rspeer.script.Script;
-import script.Beggar;
+import script.Script;
 
 import java.io.File;
 
@@ -12,7 +11,7 @@ public class BotManagementFileHelper {
     }
 
     public static File getFile(String path) {
-        return new File(Script.getDataDirectory().getParent().getParent() + File.separator + path);
+        return new File(org.rspeer.script.Script.getDataDirectory().getParent().getParent() + File.separator + path);
     }
 
     public static String getApiKeyOrThrow() {
@@ -25,6 +24,6 @@ public class BotManagementFileHelper {
         if(key == null || key.length() == 0) {
             throw new FileNotFoundException(message);
         }*/
-        return Beggar.API_KEY;
+        return Script.API_KEY;
     }
 }

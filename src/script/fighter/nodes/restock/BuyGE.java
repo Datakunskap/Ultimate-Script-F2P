@@ -12,7 +12,7 @@ import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.data.Location;
 import script.fighter.Fighter;
 import script.fighter.config.Config;
@@ -37,7 +37,6 @@ public class BuyGE extends Node {
     private boolean checkedBank;
     private boolean triedTeleport;
     private int coinsToSpend;
-    private int quantity;
 
     public BuyGE(Fighter main) {
         this.main = main;
@@ -72,7 +71,6 @@ public class BuyGE extends Node {
 
             runesIterator = items.iterator();
             itemToBuy = runesIterator.next();
-            quantity = getQuantity(itemToBuy);
             return true;
         }
 
@@ -95,21 +93,23 @@ public class BuyGE extends Node {
             return Fighter.getLoopReturn();
         }
 
+        if (!checkedBank) {
+            Log.info("Checking Bank");
+            BankWrapper.openAndDepositAll(true, true, true);
+            Bank.close();
+            Time.sleepUntil(Bank::isClosed, 1000, 5000);
+            BankWrapper.updateInventoryValue();
+            checkedBank = true;
+        }
+
         coinsToSpend = Inventory.getCount(true, "Coins");
 
         // check GP
-        if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
-            if (coinsToSpend < (getPrice(itemToBuy) * quantity)) {
-                if (!checkedBank) {
-                    Log.info(itemToBuy + " : "  + (getPrice(itemToBuy) * quantity) + " --> Checking Bank");
-                    BankWrapper.openAndDepositAll(true, true, true);
-                    runesIterator = null;
-                    checkedBank = true;
-                } else {
-                    Log.fine(itemToBuy + " : "  + (getPrice(itemToBuy) * quantity) + " --> Begging");
-                    main.onStop(true, true, 10);
-                    runesIterator = null;
-                }
+        if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY) && stillNeedsItem(itemToBuy)) {
+            if (coinsToSpend < (getPrice(itemToBuy) * getQuantity(itemToBuy))) {
+                Log.fine(itemToBuy + " : " + (getPrice(itemToBuy) * getQuantity(itemToBuy)) + " --> Begging");
+                main.onStop(true, true, 10);
+                runesIterator = null;
                 return Fighter.getLoopReturn();
             }
         }
@@ -123,23 +123,21 @@ public class BuyGE extends Node {
         }
 
         if (runesIterator != null && !GEWrapper.itemsStillActive(RSGrandExchangeOffer.Type.BUY)) {
-            if ((!Inventory.contains(itemToBuy) || Inventory.getCount(true, itemToBuy) < quantity) && !Equipment.contains(itemToBuy)) {
-                if (ExGrandExchange.buy(itemToBuy, quantity, getPrice(itemToBuy), false)) {
-                    Log.info("Buying: " + quantity + " " + itemToBuy);
+            if (stillNeedsItem(itemToBuy)) {
+                if (ExGrandExchange.buy(itemToBuy, getQuantity(itemToBuy), getPrice(itemToBuy), false)) {
+                    Log.info("Buying: " + getQuantity(itemToBuy) + " " + itemToBuy);
                     if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemName().toLowerCase().equals(itemToBuy)) != null, 8000)) {
                         if (runesIterator.hasNext()) {
                             itemToBuy = runesIterator.next();
-                            quantity = getQuantity(itemToBuy);
                         } else {
                             runesIterator = null;
                         }
                     }
                 }
             } else {
-                Log.info("Already has: " + quantity + " " + itemToBuy);
+                Log.info("Already has: " + getQuantity(itemToBuy) + " " + itemToBuy);
                 if (runesIterator.hasNext()) {
                     itemToBuy = runesIterator.next();
-                    quantity = getQuantity(itemToBuy);
                 } else {
                     runesIterator = null;
                 }
@@ -162,6 +160,10 @@ public class BuyGE extends Node {
         }
 
         return Random.low(800, 1500);
+    }
+
+    private boolean stillNeedsItem(String itemToBuy) {
+        return (!Inventory.contains(itemToBuy) || Inventory.getCount(true, itemToBuy) < getQuantity(itemToBuy)) && !Equipment.contains(itemToBuy);
     }
 
     private void doneRestockingHelper() {
@@ -191,34 +193,35 @@ public class BuyGE extends Node {
             return Random.mid(35, 50);
         }
         if (spell.equals(Spell.Modern.FIRE_STRIKE) && p.getRunes().contains(item)) {
+            int spendAmount = coinsToSpend;
 
             if (!GEWrapper.hasEquipment()) {
                 Collection<String> equipment = p.getEquipmentMap().values();
                 for (String e : equipment) {
                     if (items.contains(e)) {
-                        coinsToSpend -= (getPrice(e) / p.getRunes().size());
+                        spendAmount -= (getPrice(e) / p.getRunes().size());
                     }
                 }
             }
 
             if (item.equalsIgnoreCase("air rune")) {
-                amnt = coinsToSpend / (getPrice(item) * p.getRunes().size());
+                amnt = spendAmount / (getPrice(item) * p.getRunes().size());
                 amnt = amnt * 2;
 
-                if (amnt <= (20 * Beggar.OGRESS_MAX_MINUTES_WORTH_OF_RUNES * 2)) {
+                if (amnt <= (20 * Script.OGRESS_MAX_MINUTES_WORTH_OF_RUNES * 2)) {
                     return amnt;
                 }
             } else {
-                amnt = coinsToSpend / (getPrice(item) * p.getRunes().size());
+                amnt = spendAmount / (getPrice(item) * p.getRunes().size());
 
-                if (amnt <= (20 * Beggar.OGRESS_MAX_MINUTES_WORTH_OF_RUNES)) {
+                if (amnt <= (20 * Script.OGRESS_MAX_MINUTES_WORTH_OF_RUNES)) {
                     return amnt;
                 }
             }
 
             return item.equalsIgnoreCase("air rune")
-                    ? Random.mid(1200, (20 * Beggar.OGRESS_MAX_MINUTES_WORTH_OF_RUNES)) * 2
-                    : Random.mid(1200, (20 * Beggar.OGRESS_MAX_MINUTES_WORTH_OF_RUNES));
+                    ? Random.mid(1200, (20 * Script.OGRESS_MAX_MINUTES_WORTH_OF_RUNES)) * 2
+                    : Random.mid(1200, (20 * Script.OGRESS_MAX_MINUTES_WORTH_OF_RUNES));
         }
 
         return 1;
@@ -244,6 +247,9 @@ public class BuyGE extends Node {
             }
             if (item.equalsIgnoreCase("zamorak monk bottom")) {
                 return 3000;
+            }
+            if (item.equalsIgnoreCase("amulet of magic")) {
+                return 1000;
             }
         }
 

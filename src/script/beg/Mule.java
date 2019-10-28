@@ -12,10 +12,9 @@ import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
-import org.rspeer.script.Script;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 
 import java.io.*;
 import java.util.NavigableMap;
@@ -33,12 +32,12 @@ public class Mule extends Task {
     private String Password;
     private boolean muleing = false;
     private int begWorld = -1;
-    private static final String MULE_FILE_PATH = Script.getDataDirectory() + "\\mule.txt";
+    private static final String MULE_FILE_PATH = org.rspeer.script.Script.getDataDirectory() + "\\mule.txt";
 
-    private Beggar main;
+    private Script main;
 
-    public Mule(Beggar beggar) {
-        main = beggar;
+    public Mule(Script script) {
+        main = script;
     }
 
     private void loginMule() {
@@ -87,12 +86,12 @@ public class Mule extends Task {
 
     @Override
     public boolean validate() {
-        if (main.muted && !atMuleAmnt(Beggar.MUTED_MULE_AMNT)) {
+        if (main.muted && !atMuleAmnt(Script.MUTED_MULE_AMNT)) {
             main.disableChain = false;
             main.setStopping(true);
         }
 
-        return atMuleAmnt(main.muleAmnt) || (main.muted && atMuleAmnt(Beggar.MUTED_MULE_AMNT)) || muleing;
+        return atMuleAmnt(main.muleAmnt) || (main.muted && atMuleAmnt(Script.MUTED_MULE_AMNT)) || muleing;
     }
 
     private boolean atMuleAmnt(int amnt) {
@@ -129,7 +128,7 @@ public class Mule extends Task {
             Time.sleep(1000);
         }
         if (!main.muleArea.getMuleArea().contains(Players.getLocal())) {
-            Movement.setWalkFlag(main.muleArea.getMuleArea().getTiles().get(Beggar.randInt(0, main.muleArea.getMuleArea().getTiles().size() - 1)));
+            Movement.setWalkFlag(main.muleArea.getMuleArea().getTiles().get(Script.randInt(0, main.muleArea.getMuleArea().getTiles().size() - 1)));
         }
 
         if (Inventory.getFirst(995) != null) {
@@ -170,7 +169,7 @@ public class Mule extends Task {
                                 Time.sleep(1000);
                             }
                             if (Time.sleepUntil(() -> Trade.contains(true, 995), 500, 3500)) {
-                                if (Beggar.MULE_ITEMS) {
+                                if (Script.MULE_ITEMS) {
                                     offerItems();
                                 }
 
@@ -211,7 +210,7 @@ public class Mule extends Task {
                                 main.currWorld = Worlds.getCurrent();
                             }
                             Time.sleep(8000, 10000);
-                            main.randBuyGP = Beggar.randInt(1500, 5000);
+                            main.randBuyGP = Script.randInt(1500, 5000);
                             main.isMuling = false;
 
                             if (main.muted) {

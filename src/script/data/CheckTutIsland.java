@@ -7,7 +7,7 @@ import org.rspeer.runetek.api.Worlds;
 import org.rspeer.runetek.api.component.Interfaces;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.fighter.wrappers.WorldhopWrapper;
 import script.tutorial_island.TutorialIsland;
 
@@ -15,12 +15,12 @@ import java.io.*;
 
 public class CheckTutIsland {
 
-    private Beggar main;
+    private Script main;
     private static final int MAX_TUT_PROGRESS = 670;
     private static final int MAX_TUT_SECTION = 20;
 
-    public CheckTutIsland(Beggar beggar) {
-        main = beggar;
+    public CheckTutIsland(Script script) {
+        main = script;
     }
 
     public boolean onTutIsland() {
@@ -40,7 +40,7 @@ public class CheckTutIsland {
 
             if (main.currWorld != -1 && !main.isTanning) {
                 Log.info("World Removed");
-                WorldhopWrapper.removeWorld(main.currWorld, Beggar.CURR_WORLD_PATH);
+                WorldhopWrapper.removeWorld(main.currWorld, Script.CURR_WORLD_PATH);
             }
 
             File file1 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\TutIsland1.json");
@@ -48,8 +48,8 @@ public class CheckTutIsland {
             int[] IDs = writeJson(file1, file2, RSPeer.getGameAccount().getUsername());
 
             String path1 = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\TutIsland";
-            String path2 = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\Beggar";
-            int sleep = Beggar.randInt(360000, 660000);
+            String path2 = "C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\Script";
+            int sleep = Script.randInt(360000, 660000);
             String javaVersion = "java";//"\"C:\\Program Files\\Java\\jdk1.8.0_201\\bin\\java.exe\"";
             String launcher = javaVersion + " -jar C:\\Users\\bllit\\OneDrive\\Desktop\\BegLauncher.jar "
                     + IDs[0] + " " + IDs[1] + " " + path1 + " " + path2 + " " + sleep + " && exit";
@@ -69,7 +69,7 @@ public class CheckTutIsland {
 
     private void addWorldToFile() {
         main.currWorld = Worlds.getCurrent();
-        WorldhopWrapper.writeWorldToFile(main.currWorld, Beggar.CURR_WORLD_PATH);
+        WorldhopWrapper.writeWorldToFile(main.currWorld, Script.CURR_WORLD_PATH);
     }
 
     private int[] writeJson(File file1, File file2, String account) {
@@ -103,7 +103,7 @@ public class CheckTutIsland {
             int begID = 1;
             while (file2.exists()) {
                 begID++;
-                file2 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\Beggar" + begID + ".json");
+                file2 = new File("C:\\Users\\bllit\\OneDrive\\Desktop\\RSPeer\\EXTutIsland\\Script" + begID + ".json");
             }
             file2.createNewFile();
             IDs[1] = begID;
@@ -146,7 +146,7 @@ public class CheckTutIsland {
                 arr1[i] = "\t\t\"RsUsername\": " + "\"" + account + "\"" + ",";
             }
             if (arr1[i].contains("\"World\":")) {
-                arr1[i] = "\t\t\"World\": " + main.popWorldsArr[Beggar.randInt(0, 2)] + ",";
+                arr1[i] = "\t\t\"World\": " + main.popWorldsArr[Script.randInt(0, 2)] + ",";
             }
         }
         return arr1;

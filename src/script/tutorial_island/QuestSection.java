@@ -8,7 +8,7 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
-import script.Beggar;
+import script.Script;
 
 import java.util.Arrays;
 import java.util.List;
@@ -79,7 +79,7 @@ public final class QuestSection extends TutorialSection {
                 if (SceneObjects.getNearest("Ladder").interact("Climb-down")) {
                     Time.sleepUntil(() -> (SceneObjects.getNearest("Ladder") != null && !SceneObjects.getNearest("Ladder").containsAction("Climb-down")) || getProgress() != 250, 2000,5000);
                     Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                    Time.sleepUntil(() -> !Players.getLocal().isMoving(), Beggar.randInt(3500, 6500));
+                    Time.sleepUntil(() -> !Players.getLocal().isMoving(), Script.randInt(3500, 6500));
                 }
                 break;
         }

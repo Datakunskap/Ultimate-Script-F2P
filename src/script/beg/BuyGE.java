@@ -16,7 +16,7 @@ import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.chocolate.Main;
 import script.chocolate.beg.StartTanning;
 import script.tanner.ExGrandExchange;
@@ -27,19 +27,19 @@ import java.util.Objects;
 public class BuyGE extends Task {
 
     private Main main;
-    private Beggar beggar;
+    private Script script;
     private Banking banking;
     private int buyQuantity;
 
-    public BuyGE(Main main, Beggar beggar) {
+    public BuyGE(Main main, Script script) {
         this.main = main;
-        this.beggar = beggar;
+        this.script = script;
         banking = new Banking(main);
     }
 
     @Override
     public boolean validate() {
-        return main.sold && main.restock && Location.GE_AREA.containsPlayer() && !main.isMuling && !beggar.muleChocBeg;
+        return main.sold && main.restock && Location.GE_AREA.containsPlayer() && !main.isMuling && !script.muleChocBeg;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class BuyGE extends Task {
 
         if (!main.checkedBank) {
             if (main.atGELimit) {
-                StartTanning.execute(main, beggar);
+                StartTanning.execute(main, script);
             }
 
             main.checkedBank = true;

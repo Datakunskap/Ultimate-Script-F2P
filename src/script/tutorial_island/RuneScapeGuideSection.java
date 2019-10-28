@@ -13,7 +13,7 @@ import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.api.scene.SceneObjects;
-import script.Beggar;
+import script.Script;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,7 +77,7 @@ public final class RuneScapeGuideSection extends TutorialSection{
                         e.printStackTrace();
                     }
                 } else if (Dialog.isViewingChatOptions()) {//experienceWidget.get(getWidgets()).isPresent()) {
-                    if (Dialog.process(Beggar.randInt(1, 3))) {
+                    if (Dialog.process(Script.randInt(1, 3))) {
                         Time.sleepUntil(() -> !Dialog.isProcessing() && !Dialog.isViewingChatOptions(), 2000, 2000);
                     }
                 } else {
@@ -141,7 +141,7 @@ public final class RuneScapeGuideSection extends TutorialSection{
         StringBuilder salt = new StringBuilder();
         salt.append(randomPrefix());
         java.util.Random rnd = new java.util.Random();
-        int strLen = Beggar.randInt(minLength, maxLength);
+        int strLen = Script.randInt(minLength, maxLength);
 
         while (salt.length() < strLen) { // length of the random string.
             int index = (int) (rnd.nextFloat() * SALTCHARS.length());
@@ -154,15 +154,15 @@ public final class RuneScapeGuideSection extends TutorialSection{
     private String randomPrefix() {
         StringBuilder salt = new StringBuilder();
 
-        switch (Beggar.randInt(0, 1)) {
+        switch (Script.randInt(0, 1)) {
             case 0:
-                salt.append(vowels[Beggar.randInt(0, (vowels.length - 1))]);
-                salt.append(nonVowels[Beggar.randInt(0, (nonVowels.length - 1))]);
-                salt.append(vowels[Beggar.randInt(0, (vowels.length - 1))]);
+                salt.append(vowels[Script.randInt(0, (vowels.length - 1))]);
+                salt.append(nonVowels[Script.randInt(0, (nonVowels.length - 1))]);
+                salt.append(vowels[Script.randInt(0, (vowels.length - 1))]);
             case 1:
-                salt.append(nonVowels[Beggar.randInt(0, (nonVowels.length - 1))]);
-                salt.append(vowels[Beggar.randInt(0, (vowels.length - 1))]);
-                salt.append(nonVowels[Beggar.randInt(0, (nonVowels.length - 1))]);
+                salt.append(nonVowels[Script.randInt(0, (nonVowels.length - 1))]);
+                salt.append(vowels[Script.randInt(0, (vowels.length - 1))]);
+                salt.append(nonVowels[Script.randInt(0, (nonVowels.length - 1))]);
         }
         return salt.toString();
     }

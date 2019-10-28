@@ -6,7 +6,7 @@ import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.tab.*;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.fighter.Fighter;
 import script.fighter.config.ProgressiveSet;
 import script.fighter.debug.Logger;
@@ -135,7 +135,7 @@ public class ProgressionChecker extends Node {
     private void noAmmoSwitch() {
         HashMap<EquipmentSlot, String> map = new HashMap<>();
 
-        switch (Beggar.randInt(0, 1)) {
+        switch (Script.randInt(0, 1)) {
             case 0:
                 map.put(EquipmentSlot.MAINHAND, "Bronze sword");
                 map.put(EquipmentSlot.OFFHAND, "Wooden shield");

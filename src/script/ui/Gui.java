@@ -4,7 +4,7 @@ import net.miginfocom.swing.MigLayout;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.data.Coins;
 import script.data.MuleArea;
 
@@ -42,11 +42,11 @@ public class Gui extends Task {
 
 
     private JFrame frame;
-    private Beggar main;
+    private Script main;
 
-    public Gui(Beggar beggar) {
-        main = beggar;
-        frame = new JFrame("Ultimate Beggar");
+    public Gui(Script script) {
+        main = script;
+        frame = new JFrame("Ultimate Script");
         //frame.setLayout(new MigLayout());
         //frame.setPreferredSize(new Dimension(400, 950));
 
@@ -242,7 +242,7 @@ public class Gui extends Task {
 
     private void autoOpen() {
 
-            File f = new File(Beggar.BEG_LINES_PATH);
+            File f = new File(Script.BEG_LINES_PATH);
 
             BufferedReader br;
             try {

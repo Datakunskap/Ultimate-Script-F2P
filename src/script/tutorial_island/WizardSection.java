@@ -13,7 +13,7 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
-import script.Beggar;
+import script.Script;
 import script.fighter.Fighter;
 
 import java.util.Arrays;
@@ -102,9 +102,9 @@ public final class WizardSection extends TutorialSection {
         }
 
         if (!main.onTutorialIsland()) {
-            switch (Beggar.randInt(0, 2)) {
+            switch (Script.randInt(0, 2)) {
                 case 0:
-                    getEmptyPosition(false, Beggar.TUTORIAL_COMPLETED_WALK_DIST, false).ifPresent(this::randWalker);
+                    getEmptyPosition(false, Script.TUTORIAL_COMPLETED_WALK_DIST, false).ifPresent(this::randWalker);
                     break;
                 case 1:
                     randWalker(BankLocation.LUMBRIDGE_CASTLE.getPosition());
@@ -113,7 +113,7 @@ public final class WizardSection extends TutorialSection {
                     randWalker(BankLocation.DRAYNOR.getPosition());
                     break;
             }
-            main.beggar.startFighter();
+            main.script.startFighter();
         }
 
         return TutorialIsland.getRandSleep();

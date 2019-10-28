@@ -24,17 +24,17 @@ public class SellGE extends Task {
     private Main main;
     private Banking banking;
 
-    /*private Beggar beggar;
+    /*private Script script;
     private StartChocolate startBegging;*/
 
-    public SellGE (Main main/*, Beggar beggar*/) {
+    public SellGE (Main main/*, Script script*/) {
         this.main = main;
-        //this.beggar = beggar;
+        //this.script = script;
         banking = new Banking(main);
     }
 
     /*private boolean checkStartBegging() {
-        startBegging = new StartChocolate(main, beggar, banking);
+        startBegging = new StartChocolate(main, script, banking);
         return startBegging.execute();
     }*/
 

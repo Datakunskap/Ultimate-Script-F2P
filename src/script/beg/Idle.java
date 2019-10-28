@@ -6,7 +6,7 @@ import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.script.events.LoginScreen;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.fighter.Fighter;
 
 import java.util.concurrent.TimeUnit;
@@ -16,9 +16,9 @@ public class Idle extends Task {
     private int max;
     private long idleTill;
 
-    private Beggar main;
+    private Script main;
 
-    public Idle(Beggar main){
+    public Idle(Script main){
         this.main = main;
     }
 
@@ -53,7 +53,7 @@ public class Idle extends Task {
             return Fighter.getLoopReturn();
         }
         long timeout = getIdleFor();
-        if(timeout > 60 && Game.isLoggedIn() && Beggar.IDLE_LOGOUT) {
+        if(timeout > 60 && Game.isLoggedIn() && Script.IDLE_LOGOUT) {
             Log.fine("Logging out....");
             main.removeBlockingEvent(LoginScreen.class);
             Game.logout();
@@ -67,7 +67,7 @@ public class Idle extends Task {
         max = 0;
         main.numBegs = 0;
         main.idleBegNum = Random.high(main.idleBegNum - 10, main.idleBegNum + 10);
-        Beggar.timesIdled ++;
+        Script.timesIdled ++;
         if (main.getBlockingEvent(LoginScreen.class) == null) {
             main.addBlockingEvent(new LoginScreen(main));
         }

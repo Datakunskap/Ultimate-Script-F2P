@@ -4,7 +4,7 @@ import org.rspeer.runetek.api.Worlds;
 import org.rspeer.runetek.api.component.tab.Inventory;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.chocolate.Main;
 import script.fighter.wrappers.OgressWrapper;
 import script.fighter.wrappers.WorldhopWrapper;
@@ -24,10 +24,10 @@ public class StartOther extends Task {
     public static final int TANS_PER_HR = 1053;
     public static final int CHOC_PER_HR = 3000;
 
-    private Beggar main;
+    private Script main;
 
-    public StartOther(Beggar beggar) {
-        main = beggar;
+    public StartOther(Script script) {
+        main = script;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class StartOther extends Task {
 
         checkMuted();
 
-        if (Beggar.OGRESS && hasEnoughGP(Beggar.OGRESS_START_GP)) {
+        if (Script.OGRESS && hasEnoughGP(Script.OGRESS_START_GP)) {
             return true;
         }
 
@@ -71,7 +71,7 @@ public class StartOther extends Task {
 
     private boolean hasLongRuntime(int hours, int minutes) {
         return (hours > 0) ? main.runtime.exceeds(Duration.ofHours(hours))
-                : (Beggar.RESET_RUNTIME ? main.runtime.exceeds(Duration.ofMinutes(minutes))
+                : (Script.RESET_RUNTIME ? main.runtime.exceeds(Duration.ofMinutes(minutes))
                 : main.runtime.exceeds(Duration.ofMinutes(minutes + 30)));
     }
 
@@ -99,8 +99,6 @@ public class StartOther extends Task {
     }
 
     private void checkMuted() {
-        if (main.ogressBeg)
-            return;
         if (hasLongLastTradeTime(LAST_TRADE_MINUTES_MUTED) || (main.lastTradeTime == null && hasLongRuntime(0, LAST_TRADE_MINUTES_MUTED))) {
             Log.severe("Muted");
             main.muted = true;
@@ -115,7 +113,7 @@ public class StartOther extends Task {
             main.tanner = tanner;
             main.timesTanned++;
             main.tanner.amntMuled += main.amntMuled;
-            WorldhopWrapper.removeWorld(main.currWorld, Beggar.CURR_WORLD_PATH);
+            WorldhopWrapper.removeWorld(main.currWorld, Script.CURR_WORLD_PATH);
             if (main.isMuling) {
                 Mule.logoutMule();
             }
@@ -131,7 +129,7 @@ public class StartOther extends Task {
             if (main.isMuling) {
                 Mule.logoutMule();
             }
-            WorldhopWrapper.removeWorld(main.currWorld, Beggar.CURR_WORLD_PATH);
+            WorldhopWrapper.removeWorld(main.currWorld, Script.CURR_WORLD_PATH);
             main.timesChocolate++;
             main.chocolate = new Main(main);
             main.chocolate.amntMuled += main.amntMuled;
@@ -139,16 +137,16 @@ public class StartOther extends Task {
             return 5000;
         }
 
-        if (hasEnoughGP(Beggar.OGRESS_START_GP)) {
+        if (hasEnoughGP(Script.OGRESS_START_GP)) {
             if (main.isMuling) {
                 Mule.logoutMule();
             }
             if (Worlds.get(Worlds.getCurrent()).getPopulation() > 400) {
-                WorldhopWrapper.hopToLowPopWorld(400, Worlds.getCurrent(), WorldhopWrapper.getWorldsFromFile(Beggar.OGRESS_WORLD_PATH));
+                WorldhopWrapper.hopToLowPopWorld(400, Worlds.getCurrent(), WorldhopWrapper.getWorldsFromFile(Script.OGRESS_WORLD_PATH));
             }
 
             OgressWrapper.unequipAll(false);
-            WorldhopWrapper.removeWorld(main.currWorld, Beggar.CURR_WORLD_PATH);
+            WorldhopWrapper.removeWorld(main.currWorld, Script.CURR_WORLD_PATH);
             main.startOgress();
             return 5000;
         }

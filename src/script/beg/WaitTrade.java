@@ -7,7 +7,7 @@ import org.rspeer.runetek.api.component.tab.Tab;
 import org.rspeer.runetek.api.component.tab.Tabs;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 
 public class WaitTrade extends Task {
 
@@ -15,10 +15,10 @@ public class WaitTrade extends Task {
     private int max;
     private boolean waitSet = false;
 
-    private Beggar main;
+    private Script main;
 
-    public WaitTrade(Beggar beggar) {
-        main = beggar;
+    public WaitTrade(Script script) {
+        main = script;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class WaitTrade extends Task {
         if (Tabs.isOpen(Tab.INVENTORY))
             Tabs.open(Tab.INVENTORY);
 
-        int timeout = Beggar.randInt(min, max);
+        int timeout = Script.randInt(min, max);
         Log.info("Waiting " + (timeout / 1000) + "s for a trade");
         //int grindTimeout = 16000;
         //timeout -= grindTimeout;
@@ -55,7 +55,7 @@ public class WaitTrade extends Task {
             main.walk = false;
             main.sendTrade = false;
             main.beg = false;
-            return Beggar.randInt(1500, 2500);
+            return Script.randInt(1500, 2500);
         }
 
         Tabs.open(Tab.INVENTORY);

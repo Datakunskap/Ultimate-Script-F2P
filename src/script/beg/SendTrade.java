@@ -5,14 +5,14 @@ import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 
 public class SendTrade extends Task {
 
-    private Beggar main;
+    private Script main;
 
-    public SendTrade(Beggar beggar){
-        main = beggar;
+    public SendTrade(Script script){
+        main = script;
     }
 
     @Override

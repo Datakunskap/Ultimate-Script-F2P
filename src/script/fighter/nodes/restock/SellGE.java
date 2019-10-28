@@ -13,7 +13,7 @@ import org.rspeer.runetek.api.input.Keyboard;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.beg.TradePlayer;
 import script.data.Location;
 import script.fighter.Fighter;
@@ -76,7 +76,7 @@ public class SellGE extends Node {
         if (itemsToSell == null) {
             Progressive p = Config.getProgressive();
             if (p.isOgress() && !OgressWrapper.has7QuestPoints()) {
-                new QuestingDriver(main.getScript()).startSPXQuesting(Beggar.randInt(20, 30));
+                new QuestingDriver(main.getScript()).startSPXQuesting(Script.randInt(20, 30));
             }
 
             BankWrapper.openAndDepositAll(true);
@@ -108,7 +108,7 @@ public class SellGE extends Node {
             for (int i = 0; i < itemsToSell.length; i++) {
                 status = "Selling";
                 if (itemsToSell[i] != null && GrandExchange.getOffers(RSGrandExchangeOffer.Type.SELL).length < 3) {
-                    if (ExGrandExchange.sell(itemsToSell[i].getId(), itemsToSell[i].getStackSize(), Beggar.randInt(1, 2), false)) {
+                    if (ExGrandExchange.sell(itemsToSell[i].getId(), itemsToSell[i].getStackSize(), Script.randInt(1, 2), false)) {
                         Log.info("Selling: " + itemsToSell[i].getName());
                         final int index = i;
                         if (Time.sleepUntil(() -> GrandExchange.getFirst(x -> x.getItemId() == itemsToSell[index].getId()) != null,8000)) {

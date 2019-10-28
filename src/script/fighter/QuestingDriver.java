@@ -5,21 +5,21 @@ import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.Worlds;
 import org.rspeer.script.GameAccount;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.data.ClientQuickLauncher;
 
 import java.io.IOException;
 
 public class QuestingDriver {
 
-    private Beggar script;
+    private Script script;
     private String killKey;
 
-    public QuestingDriver(Beggar script) {
+    public QuestingDriver(Script script) {
         this.script = script;
     }
 
-    public QuestingDriver(Beggar script, String killKey) {
+    public QuestingDriver(Script script, String killKey) {
         this.script = script;
         this.killKey = killKey;
     }
@@ -33,7 +33,7 @@ public class QuestingDriver {
 
         ClientQuickLauncher launcher = new ClientQuickLauncher(
                 "[PREMIUM] [SPX] AIO Questing", true, Worlds.getCurrent(),
-                scriptArgs[0/*Beggar.randInt(0, scriptArgs.length - 1)*/], getSetKillKey());
+                scriptArgs[0/*Script.randInt(0, scriptArgs.length - 1)*/], getSetKillKey());
 
         GameAccount account = RSPeer.getGameAccount();
         String[] accountInfo = new String[] { account.getUsername(), account.getPassword() };
@@ -51,11 +51,11 @@ public class QuestingDriver {
     private void startRestartScript(String[] accountInfo, int sleepMinutesUntilScriptRestart) {
         String email = accountInfo[0];
         String password = accountInfo[1];
-        String command = "java -jar " + Beggar.RESTART_SCRIPT_PATH + " ";
+        String command = "java -jar " + Script.RESTART_SCRIPT_PATH + " ";
         String args;
 
         String proxyIp = null;
-        if (Beggar.PROXY_IP.length > 0) {
+        if (Script.PROXY_IP.length > 0) {
             proxyIp = script.getProxyIp(email);
         }
 
@@ -65,9 +65,9 @@ public class QuestingDriver {
                     "-email " + email + " " +
                     "-password " + password + " " +
                     "-world " + Worlds.getCurrent() + " " +
-                    "-apiKey " + Beggar.API_KEY + " " +
+                    "-apiKey " + Script.API_KEY + " " +
                     "-proxyIp " + proxyIp + " " +
-                    "-proxyPort " + Beggar.PROXY_PORT + " " +
+                    "-proxyPort " + Script.PROXY_PORT + " " +
                     "-killKey " + getSetKillKey();
 
         } else {
@@ -76,7 +76,7 @@ public class QuestingDriver {
                     "-email " + email + " " +
                     "-password " + password + " " +
                     "-world " + Worlds.getCurrent() + " " +
-                    "-apiKey " + Beggar.API_KEY + " " +
+                    "-apiKey " + Script.API_KEY + " " +
                     "-killKey " + getSetKillKey();
         }
 
@@ -93,9 +93,9 @@ public class QuestingDriver {
     }
 
     private String getSetKillKey() {
-        if (killKey == null) {
+        if (killKey == null || killKey.isEmpty() || killKey.isBlank()) {
             for (int i = 0; i < 3; i ++) {
-                killKey += Beggar.randInt(100, 999) + (i < 2 ? "_" : "_KILL_ME");
+                killKey += Script.randInt(100, 999) + "/KILL/";
             }
         }
         return  killKey;

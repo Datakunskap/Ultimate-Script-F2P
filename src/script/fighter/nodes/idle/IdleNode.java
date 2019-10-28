@@ -5,7 +5,7 @@ import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.script.events.LoginScreen;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.fighter.Fighter;
 import script.fighter.config.Config;
 import script.fighter.debug.Logger;
@@ -74,7 +74,7 @@ public class IdleNode extends Node {
             return Fighter.getLoopReturn();
         }
         long timeout = getIdleFor();
-        if (timeout > 60 && Game.isLoggedIn() && Beggar.IDLE_LOGOUT) {
+        if (timeout > 60 && Game.isLoggedIn() && Script.IDLE_LOGOUT) {
             Log.fine("Logging out....");
             main.getScript().removeBlockingEvent(LoginScreen.class);
             Game.logout();

@@ -12,7 +12,7 @@ import org.rspeer.runetek.api.movement.position.Area;
 import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.fighter.Fighter;
 import script.fighter.config.Config;
 import script.fighter.framework.Node;
@@ -35,7 +35,7 @@ public class Splash extends Node {
     @Override
     public boolean validate() {
         spell = Config.getProgressive().getSpell();
-        if (Beggar.SPLASH_USE_EQUIPMENT && !GEWrapper.hasEquipment()) {
+        if (Script.SPLASH_USE_EQUIPMENT && !GEWrapper.hasEquipment()) {
             return false;
         }
 
@@ -96,7 +96,8 @@ public class Splash extends Node {
             }
         }
 
-        Npc npc = Npcs.getNearest(n -> Config.getProgressive().getEnemies().contains(n.getName().toLowerCase()) && n.getTargetIndex() == -1);
+        Npc npc = Npcs.getNearest(n -> Config.getProgressive().getEnemies().contains(n.getName().toLowerCase())
+                && (n.getTargetIndex() == -1 || (n.getTarget() != null && n.getTarget().equals(Players.getLocal()))));
 
         if (npc != null && Players.getLocal().getTargetIndex() == -1 && !Players.getLocal().isAnimating()) {
             Log.info("Manual cast");
@@ -108,9 +109,8 @@ public class Splash extends Node {
             }
         } else if (npc == null){
             Log.severe("Cant Find Npc");
+            WorldhopWrapper.checkWorldhop(false);
         }
-
-        WorldhopWrapper.checkWorldhop(false);
 
         return Random.high(2000, 5000);
     }

@@ -17,7 +17,7 @@ import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.tanner.ExGrandExchange;
 
 import java.io.IOException;
@@ -25,17 +25,17 @@ import java.util.Objects;
 
 public class BuyEquip extends Task {
 
-    private Beggar main;
+    private Script main;
     private final int ITEM;
 
-    public BuyEquip(Beggar beggar){
-        main = beggar;
+    public BuyEquip(Script script){
+        main = script;
         ITEM = main.item;
     }
 
     @Override
     public boolean validate() {
-        return Beggar.BUY_GEAR && Inventory.getCount(true, 995) >= main.randBuyGP && !main.equipped;
+        return Script.BUY_GEAR && Inventory.getCount(true, 995) >= main.randBuyGP && !main.equipped;
     }
 
     @Override
@@ -101,7 +101,7 @@ public class BuyEquip extends Task {
     }
 
     private void setRandBuyGP() {
-        int newRand = Inventory.getCount(true, 995) + Beggar.randInt(20000, 30000);
+        int newRand = Inventory.getCount(true, 995) + Script.randInt(20000, 30000);
         if (newRand < main.muleAmnt) {
             main.randBuyGP = newRand;
         } else {
@@ -109,7 +109,7 @@ public class BuyEquip extends Task {
         }
         main.equipped = true;
         main.walk = true;
-        main.item = main.items[Beggar.randInt(0, main.items.length - 1)];
+        main.item = main.items[Script.randInt(0, main.items.length - 1)];
     }
 
     private void openGE() {

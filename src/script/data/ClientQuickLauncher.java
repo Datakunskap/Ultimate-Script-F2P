@@ -5,7 +5,7 @@ import api.bot_management.data.LaunchedClient;
 import api.bot_management.data.QuickLaunch;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,17 +49,17 @@ public class ClientQuickLauncher {
     public boolean isInstanceLimit() {
         try {
             runningClients = BotManagement.getRunningClients();
-            Log.fine(runningClients.size() + " / " + Beggar.ALLOWED_INSTANCES + " Clients Running");
+            Log.fine(runningClients.size() + " / " + Script.ALLOWED_INSTANCES + " Clients Running");
 
             for (int t = 0; t < 2; t++) {
-                if (runningClients.size() < Beggar.ALLOWED_INSTANCES) {
+                if (runningClients.size() < Script.ALLOWED_INSTANCES) {
                     Time.sleep(10000);
                     runningClients = BotManagement.getRunningClients();
-                    Log.fine(runningClients.size() + " / " + Beggar.ALLOWED_INSTANCES + " Clients Running");
+                    Log.fine(runningClients.size() + " / " + Script.ALLOWED_INSTANCES + " Clients Running");
                 }
             }
 
-            return runningClients.size() >= Beggar.ALLOWED_INSTANCES;
+            return runningClients.size() >= Script.ALLOWED_INSTANCES;
 
         } catch (IOException e) {
             e.printStackTrace();

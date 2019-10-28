@@ -173,7 +173,7 @@ public class Ogress extends Node {
                 if (Tzhaar3 != null && !isDead(Tzhaar3)) {
                     action = "Attacking";
                     if (!Players.getLocal().isMoving() && RIGHT_AREA[0].contains(Tzhaar3)) {
-                        if (Health.getCurrent() > 8) {
+                        if (Health.getCurrent() > 8  || (!Tzhaar3.isMoving() && Tzhaar3.distance() <= 3)) {
                             Log.info("Casting: " + spell.getName());
                             if (Tzhaar3.interact("Attack")) {
                                 Time.sleepUntil(Players.getLocal()::isAnimating, Random.nextInt(4000, 5000));
@@ -219,7 +219,7 @@ public class Ogress extends Node {
                 if (Tzhaar2 != null && !isDead(Tzhaar2)) {
                     action = "Attacking";
                     if (!Players.getLocal().isMoving() && SEARCH_AREA.contains(Tzhaar2)) {
-                        if (Health.getCurrent() > 8) {
+                        if (Health.getCurrent() > 8 || (!Tzhaar2.isMoving() && Tzhaar2.distance() <= 3)) {
                             Log.info("Casting: " + spell.getName());
                             if (Tzhaar2.interact("Attack")) {
                                 Time.sleepUntil(Players.getLocal()::isAnimating, Random.nextInt(4000, 6000));
@@ -254,16 +254,19 @@ public class Ogress extends Node {
                 Movement.walkTo(LEFT_SAFESPOT);
             } else {
                 Movement.walkTo(RIGHT_SAFESPOT);
+
             }
             if (!Movement.isRunEnabled()) {
                 Movement.toggleRun(true);
             }
+            Time.sleepUntil(() -> Players.getLocal().isMoving(), 1500);
+            Time.sleepUntil(() -> !Players.getLocal().isMoving(), 5000);
         }
         else if (!looting && Health.getCurrent() > 8) {
             WorldhopWrapper.checkWorldhop(true);
         }
 
-        return Random.nextInt(500, 1000);
+        return Fighter.getLoopReturn();
     }
 
     private Pickable getLoot() {
@@ -294,10 +297,6 @@ public class Ogress extends Node {
     private Npc[] getTargetingMe() {
         return Npcs.getLoaded(n -> n.getTarget() != null && n.getTarget().equals(Players.getLocal()));
         //return CombatStore.getTargetingMe().size() > 0;
-    }
-
-    private int getNumTargetingMe() {
-        return CombatStore.getTargetingMe().size();
     }
 
     @Override

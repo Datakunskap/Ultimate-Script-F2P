@@ -15,7 +15,7 @@ import org.rspeer.runetek.api.scene.Npcs;
 import org.rspeer.runetek.providers.RSGrandExchangeOffer;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.chocolate.Main;
 import script.tanner.ExGrandExchange;
 import script.tanner.data.Location;
@@ -25,13 +25,13 @@ import java.util.Objects;
 public class BuyGE extends Task {
 
     private Main main;
-    private Beggar beggar;
+    private Script script;
     private Banking banking;
     private int buyQuantity;
 
-    public BuyGE (Main main, Beggar beggar) {
+    public BuyGE (Main main, Script script) {
         this.main = main;
-        this.beggar = beggar;
+        this.script = script;
         banking = new Banking(main);
     }
 
@@ -44,8 +44,8 @@ public class BuyGE extends Task {
     public int execute() {
 
         if (!main.checkedBank) {
-            if (StartTanning.validate(main, beggar)) {
-                StartTanning.execute(main, beggar);
+            if (StartTanning.validate(main, script)) {
+                StartTanning.execute(main, script);
             }
 
             main.checkedBank = true;

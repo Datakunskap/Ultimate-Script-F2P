@@ -11,7 +11,7 @@ import org.rspeer.runetek.api.input.menu.ActionOpcodes;
 import org.rspeer.runetek.event.types.RenderEvent;
 import org.rspeer.script.ScriptMeta;
 import org.rspeer.ui.Log;
-import script.Beggar;
+import script.Script;
 import script.beg.StartOther;
 import script.chocolate.tasks.*;
 import script.data.MuleArea;
@@ -75,38 +75,38 @@ public class Main {
     public int[] lastPrices = new int[2];
     public boolean usingBuyFallback = false;
     public boolean usingSellFallback = false;
-    public int idleChocNum = Beggar.randInt((StartOther.CHOC_PER_HR / 2 - 500), (StartOther.CHOC_PER_HR / 2 + 500));
+    public int idleChocNum = Script.randInt((StartOther.CHOC_PER_HR / 2 - 500), (StartOther.CHOC_PER_HR / 2 + 500));
 
-    public Beggar beggar;
+    public Script script;
 
-    public Main(Beggar script) {
-        beggar = script;
+    public Main(Script script) {
+        this.script = script;
     }
 
     public void start() {
-        beggar.removeAll();
+        script.removeAll();
 
         Log.fine("Chocolate Started");
-        muleName = Beggar.MULE_NAME;
-        muleArea = Beggar.MULE_AREA;
-        muleWorld = Beggar.MULE_WORLD;
+        muleName = Script.MULE_NAME;
+        muleArea = Script.MULE_AREA;
+        muleWorld = Script.MULE_WORLD;
 
         setPrices(true);
         setRandMuleKeep(minKeep, maxKeep);
         timeRan = StopWatch.start();
 
-        beggar.submit(new Mule(this),
+        script.submit(new Mule(this),
                 new Traverse(this),
                 new SellGE(this),
-                new BuyGE(this, beggar),
+                new BuyGE(this, script),
                 new Grind(this));
     }
 
     public void setPrices(boolean refresh) {
         try {
             Log.info("Setting prices");
-            sellPrice = ExPriceCheck.getOSBuddySellPrice(script.chocolate.Main.DUST, refresh);
-            buyPrice = ExPriceCheck.getOSBuddyBuyPrice(script.chocolate.Main.BAR, refresh);
+            sellPrice = ExPriceCheck.getOSBuddySellPrice(DUST, refresh);
+            buyPrice = ExPriceCheck.getOSBuddyBuyPrice(BAR, refresh);
         } catch (Exception e) {
             Log.severe("Failed getting OSBuddy price");
             e.printStackTrace();
@@ -114,30 +114,30 @@ public class Main {
             try {
                 for (int i = 0; sellPrice < SELL_PL && i < 3; i++) {
                     if (i == 0) {
-                        try { sellPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.DUST); }
+                        try { sellPrice = ExPriceCheck.getAccurateRSPrice(DUST); }
                         catch (Exception ignored) {}
                     }
                     if (i == 1)
-                        sellPrice = ExPriceCheck.getRSBuddySellPrice(script.chocolate.Main.DUST, refresh);
+                        sellPrice = ExPriceCheck.getRSBuddySellPrice(DUST, refresh);
                     if (i == 2)
-                        sellPrice = ExPriceCheck.getRSPrice(script.chocolate.Main.DUST);
+                        sellPrice = ExPriceCheck.getRSPrice(DUST);
                 }
             } catch (Exception e) {
-                beggar.writeToErrorFile("Failed getting sell price");
+                script.writeToErrorFile("Failed getting sell price");
             }
 
             try {
                 for (int i = 0; buyPrice < BUY_PL && i < 3; i++) {
                     if (i == 0)
-                        try { buyPrice = ExPriceCheck.getAccurateRSPrice(script.chocolate.Main.BAR); }
+                        try { buyPrice = ExPriceCheck.getAccurateRSPrice(BAR); }
                         catch (Exception ignored) {}
                     if (i == 1)
-                        buyPrice = ExPriceCheck.getRSBuddyBuyPrice(script.chocolate.Main.BAR, refresh);
+                        buyPrice = ExPriceCheck.getRSBuddyBuyPrice(BAR, refresh);
                     if (i == 2)
-                        buyPrice = ExPriceCheck.getRSPrice(script.chocolate.Main.BAR);
+                        buyPrice = ExPriceCheck.getRSPrice(BAR);
                 }
             } catch (Exception e) {
-                beggar.writeToErrorFile("Failed getting buy price");
+                script.writeToErrorFile("Failed getting buy price");
 
             } finally {
                 fallbackPriceHelper();

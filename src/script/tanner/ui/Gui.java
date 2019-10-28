@@ -3,7 +3,7 @@ package script.tanner.ui;
 import net.miginfocom.swing.MigLayout;
 import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.StopWatch;
-import script.Beggar;
+import script.Script;
 import script.data.MuleArea;
 import script.tanner.Main;
 
@@ -91,9 +91,9 @@ public class Gui extends JFrame {
         // Muling - if blank wont mule
         if (muleAmnt != null && muleKeep != null && muleArea != null && muleName != null && muleWorld != null &&
                 !muleAmnt.getText().equals("") && !muleKeep.getText().equals("") && !muleWorld.getText().equals("")) {
-            main.muleName = Beggar.MULE_NAME;
-            main.muleWorld = Beggar.MULE_WORLD;
-            main.muleArea.setMuleArea(Beggar.MULE_AREA.getMuleArea());
+            main.muleName = Script.MULE_NAME;
+            main.muleWorld = Script.MULE_WORLD;
+            main.muleArea.setMuleArea(Script.MULE_AREA.getMuleArea());
             main.setRandMuleKeep(85000, 100000);
 
             /*main.muleAmnt = Integer.parseInt(muleAmnt.getText());

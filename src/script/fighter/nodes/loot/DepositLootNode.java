@@ -5,6 +5,7 @@ import org.rspeer.runetek.api.component.tab.Inventory;
 import script.fighter.Fighter;
 import script.fighter.config.Config;
 import script.fighter.framework.Node;
+import script.fighter.models.Progressive;
 import script.fighter.wrappers.BankWrapper;
 
 public class DepositLootNode extends Node {
@@ -28,7 +29,12 @@ public class DepositLootNode extends Node {
         main.invalidateTask(this);
 
         if (BankWrapper.openNearest()) {
-            Bank.depositAllExcept(Config.getProgressive().getRunes().toArray(new String[0]));
+            Progressive p = Config.getProgressive();
+            Bank.depositAllExcept(p.getRunes().toArray(new String[0]));
+            if (p.isOgress()) {
+                Bank.withdrawAll("Nature rune");
+                Bank.withdrawAll("Fire rune");
+            }
             BankWrapper.updateBankValue();
             BankWrapper.updateInventoryValue();
         }

@@ -4,13 +4,13 @@ import org.rspeer.runetek.api.Game;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.movement.Movement;
 import org.rspeer.runetek.api.scene.Players;
-import script.Beggar;
+import script.Script;
 
 class WalkingHelper {
 
-    private Beggar main;
+    private Script main;
 
-    WalkingHelper(Beggar main) {
+    WalkingHelper(Script main) {
         this.main = main;
     }
 
