@@ -180,7 +180,7 @@ public class Mule extends Task {
                             logoutMule();
                             muleing = false;
                             main.amntMuled += (Coins - main.muleKeep);
-                            main.setRandMuleKeep(85000, 100000);
+                            main.setRandMuleKeep(100_000, 200_000);
                             if(begWorld != -1) {
                                 WorldHopper.hopTo(begWorld);
                                 Time.sleepUntil(() -> Worlds.getCurrent() == begWorld, 10000);

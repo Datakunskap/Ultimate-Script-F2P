@@ -103,7 +103,7 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
         'year': randint(1995, 2005),
         'agree_email': 1,
         'agree_email_third_party': 1,
-        'g-recaptcha-response': solve_captcha(3, s),
+        'g-recaptcha-response': solve_captcha(s),
         'create-submit': 'Play Now'
     }
 
@@ -131,7 +131,7 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
     s.close()
 
 
-def solve_captcha(retries, s):
+def solve_captcha(s):
     print('Solving Captcha')
     waiting = True
     touched = False
@@ -146,20 +146,11 @@ def solve_captcha(retries, s):
 
     response = s.get(CAPTCHA_REQ_URL, params=params)
 
-    if retries < 1:
-        if response.status_code != requests.codes.ok:
-            raise Exception('2Captcha says no')
-        else:
-            solve_captcha(retries - 1)
-        raise Exception('Captcha request failed')
-
     if response.status_code != requests.codes.ok:
-        solve_captcha(retries - 1)
+        raise Exception('2Captcha says no')
 
     if '|' in response.text:
         _, captcha_id = response.text.split('|')
-    else:
-        solve_captcha(retries - 1)
 
     wait_for_captcha = WaitForCaptcha()
 

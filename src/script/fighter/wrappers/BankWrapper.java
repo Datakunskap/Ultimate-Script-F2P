@@ -41,7 +41,7 @@ public class BankWrapper {
     }
 
     public static int getTotalValueGained() {
-        return getTotalValue() - (startingValue > 0 ? startingValue : getTotalValue());
+        return (getTotalValue() - (startingValue > 0 ? startingValue : getTotalValue()));
     }
 
     public static boolean isTradeRestricted() {

@@ -161,7 +161,7 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
     public static final boolean FIGHTER_TRAIN_DEFENCE = false;
     public static final boolean MULTI_CLIENT_LAUNCH = false;
 
-    public static final boolean OGRESS = true;
+    public static final boolean OGRESS = false;
     public static final int OGRESS_START_GP = 50_000;
     public static final boolean SPLASH_USE_EQUIPMENT = true;
     public static final int OGRESS_WORLD_HOP_MINS = 5;
