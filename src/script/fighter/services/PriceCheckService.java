@@ -15,6 +15,7 @@ import org.rspeer.ui.Log;
 import script.beg.TradePlayer;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -29,64 +30,68 @@ public class PriceCheckService {
     private static Map<Integer, ItemPrice> prices = new HashMap<>();
     private static int reloadMinutes = 30;
     private static boolean isReloadEnabled = true;
+    private static HashSet<String> failedItemPriceNames = new HashSet<>();
 
     private static ScheduledThreadPoolExecutor executor = ExecutorUtil.newScheduledExecutorPool(1, Throwable::printStackTrace);
     private static ScheduledFuture<?> task;
 
     public static int getInventoryValue(boolean includeTradeRestricted) {
-        try {
-            int total = Inventory.getCount(true, "Coins");
-            Item[] invItems;
+        int total = Inventory.getCount(true, "Coins");
+        Item[] invItems;
 
-            if (includeTradeRestricted) {
-                invItems = Inventory.getItems();
-            } else {
-                invItems = Inventory.getItems(x -> !TradePlayer.isTradeRestrictedItem(x.getName()));
-            }
-
-            return getItemPrices(total, invItems);
-
-        } catch (Exception ignored) {
-            Log.severe("Failed Getting Inventory Value");
-            return -1;
+        if (includeTradeRestricted) {
+            invItems = Inventory.getItems();
+        } else {
+            invItems = Inventory.getItems(x -> !TradePlayer.isTradeRestrictedItem(x.getName()));
         }
+
+        return getItemPrices(total, invItems);
     }
 
     public static int getBankValue(boolean includeTradeRestricted) {
-        try {
-            int total = Bank.getCount("Coins");
-            Item[] bankItems;
+        int total = Bank.getCount("Coins");
+        Item[] bankItems;
 
-            if (includeTradeRestricted) {
-                bankItems = Bank.getItems();
-            } else {
-                bankItems = Bank.getItems(x -> !TradePlayer.isTradeRestrictedItem(x.getName()));
-            }
-
-            return getItemPrices(total, bankItems);
-
-        } catch (Exception ignored) {
-            Log.severe("Failed Getting Bank Value");
-            return -1;
+        if (includeTradeRestricted) {
+            bankItems = Bank.getItems();
+        } else {
+            bankItems = Bank.getItems(x -> !TradePlayer.isTradeRestrictedItem(x.getName()));
         }
+
+        return getItemPrices(total, bankItems);
     }
 
-    private static int getItemPrices(int total, Item[] items) throws Exception {
+    private static int getItemPrices(int total, Item[] items) {
         for (Item item : items) {
-            if (item.isExchangeable() && !item.getName().equalsIgnoreCase("coins")) {
-                int itemValue = PriceCheckService.getPrice(item.getId()).getSellAverage() * item.getStackSize();
+            if (item.isExchangeable() && !item.isNoted() && item.getId() != 995) {
+                int itemValue = 0;
+                try {
+                    itemValue = PriceCheckService.getPrice(item.getId()).getSellAverage() * item.getStackSize();
+                } catch (Exception ignored) { }
 
-                if (itemValue <= 0) {
+                if (itemValue <= 0 && !failedItemPriceNames.contains(item.getName())) {
                     reload(OSBUDDY_EXCHANGE_SUMMARY_URL);
+                    try {
+                        itemValue = PriceCheckService.getPrice(item.getId()).getSellAverage() * item.getStackSize();
+                    } catch (Exception e) {
+                        Log.severe("Failed Getting Item Price: " + item.getName());
+                        failedItemPriceNames.add(item.getName());
+                        reload();
+                    }
                 }
-                total += PriceCheckService.getPrice(item.getId()).getSellAverage() * item.getStackSize();
+
+                total += itemValue;
             }
         }
         return total;
     }
 
+    public static void purgeFailedPriceCache() {
+        failedItemPriceNames.clear();
+    }
+
     public static ItemPrice getPrice(String name) {
-        if(prices.size() == 0) {
+        if (prices.size() == 0) {
             reload();
         }
         int id = itemNameMapping.getOrDefault(name.toLowerCase(), -1);
@@ -94,7 +99,7 @@ public class PriceCheckService {
     }
 
     public static ItemPrice getPrice(int id) {
-        if(prices.size() == 0) {
+        if (prices.size() == 0) {
             reload();
         }
         return prices.getOrDefault(id, null);
@@ -105,15 +110,15 @@ public class PriceCheckService {
     }
 
     public static void reload(String url) {
-        if(!isReloadEnabled && prices.size() > 0) {
+        if (!isReloadEnabled && prices.size() > 0) {
             return;
         }
-        if(task == null && isReloadEnabled) {
+        if (task == null && isReloadEnabled) {
             task = executor.scheduleAtFixedRate(PriceCheckService::reload, reloadMinutes, reloadMinutes, TimeUnit.MINUTES);
         }
         try {
             HttpResponse<String> node = Unirest.get(url).asString();
-            if(node.getStatus() != 200) {
+            if (node.getStatus() != 200) {
                 System.out.println(node.getBody());
                 Log.severe("PriceCheck", "Failed to load prices. Result: " + node.getBody());
                 return;

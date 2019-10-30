@@ -159,13 +159,15 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
     public static final boolean EXPLV_TUTORIAL = false;
     public static final boolean FIGHTER_TRAIN_DEFENCE = false;
+    public static final boolean MULTI_CLIENT_LAUNCH = false;
 
     public static final boolean OGRESS = true;
-    public static final int OGRESS_START_GP = 25_000;
+    public static final int OGRESS_START_GP = 50_000;
     public static final boolean SPLASH_USE_EQUIPMENT = true;
     public static final int OGRESS_WORLD_HOP_MINS = 5;
-    public static final int OGRESS_MAX_MINUTES_WORTH_OF_RUNES = 150;
+    public static final int OGRESS_MAX_MINUTES_WORTH_OF_RUNES = 180;
     public static final int OGRESS_MULE_AMOUNT = 115_115;
+    public static final boolean OGRESS_LOOT_ALL = false;
 
     @Override
     public void onStart() {
@@ -261,7 +263,7 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
 
         resetRender(RESET_RUNTIME);
 
-        Log.fine("Starting Script");
+        Log.fine("Starting Beggar");
         submitTasks();
     }
 
@@ -302,7 +304,8 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
             if (!disableChain) {
                 writeToErrorFile("Ogress  |  Runtime: "
                         + Fighter.getRuntime().toElapsedString() + "  |  Value Gained: " + BankWrapper.getTotalValueGained()
-                        + "  |  Value / H: " + format((long) Fighter.getRuntime().getHourlyRate(BankWrapper.getTotalValueGained())));
+                        + "  |  Value / H: " + format((long) Fighter.getRuntime().getHourlyRate(BankWrapper.getTotalValueGained()))
+                        + "  |  Amount Muled: " + muleAmnt + "  |  Loot All: " + OGRESS_LOOT_ALL);
             }
             fighter.onStop(false, 10);
         }

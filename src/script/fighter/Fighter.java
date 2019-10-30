@@ -157,13 +157,18 @@ public class Fighter {
         p.setSpell(Spell.Modern.FIRE_STRIKE);
         HashSet<String> enemies = new HashSet<>();
         p.setEnemies(enemies);
-        String[] loot = new String[]{
+        String[] primaryLoot = new String[]{
                 "Iron arrow", "Steel arrow", "Adamant arrow", "Mithril arrow", "Rune med helm", "Rune full helm", "Rune battleaxe", "Shaman mask", "Air rune",
-                "Mind rune", "Water rune", "Earth rune", "Fire rune", "Chaos rune", "Cosmic rune", "Nature rune", "Law rune", "Death rune", "Ranarr seed", "Snapdragon seed", "Torstol seed",
-                "Cadantine seed", "Snape grass seed", "Mithril kiteshield", "Uncut diamond", "Uncut ruby", "Limpwurt root", "Bones"
+                "Mind rune", "Water rune", "Earth rune", "Fire rune", "Chaos rune", "Cosmic rune", "Nature rune", "Law rune", "Death rune", "Mithril kiteshield", "Bones", "Shaman mask"
         };
-        HashSet<String> lootSet = new HashSet<>(Arrays.asList(loot));
+        String[] secondaryLoot = new String[]{
+                "Uncut diamond", "Uncut ruby", "Uncut emerald", "Uncut sapphire", "Limpwurt root", "Bones", "Shaman mask", "Big bones"
+        };
+        HashSet<String> lootSet = new HashSet<>(Arrays.asList(primaryLoot));
         lootSet.addAll(map.values());
+        if (Script.OGRESS_LOOT_ALL) {
+            lootSet.addAll(Arrays.asList(secondaryLoot));
+        }
         p.setLoot(lootSet);
         p.setPrioritizeLooting(false);
         p.setBuryBones(false);

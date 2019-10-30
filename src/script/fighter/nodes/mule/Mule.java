@@ -20,7 +20,6 @@ import script.fighter.wrappers.TeleportWrapper;
 import script.tanner.data.Location;
 
 import java.io.*;
-import java.util.HashSet;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -30,8 +29,10 @@ public class Mule extends Node {
     private int begWorld = -1;
     private static final String MULE_FILE_PATH = org.rspeer.script.Script.getDataDirectory() + "\\mule.txt";
     private boolean banked;
-    private String status2;
+    private String status;
     private boolean soldItems;
+    private boolean triedTeleport;
+    private int gp;
 
     private Fighter main;
 
@@ -94,8 +95,11 @@ public class Mule extends Node {
         Config.isMuleing = true;
 
         if (!Location.GE_AREA.containsPlayer() && !banked) {
-            status2 = "Walking to GE";
-            TeleportWrapper.tryTeleport(false);
+            status = "Walking to GE";
+            if (!triedTeleport) {
+                TeleportWrapper.tryTeleport(false);
+                triedTeleport = true;
+            }
             GEWrapper.walkToGE();
             return Fighter.getLoopReturn();
         }
@@ -112,39 +116,26 @@ public class Mule extends Node {
         if (!banked) {
             Log.info("Withdrawing Items To Mule");
             banked = true;
-            HashSet<String> runes = Config.getProgressive().getRunes();
 
-            BankWrapper.openAndDepositAll();
+            BankWrapper.openAndDepositAll(false);
             Time.sleepUntil(Inventory::isEmpty, 2000, 8000);
             Bank.setWithdrawMode(Bank.WithdrawMode.NOTE);
             Time.sleepUntil(() -> Bank.getWithdrawMode().equals(Bank.WithdrawMode.NOTE), 2000, 8000);
 
-            if (BankWrapper.isTradeRestricted()) {
-                Log.fine("Withdrawing Coins");
-                Item coins = Bank.getFirst("Coins");
-                if (coins != null) {
-                    Bank.withdraw("Coins", coins.getStackSize() - Script.OGRESS_START_GP);
-                }
+            Log.fine("Withdrawing Coins");
+            Item coins = Bank.getFirst("Coins");
+            if (coins != null) {
+                gp = coins.getStackSize() - Script.OGRESS_START_GP;
+                Bank.withdraw("Coins", gp);
             } else {
-                Log.fine("Withdrawing Trade Restricted Items!!!");
-                Item[] restrictedItems = Bank.getItems(i -> !runes.contains(i.getName().toLowerCase()));
-
-                for(Item i : restrictedItems) {
-                    if (i.getName().equals("Coins")) {
-                        Bank.withdraw(i.getId(), i.getStackSize() - Script.OGRESS_START_GP);
-                        main.getScript().amntMuled += i.getStackSize() - Script.OGRESS_START_GP;
-                    } else {
-                        Bank.withdrawAll(i.getId());
-                    }
-                    Time.sleepUntil(() -> !Inventory.contains(i.getId()), 2000, 10_000);
-                }
+                Log.severe("Cant find coins");
             }
+            Time.sleepUntil(() -> Inventory.contains("Coins"), 1000, 5000);
 
-
-            Time.sleep(300, 800);
             BankWrapper.updateBankValue();
-            BankWrapper.updateInventoryValue();
             Bank.close();
+            Time.sleep(300, 800);
+            BankWrapper.updateInventoryValue();
             return Fighter.getLoopReturn();
         }
 
@@ -224,8 +215,8 @@ public class Mule extends Node {
                             Item[] tradeItems = Inventory.getItems();
 
                             for (Item o : tradeItems) {
-                                Trade.offerAll(o.getId());
-                                Time.sleepUntil(() -> Trade.contains(true, o.getId()), 2000, 8000);
+                                Trade.offerAll(i -> i.getId() == o.getId());
+                                Time.sleepUntil(() -> Trade.contains(true, i -> i.getId() == o.getId() && i.getStackSize() == o.getStackSize()), 2000, 8000);
                             }
                             if (Inventory.isEmpty()) {
                                 Log.info("Trade entered & accepted");
@@ -248,7 +239,7 @@ public class Mule extends Node {
                             logoutMule();
                             trading = false;
                             BankWrapper.updateInventoryValue();
-                            //main.getScript().amntMuled += (Coins - main.muleKeep);
+                            main.getScript().amntMuled += gp;
                             //main.setRandMuleKeep(main.minKeep, main.maxKeep);
                             if (begWorld != -1) {
                                 WorldHopper.hopTo(begWorld);
@@ -281,12 +272,14 @@ public class Mule extends Node {
     @Override
     public void onInvalid() {
         banked = false;
+        triedTeleport = false;
+        BankWrapper.openAndDepositAll(false, true, false);
         super.onInvalid();
     }
 
     @Override
     public String status() {
-        return status2;
+        return status;
     }
 }
 

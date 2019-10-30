@@ -66,6 +66,11 @@ public class Ogress extends Node {
             lootNames = Config.getProgressive().getLoot().toArray(new String[0]);
             WorldhopWrapper.resetChecker();
         }
+
+        if (!LEFT_SAFESPOT.equals(Players.getLocal().getPosition()) && !RIGHT_SAFESPOT.equals(Players.getLocal().getPosition()) && !shouldLoot()) {
+            returnSafeSpot();
+        }
+
         Spell spell = Config.getProgressive().getSpell();
 
         if (Random.nextInt(0, 750) == 1) {
@@ -156,8 +161,10 @@ public class Ogress extends Node {
 
             if (!RIGHT_SAFESPOT.equals(Players.getLocal().getPosition())) {
                 Movement.walkTo(RIGHT_SAFESPOT);
-                Log.info("Walking to RIGHT Safespot");
-                Time.sleep(800, 4050);
+                Time.sleepUntil(() -> Players.getLocal().getPosition().equals(RIGHT_SAFESPOT) || !Players.getLocal().isMoving(), 4050);
+                if (getTargetingMe().length == 0 && (getLoot() == null || !shouldLoot())) {
+                    Time.sleep(600, 4050);
+                }
             }
 
             loot = getLoot();
@@ -202,8 +209,10 @@ public class Ogress extends Node {
 
             if (!LEFT_SAFESPOT.equals(Players.getLocal().getPosition())) {
                 Movement.walkTo(LEFT_SAFESPOT);
-                Log.info("Walking to LEFT Safespot");
-                Time.sleep(1020, 4050);
+                Time.sleepUntil(() -> Players.getLocal().getPosition().equals(LEFT_SAFESPOT) || !Players.getLocal().isMoving(), 4050);
+                if (getTargetingMe().length == 0 && (getLoot() == null || !shouldLoot())) {
+                    Time.sleep(600, 4050);
+                }
             }
 
             loot = getLoot();
@@ -246,27 +255,30 @@ public class Ogress extends Node {
         }
 
         if (!LEFT_SAFESPOT.equals(Players.getLocal().getPosition()) && !RIGHT_SAFESPOT.equals(Players.getLocal().getPosition()) && !shouldLoot()) {
-            Log.severe("Targeted / Low HP  |  Returning to safespot");
-            looting = false;
-            double dist1 = LEFT_SAFESPOT.distance();
-            double dist2 = RIGHT_SAFESPOT.distance();
-            if (dist1 <= dist2) {
-                Movement.walkTo(LEFT_SAFESPOT);
-            } else {
-                Movement.walkTo(RIGHT_SAFESPOT);
-
-            }
-            if (!Movement.isRunEnabled()) {
-                Movement.toggleRun(true);
-            }
-            Time.sleepUntil(() -> Players.getLocal().isMoving(), 1500);
-            Time.sleepUntil(() -> !Players.getLocal().isMoving(), 5000);
+            returnSafeSpot();
         }
         else if (!looting && Health.getCurrent() > 8) {
             WorldhopWrapper.checkWorldhop(true);
         }
 
         return Fighter.getLoopReturn();
+    }
+
+    private void returnSafeSpot() {Log.severe("Targeted / Low HP  |  Returning to safespot");
+        looting = false;
+        double dist1 = LEFT_SAFESPOT.distance();
+        double dist2 = RIGHT_SAFESPOT.distance();
+        if (dist1 <= dist2) {
+            Movement.walkTo(LEFT_SAFESPOT);
+        } else {
+            Movement.walkTo(RIGHT_SAFESPOT);
+        }
+        if (!Movement.isRunEnabled()) {
+            Movement.toggleRun(true);
+        }
+        Time.sleepUntil(() -> Players.getLocal().isMoving(), 1500);
+        Time.sleepUntil(() -> !Players.getLocal().isMoving(), 5000);
+
     }
 
     private Pickable getLoot() {
@@ -309,6 +321,7 @@ public class Ogress extends Node {
         running = false;
         looting = false;
         lootNames = null;
+        PriceCheckService.purgeFailedPriceCache();
         WorldhopWrapper.resetChecker();
         CombatStore.resetTargetingValues();
         super.onInvalid();

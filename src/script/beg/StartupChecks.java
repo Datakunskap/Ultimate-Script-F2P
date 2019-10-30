@@ -59,7 +59,7 @@ public class StartupChecks extends Task {
         }
         else {
             instanceCheck();
-            Log.fine("Starting Script");
+            Log.fine("Starting Beggar");
             //addWorldToFile();
             main.startupChecks = true;
         }
@@ -77,6 +77,7 @@ public class StartupChecks extends Task {
     private boolean isOgress() {
         return Script.OGRESS && (Skills.getLevel(Skill.MAGIC) >= 13
                 || Equipment.contains("Cursed goblin staff")
+                || (Script.OGRESS && Inventory.getCount(true, "Coins") >= Script.OGRESS_START_GP)
                 || (Inventory.contains(r -> r.getName().equals("Air rune") && r.getStackSize() > 300)
                 && Inventory.contains(r -> r.getName().equals("Mind rune") && r.getStackSize() > 300)));
     }
@@ -86,16 +87,20 @@ public class StartupChecks extends Task {
         ClientQuickLauncher launcher = new ClientQuickLauncher(
                 "Ultimate Script", false, main.getNextWorld());
 
-        while (!launcher.isInstanceLimit() && Game.isLoggedIn() && !main.isStopping()) {
-            try {
-                main.accountGeneratorDriver(Script.NUM_BACKLOG_ACCOUNTS);
-                launcher.launchClient(main.readAccount(true));
-                Time.sleep(60_000);
-            } catch (IOException e) {
-                Log.severe(e);
-                e.printStackTrace();
+            while (!launcher.isInstanceLimit() && Game.isLoggedIn() && !main.isStopping()) {
+                try {
+                    main.accountGeneratorDriver(Script.NUM_BACKLOG_ACCOUNTS);
+                    launcher.launchClient(main.readAccount(true));
+                    if (!Script.MULTI_CLIENT_LAUNCH) {
+                        break;
+                    } else {
+                        Time.sleep(60_000);
+                    }
+                } catch (IOException e) {
+                    Log.severe(e);
+                    e.printStackTrace();
+                }
             }
-        }
 
         main.runningClients = launcher.getRunningClients();
     }

@@ -1,15 +1,15 @@
 package script.fighter.wrappers;
 
 import org.rspeer.runetek.adapter.component.Item;
-import org.rspeer.runetek.adapter.scene.SceneObject;
 import org.rspeer.runetek.api.Game;
+import org.rspeer.runetek.api.commons.BankLocation;
 import org.rspeer.runetek.api.commons.StopWatch;
 import org.rspeer.runetek.api.commons.Time;
 import org.rspeer.runetek.api.component.Bank;
 import org.rspeer.runetek.api.component.tab.EquipmentSlot;
 import org.rspeer.runetek.api.component.tab.Inventory;
+import org.rspeer.runetek.api.component.tab.Spell;
 import org.rspeer.runetek.api.scene.Players;
-import org.rspeer.runetek.api.scene.SceneObjects;
 import org.rspeer.ui.Log;
 import script.beg.TradePlayer;
 import script.fighter.config.Config;
@@ -32,7 +32,9 @@ public class BankWrapper {
         return bankValue + inventoryValue;
     }
 
-    public static int getBankValue() { return bankValue; }
+    public static int getBankValue() {
+        return bankValue;
+    }
 
     public static int getInventoryValue() {
         return inventoryValue;
@@ -54,34 +56,26 @@ public class BankWrapper {
         boolean includeTradeRestricted = !isTradeRestricted();
         int newValue = PriceCheckService.getBankValue(includeTradeRestricted);
 
-        if (newValue > -1) {
-            if (bankValue == -1) {
-                startValueTimer = StopWatch.start();
-            }
-            else if (startValueTimer != null && startValueTimer.exceeds(Duration.ofSeconds(10))) {
-                startingValue += newValue;
-                startValueTimer = null;
-            }
-
-            bankValue = newValue;
+        if (bankValue == -1) {
+            startingValue += newValue;
         }
+
+        bankValue = newValue;
     }
 
     public static void updateInventoryValue() {
         boolean includeTradeRestricted = !isTradeRestricted();
         int newValue = PriceCheckService.getInventoryValue(includeTradeRestricted);
 
-        if (newValue > -1) {
-            if (inventoryValue == -1) {
-                startValueTimer = StopWatch.start();
-            }
-            if (startValueTimer != null && startValueTimer.exceeds(Duration.ofSeconds(10))) {
-                startingValue += newValue;
-                startValueTimer = null;
-            }
-
-            inventoryValue = newValue;
+        if (inventoryValue == -1) {
+            startValueTimer = StopWatch.start();
         }
+        if (startValueTimer != null && startValueTimer.exceeds(Duration.ofSeconds(10))) {
+            startingValue += newValue;
+            startValueTimer = null;
+        }
+
+        inventoryValue = newValue;
     }
 
     private static void openAndDepositAll(boolean keepAllCoins, int numCoinsToKeep,
@@ -101,7 +95,7 @@ public class BankWrapper {
         if (numCoinsToKeep > 0) {
             Bank.withdraw(995, numCoinsToKeep);
             Time.sleepUntil(()
-                    -> Inventory.contains(995) && Inventory.getCount(true, 995) >= numCoinsToKeep,
+                            -> Inventory.contains(995) && Inventory.getCount(true, 995) >= numCoinsToKeep,
                     1000, 5000);
         }
         if (keepAllCoins) {
@@ -191,15 +185,30 @@ public class BankWrapper {
         if (BackToFightZone.shouldEnableRun()) {
             BackToFightZone.enableRun();
         }
-        if (OgressWrapper.CORSAIR_COVE_DUNGEON.contains(Players.getLocal())) {
-            SceneObject ladder = SceneObjects.getNearest("Vine ladder");
-            if (ladder != null) {
-                if (ladder.interact("Climb")) {
-                    Log.info("Handling ladder");
-                    Time.sleep(1500, 2000);
+        if (Config.getProgressive().isOgress()) {
+            if (OgressWrapper.CORSAIR_COVE[0].contains(Players.getLocal())
+                    || OgressWrapper.CORSAIR_COVE[1].contains(Players.getLocal())
+                    || BankLocation.getNearest() == BankLocation.CORSAIR_COVE) {
+
+                if (TeleportWrapper.tryTeleport(Spell.Modern.FALADOR_TELEPORT)) {
+
+                }
+                if (TeleportWrapper.tryTeleport(Spell.Modern.TELEOTHER_FALADOR)) {
+
+                }
+                if (TeleportWrapper.tryTeleport(true)) {
+
+                }
+                if (TeleportWrapper.tryTeleport(Spell.Modern.LUMBRIDGE_TELEPORT)) {
+
+                }
+                if (TeleportWrapper.tryTeleport(Spell.Modern.TELEOTHER_LUMBRIDGE)) {
+
                 }
             }
+            GEWrapper.walkToGE();
         }
+
         return Bank.open();
     }
 }

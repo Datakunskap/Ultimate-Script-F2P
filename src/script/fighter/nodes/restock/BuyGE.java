@@ -51,7 +51,7 @@ public class BuyGE extends Node {
         items = new HashSet<>();
         spell = p.getSpell();
 
-        if ((p.isSplash() || p.isOgress()) && runesIterator == null &&
+        if (spell != null && runesIterator == null &&
                 (!GEWrapper.hasRunes(spell) || !GEWrapper.hasEquipment())) {
 
             if (main.getActive() == null || !main.getActive().equals(main.supplier.SELL_GE)) {
