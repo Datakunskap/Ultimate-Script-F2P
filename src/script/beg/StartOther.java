@@ -21,7 +21,7 @@ public class StartOther extends Task {
     public static final int START_GP = 85_000;
     private final int MIN_START_GP = 55_000;
 
-    public static final int TANS_PER_HR = 1053;
+    public static final int TANS_PER_HR = 1400;
     public static final int CHOC_PER_HR = 3000;
 
     private Script main;

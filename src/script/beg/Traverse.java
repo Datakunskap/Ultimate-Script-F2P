@@ -3,6 +3,8 @@ package script.beg;
 import org.rspeer.runetek.api.commons.BankLocation;
 import org.rspeer.runetek.api.commons.math.Random;
 import org.rspeer.runetek.api.movement.Movement;
+import org.rspeer.runetek.api.movement.position.Area;
+import org.rspeer.runetek.api.movement.position.Position;
 import org.rspeer.runetek.api.scene.Players;
 import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
@@ -28,14 +30,17 @@ public class Traverse extends Task {
     public int execute() {
 
         int rand = Script.randInt(1, main.walkChance);
+        Area begArea = main.location.getBegArea();
 
-        if(!main.location.getBegArea().contains(Players.getLocal())){
+        if(!begArea.contains(Players.getLocal())){
             //Log.info("Walking to GE");
             //tutIslandCheck();
-            Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition());
+            Position ge = BankLocation.GRAND_EXCHANGE.getPosition();
+            Movement.walkTo(ge.randomize(6), () -> begArea.contains(Players.getLocal()));
+            //Movement.walkToRandomized(BankLocation.GRAND_EXCHANGE.getPosition());
         } else if (rand != 1 && rand != 2 && rand != 3 && rand != 4 && rand != 5 && rand != 6 && rand != 7) {
             //main.daxWalker.walkTo(main.location.getBegArea().getTiles().get(Script.randInt(0, main.location.getBegArea().getTiles().size() - 1)));
-            Movement.walkToRandomized(main.location.getBegArea().getTiles().get(Script.randInt(0, main.location.getBegArea().getTiles().size() - 1)));
+            Movement.walkTo(begArea.getTiles().get(Script.randInt(0, begArea.getTiles().size() - 1)), () -> Players.getLocal().isMoving());
             Log.info("Walking to random GE location");
             main.walk = false;
             return Script.randInt(4000, 5000);

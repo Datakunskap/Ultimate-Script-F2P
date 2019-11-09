@@ -40,12 +40,11 @@ import java.util.HashSet;
 public class Fighter {
 
     private NodeManager manager;
-    private ScriptPaint paint;
     private static StopWatch runtime;
     private long stopTimeMs;
     private long startTimeMs;
     private Script script;
-    private int totalItemValue;
+    private ScriptPaint paint;
 
     public Fighter(Script script, long stopTimeMs) {
         this.script = script;

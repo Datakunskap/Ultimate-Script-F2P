@@ -66,13 +66,8 @@ public class BotManagement {
 
         List<Launcher> launchers = getLaunchers();
         while (launchers.size() < 1 && retries > 0) {
-            try {
-                Thread.sleep(10000);
-                launchers = getLaunchers();
-                retries --;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            launchers = getLaunchers();
+            retries --;
         }
 
         final Headers headers = new Headers.Builder()

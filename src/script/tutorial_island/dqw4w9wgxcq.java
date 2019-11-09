@@ -468,7 +468,8 @@ public class dqw4w9wgxcq extends Task {
             }
         }
 
-        return Random.high(800, 3000);
+        return Random.low(600, 3000);
+        //return Random.high(800, 3000);
     }
 
     private void handleFurnaceButton() {
@@ -732,7 +733,7 @@ public class dqw4w9wgxcq extends Task {
             Log.info("Random walking " + times + " time(s)");
             for (int i = 0; i < times; i++) {
                 //Movement.walkToRandomized(Players.getLocal().getPosition().randomize(8));
-                getEmptyPosition(false, Script.randInt(1, 9), false).ifPresent(Movement::walkTo);
+                getEmptyPosition(false, Script.randInt(1, 9), true).ifPresent(Movement::walkTo);
                 Time.sleepUntil(() -> Players.getLocal().isMoving(), Script.randInt(800, 1500));
                 Time.sleepUntil(() -> !Players.getLocal().isMoving(), 600, Script.randInt(2000, 4000));
             }

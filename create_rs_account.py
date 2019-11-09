@@ -122,7 +122,6 @@ def register_account(email, password, proxyIp=None, proxyUser=None, proxyPass=No
                 f.close()
 
             verify_email(s)
-
         else:
             print('JAGEX SAYS NO: Creation')
     else:

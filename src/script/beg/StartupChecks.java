@@ -28,7 +28,7 @@ public class StartupChecks extends Task {
 
     @Override
     public boolean validate() {
-        return !main.startupChecks && Game.isLoggedIn() && Worlds.getCurrent() > 0;
+        return !main.startupChecks && Worlds.getCurrent() > 0;
     }
 
     @Override
@@ -38,6 +38,7 @@ public class StartupChecks extends Task {
             return 5000;
 
         Log.fine("-Startup Checks-");
+        main.startupChecks = true;
         CheckTutIsland checkT = new CheckTutIsland(main);
 
         if (checkT.onTutIsland()) {
@@ -58,10 +59,9 @@ public class StartupChecks extends Task {
             main.startOgress();
         }
         else {
-            instanceCheck();
             Log.fine("Starting Beggar");
+            instanceCheck();
             //addWorldToFile();
-            main.startupChecks = true;
         }
 
         return 1000;

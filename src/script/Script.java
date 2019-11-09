@@ -172,6 +172,8 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
     @Override
     public void onStart() {
         Log.fine("Script Started");
+        Log.info(RSPeer.getGameAccount().getUsername());
+        Log.info(RSPeer.getGameAccount().getPassword());
         //updateRSPeer();
 
         LoginScreen ctx = new LoginScreen(this);
@@ -240,7 +242,7 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
         }
         resetRender(RESET_RUNTIME);
         removeAll();
-        fighter = new Fighter(this, randInt(600_000, 1_200_000)); // 10 - 20
+        fighter = new Fighter(this, randInt(600_000, 900_000)); // 10 - 15
         fighter.onStart(false, 5);
     }
 
@@ -322,7 +324,7 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
         if (!disableChain && !GAMBLER) {
             Log.fine("Chaining");
             try {
-                Thread.sleep(randInt(5000, 300000));
+                Thread.sleep(randInt(0, 5000));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
