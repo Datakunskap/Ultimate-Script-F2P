@@ -115,7 +115,7 @@ public class StartOther extends Task {
             main.tanner.amntMuled += main.amntMuled;
             WorldhopWrapper.removeWorld(main.currWorld, Script.CURR_WORLD_PATH);
             if (main.isMuling) {
-                Mule.logoutMule();
+                Mule.logoutMule(Script.MULE_IP);
             }
             OgressWrapper.unequipAll(true);
             tanner.start();
@@ -127,7 +127,7 @@ public class StartOther extends Task {
                 WorldhopWrapper.hopToLowPopWorld(400, Worlds.getCurrent());
             }
             if (main.isMuling) {
-                Mule.logoutMule();
+                Mule.logoutMule(Script.MULE_IP);
             }
             WorldhopWrapper.removeWorld(main.currWorld, Script.CURR_WORLD_PATH);
             main.timesChocolate++;
@@ -139,7 +139,7 @@ public class StartOther extends Task {
 
         if (hasEnoughGP(Script.OGRESS_START_GP)) {
             if (main.isMuling) {
-                Mule.logoutMule();
+                Mule.logoutMule(Script.MULE_IP);
             }
             if (Worlds.get(Worlds.getCurrent()).getPopulation() > 400) {
                 WorldhopWrapper.hopToLowPopWorld(400, Worlds.getCurrent(), WorldhopWrapper.getWorldsFromFile(Script.OGRESS_WORLD_PATH));

@@ -45,7 +45,7 @@ public class StartChocolate {
 
 
         if (tanner.isMuling) {
-            Mule.logoutMule();
+            Mule.logoutMule(Script.MULE_IP);
         }
         WorldhopWrapper.removeWorld(script.currWorld, Script.CURR_WORLD_PATH);
         script.isChoc = true;
