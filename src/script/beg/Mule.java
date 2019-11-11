@@ -249,7 +249,6 @@ public class Mule extends Task {
         out.writeChars(message);
         //read the server response message
         //close resources
-        out.close();
         Thread.sleep(500);
     }
 
@@ -263,6 +262,7 @@ public class Mule extends Task {
         send(ip, "Done:");
         if (socket != null && !socket.isClosed()) {
             try {
+                out.close();
                 socket.close();
             } catch (IOException e) {
                 Log.severe(e);
