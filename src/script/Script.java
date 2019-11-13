@@ -151,7 +151,7 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
     public static final int MULE_WORLD = 393;
     public static final boolean MULE_ITEMS = false;
     public static final int MUTED_MULE_AMNT = 30000;
-    public static final int ALLOWED_INSTANCES = 1;
+    public static final int ALLOWED_INSTANCES = 8;
     public static final String API_KEY = "JV5ML4DE4M9W8Z5KBE00322RDVNDGGMTMU1EH9226YCVGFUBE6J6OY1Q2NJ0RA8YAPKO70";
     public static final int NUM_BACKLOG_ACCOUNTS = 15;
     private static final boolean TUTORIAL_COMPLETED_SLEEP = false;
