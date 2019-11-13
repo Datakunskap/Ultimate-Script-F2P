@@ -17,7 +17,6 @@ import org.rspeer.ui.Log;
 import script.Script;
 
 import java.io.*;
-import java.net.Socket;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -27,6 +26,7 @@ public class Mule extends Task {
     private int Gold2;
     private int gold3;
     private String status1;
+    String user;
     private String status = "needgold";
     private String Username;
     private String Password;
@@ -38,6 +38,50 @@ public class Mule extends Task {
 
     public Mule(Script script) {
         main = script;
+    }
+
+    private void loginMule() {
+        try {
+            File file = new File(MULE_FILE_PATH);
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            PrintWriter pw = new PrintWriter(file);
+            pw.println("mule");
+            pw.close();
+
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+
+            while (((status1 = br.readLine())) != null) {
+                Log.info(status1);
+            }
+
+            br.close();
+        } catch (IOException e) {
+            Log.info("File not found");
+        }
+
+        user = main.muleName;
+    }
+
+    public static void logoutMule() {
+        try {
+            File file = new File(MULE_FILE_PATH);
+
+            if (!file.exists()) {
+                Log.info("Logout file not found");
+            }
+            PrintWriter pw = new PrintWriter(file);
+            pw.println("done");
+            pw.close();
+
+            Log.info("done");
+
+        } catch (IOException e) {
+            Log.info("File not found");
+        }
     }
 
     @Override
@@ -104,8 +148,8 @@ public class Mule extends Task {
                 Time.sleep(200);
                 Keyboard.pressEnter();
             }
-            if (Players.getNearest(Script.MULE_NAME) != null && !Trade.isOpen()) {
-                Players.getNearest((Script.MULE_NAME)).interact("Trade with");
+            if (Players.getNearest(user) != null && !Trade.isOpen()) {
+                Players.getNearest(user).interact("Trade with");
                 Time.sleep(3000);
             }
             if (Inventory.getFirst(995) != null) {
@@ -146,7 +190,7 @@ public class Mule extends Task {
                             Time.sleep(3000);
                             Log.fine("Complete Shutting Down Mule");
                             muleing = false;
-                            logoutMule(Script.MULE_IP);
+                            logoutMule();
                             main.changeAmount = true;
                             main.walk = true;
                             main.sendTrade = true;
@@ -207,66 +251,6 @@ public class Mule extends Task {
                 !x.isExchangeable() && isDefaultItem(x.getId())) && !Inventory.isEmpty()) {
             Trade.offerAll(x -> x.getId() != 995 && x.isExchangeable() && !isDefaultItem(x.getId()));
             Time.sleep(500);
-        }
-    }
-
-    private static Socket socket;
-    private static DataOutputStream out;
-
-    /**
-     * Send method
-     *
-     * @param message - TRADE = Activate login , DONE - Turn off login
-     */
-    private static void send(String ip, String message) {
-        try {
-            sendTradeRequest(ip, message);
-        } catch (Exception e) {
-            Log.severe(e);
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Sends message to server from client (Slave)
-     *
-     * @param message - TRADE = Activate login , DONE - Turn off login
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws ClassNotFoundException
-     */
-    private static void sendTradeRequest(String ip, String message) throws IOException, InterruptedException, ClassNotFoundException {
-        //get the localhost IP address, if server is running on some other IP, you need to use that
-        //InetAddress host = InetAddress.getLocalHost();
-        //establish socket connection to server
-        if (socket == null || socket.isClosed()) {
-            socket = new Socket(ip, 9876);
-            socket.setReuseAddress(true);
-            socket.setKeepAlive(true);
-            out = new DataOutputStream(socket.getOutputStream());
-        }
-        Log.fine("Sending request to Socket Server");
-        out.writeChars(message);
-        //read the server response message
-        //close resources
-        out.close();
-        Thread.sleep(500);
-    }
-
-    public static void loginMule() {
-        if (socket == null || !socket.isConnected()) {
-            send(Script.MULE_IP, "Trade:" + Players.getLocal().getName() + ":" + Worlds.getCurrent() + ":" + 0);
-        }
-    }
-
-    public static void logoutMule(String ip) {
-        send(ip, "Done:");
-        if (socket != null && !socket.isClosed()) {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                Log.severe(e);
-            }
         }
     }
 }

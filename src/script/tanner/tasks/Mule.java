@@ -14,6 +14,7 @@ import org.rspeer.script.task.Task;
 import org.rspeer.ui.Log;
 import script.tanner.Main;
 
+import java.io.*;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -34,6 +35,50 @@ public class Mule extends Task {
         this.main = main;
     }
 
+    private void loginMule() {
+        String status1;
+        try {
+            File file = new File(MULE_FILE_PATH);
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            PrintWriter pw = new PrintWriter(file);
+            pw.println("mule");
+            pw.close();
+
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+
+            while (((status1 = br.readLine())) != null) {
+                Log.info(status1);
+            }
+
+            br.close();
+        } catch (IOException e) {
+            Log.info("File not found");
+        }
+
+    }
+
+    public static void logoutMule() {
+        try {
+            File file = new File(MULE_FILE_PATH);
+
+            if (!file.exists()) {
+                Log.info("Logout file not found");
+            }
+            PrintWriter pw = new PrintWriter(file);
+            pw.println("done");
+            pw.close();
+
+            Log.info("done");
+
+        } catch (IOException e) {
+            Log.info("File not found");
+        }
+    }
+
     @Override
     public boolean validate() {
         return main.sold && (Inventory.getCount(true, 995) >= main.muleAmnt || Bank.getCount(995) >= main.muleAmnt || muleing); }
@@ -46,7 +91,7 @@ public class Mule extends Task {
 			Time.sleepUntil(() -> !Bank.contains(995), 5000);
 		}
 		
-        script.beg.Mule.loginMule();
+        loginMule();
 
         if(Worlds.getCurrent() != main.muleWorld){
             begWorld = Worlds.getCurrent();
@@ -132,7 +177,7 @@ public class Mule extends Task {
                         if (Trade.accept()) {
                             Time.sleep(3000);
                             Log.fine("Trade completed shutting down mule");
-                            script.beg.Mule.logoutMule(script.Script.MULE_IP);
+                            logoutMule();
                             muleing = false;
                             main.amntMuled += (Coins - main.muleKeep);
                             main.setRandMuleKeep(100_000, 200_000);

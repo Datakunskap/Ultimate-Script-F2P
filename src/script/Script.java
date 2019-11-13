@@ -145,8 +145,7 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
     private static final String SELENIUM_GEN_PATH = System.getProperty("user.home") + "\\IdeaProjects\\UltimateScript\\Runescape-Account-Generator-2.0.jar";
     public static final String RESTART_SCRIPT_PATH = System.getProperty("user.home") + "\\IdeaProjects\\UltimateScript\\RestartScript.jar";
 
-    public static final String MULE_NAME = "ScatGrem";
-    public static final String MULE_IP = "10.181.66.95";
+    public static final String MULE_NAME = "Madman38snur";
     public static final MuleArea MULE_AREA = MuleArea.GE_NEW;
     public static final int MULE_WORLD = 393;
     public static final boolean MULE_ITEMS = false;
@@ -314,7 +313,7 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
         }
 
         if (isMuling || (isTanning && tanner.isMuling) || (isChoc && chocolate.isMuling) || Config.isMuleing) {
-            Mule.logoutMule(Script.MULE_IP);
+            Mule.logoutMule();
         }
 
         if (currWorld != -1 && !isTanning && !isChoc) {

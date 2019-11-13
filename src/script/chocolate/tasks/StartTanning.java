@@ -21,7 +21,7 @@ public final class StartTanning {
         script.timesTanned ++;
 
         if (chocolate.isMuling) {
-            Mule.logoutMule(Script.MULE_IP);
+            Mule.logoutMule();
         }
         tanner.amntMuled += chocolate.amntMuled;
         tanner.start();

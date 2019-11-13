@@ -19,6 +19,7 @@ import script.fighter.wrappers.GEWrapper;
 import script.fighter.wrappers.TeleportWrapper;
 import script.tanner.data.Location;
 
+import java.io.*;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -37,6 +38,50 @@ public class Mule extends Node {
 
     public Mule(Fighter main) {
         this.main = main;
+    }
+
+    private void loginMule() {
+        String status1;
+        try {
+            File file = new File(MULE_FILE_PATH);
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            PrintWriter pw = new PrintWriter(file);
+            pw.println("mule");
+            pw.close();
+
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+
+            while (((status1 = br.readLine())) != null) {
+                Log.info(status1);
+            }
+
+            br.close();
+        } catch (IOException e) {
+            Log.info("File not found");
+        }
+
+    }
+
+    public static void logoutMule() {
+        try {
+            File file = new File(MULE_FILE_PATH);
+
+            if (!file.exists()) {
+                Log.info("Logout file not found");
+            }
+            PrintWriter pw = new PrintWriter(file);
+            pw.println("done");
+            pw.close();
+
+            Log.info("done");
+
+        } catch (IOException e) {
+            Log.info("File not found");
+        }
     }
 
     @Override
@@ -116,7 +161,7 @@ public class Mule extends Node {
             Time.sleep(1000);
         }
 
-        script.beg.Mule.loginMule();
+        loginMule();
 
         if (!Script.MULE_AREA.getMuleArea().contains(Players.getLocal())) {
 
@@ -191,7 +236,7 @@ public class Mule extends Node {
                             Time.sleep(3000);
                             Log.fine("Trade completed shutting down mule");
                             soldItems = false;
-                            script.beg.Mule.logoutMule(Script.MULE_IP);
+                            logoutMule();
                             trading = false;
                             BankWrapper.updateInventoryValue();
                             main.getScript().amntMuled += gp;
