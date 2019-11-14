@@ -159,7 +159,7 @@ public class Script extends TaskScript implements RenderListener, ChatMessageLis
     public static final int TUTORIAL_COMPLETED_WALK_DIST = randInt(10, 40);
     public static final boolean EXPLV_TUTORIAL = false;
     public static final boolean FIGHTER_TRAIN_DEFENCE = false;
-    public static final boolean MULTI_CLIENT_LAUNCH = false;
+    public static final boolean MULTI_CLIENT_LAUNCH = true;
 
     public static final boolean OGRESS = false;
     public static final int OGRESS_START_GP = 50_000;

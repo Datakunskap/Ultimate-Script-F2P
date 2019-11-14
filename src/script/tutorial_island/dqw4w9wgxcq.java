@@ -141,6 +141,9 @@ public class dqw4w9wgxcq extends Task {
                 doDefault = true;
                 break;
             case 30:
+                if (!Tabs.isOpen(Tab.INVENTORY)) {
+                    Tabs.open(Tab.INVENTORY);
+                }
                 if (Dialog.canContinue()) {
                     Dialog.processContinue();
                 } else {
