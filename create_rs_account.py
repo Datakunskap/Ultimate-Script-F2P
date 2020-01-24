@@ -12,13 +12,13 @@ RUNESCAPE_RECAPTCHA_KEY = '6Lcsv3oUAAAAAGFhlKrkRb029OHio098bbeyi_Hv'
 CAPTCHA_URL = 'http://2captcha.com/'
 CAPTCHA_REQ_URL = CAPTCHA_URL + 'in.php'
 CAPTCHA_RES_URL = CAPTCHA_URL + 'res.php'
-CAPTCHA_API_KEY = '4935affd16c15fb4100e8813cdccfab6'
+CAPTCHA_API_KEY = 'XXXXXXXXXXXXXXX'
 
 
 def verify_email(s, sleep=60):
     server_name = "imap.gmail.com"
-    username = "milleja115"
-    password = "Xb32y0x5!"
+    username = "XXXXXXXXXXXXXXXX"
+    password = "XXXXXXXXXXXXXXXX"
     subject = 'Thank you for registering your email'
     conn = imaplib.IMAP4_SSL(server_name)
     conn.login(username, password)
